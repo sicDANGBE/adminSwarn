@@ -1,0 +1,29 @@
+all:
+  children:
+    # Groupe global
+    swarm_nodes:
+      children:
+        manager:
+          hosts:
+            ovh.core:
+              ansible_host: vps-940a692a.vps.ovh.net
+        workers:
+          hosts:
+            ovh.worker.01:
+              ansible_host: vps-255dab72.vps.ovh.net
+            ovh.worker.02:
+              ansible_host: vps-9e3ed523.vps.ovh.net
+      vars:
+        sysadmin_user: supadmin
+        # Le manager est maintenant défini dynamiquement par le groupe
+        manager_host: "{{ groups['manager'][0] }}"
+        main_domain: dgsynthex.online
+        
+        # --- CONFIGURATION CONNEXION ---
+        ansible_user: supadmin
+        ansible_port: 49281
+        ansible_python_interpreter: /usr/bin/python3
+        ansible_become: yes
+        local_public_key: "~/.ssh/id_rsa.pub"
+        docker_hub_user: spadmdck
+        docker_hub_pat: "Irmapil-1989"

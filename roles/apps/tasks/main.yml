@@ -1,0 +1,156 @@
+---
+# 1. Lecture Dynamique (Source de vérité)
+- name: Lecture UID dockremap effectif
+  shell: 'grep "^dockremap:" /etc/subuid | cut -d: -f2'
+  register: remap_uid_out
+  changed_when: false
+
+- name: Lecture GID dockremap effectif
+  shell: 'grep "^dockremap:" /etc/subgid | cut -d: -f2'
+  register: remap_gid_out
+  changed_when: false
+
+- set_fact:
+    remap_uid: "{{ remap_uid_out.stdout }}"
+    remap_gid: "{{ remap_gid_out.stdout }}"
+
+# 2. Réseau Overlay
+- name: Réseau Traefik Public
+  community.docker.docker_network:
+    name: traefik-public
+    driver: overlay
+    attachable: true
+    state: present
+
+# -------------------------------------------------------
+# GESTION DES DOSSIERS (SÉPARATION MANAGER / WORKERS)
+# -------------------------------------------------------
+
+# 1. DOSSIERS MANAGER UNIQUEMENT
+# Ces services sont contraints sur "node.role == manager"
+# Inutile de polluer les workers avec ces dossiers.
+- name: Création dossiers Apps (Manager uniquement)
+  file:
+    path: "/srv/docker/{{ item }}"
+    state: directory
+    owner: "{{ remap_uid }}"
+    group: "{{ remap_gid }}"
+    mode: '0755'
+  loop:
+    - traefik
+    - traefik/acme
+    - portainer
+    - portainer/data
+    - monitoring             # Parent
+    - monitoring/prometheus
+    - monitoring/grafana
+    - monitoring/loki
+  # Pas de delegate_to ici, ça s'exécute sur le manager (ovh.core)
+
+# 2. DOSSIERS GLOBAUX (Promtail)
+# Promtail tourne en mode "global" (sur tous les noeuds).
+# Il a besoin de son dossier de config partout.
+- name: Création dossiers Promtail (Cluster-wide)
+  file:
+    path: "/srv/docker/{{ item[1] }}"
+    state: directory
+    owner: "{{ remap_uid }}"
+    group: "{{ remap_gid }}"
+    mode: '0755'
+  # On ne boucle QUE sur les dossiers nécessaires à Promtail
+  loop: "{{ groups['swarm_nodes'] | product(['monitoring', 'monitoring/promtail']) | list }}"
+  delegate_to: "{{ item[0] }}"
+  vars:
+    ansible_become: yes
+
+# 4. ACL Socket
+- name: ACL Docker Socket
+  acl:
+    path: /var/run/docker.sock
+    entity: "{{ remap_uid }}"
+    etype: user
+    permissions: rw
+    state: present
+
+- name: Login Docker Hub (Manager)
+  community.docker.docker_login:
+    username: "{{ docker_hub_user | default(omit) }}"
+    password: "{{ docker_hub_pat | default(omit) }}"
+  when: docker_hub_user is defined
+
+# 5. Déploiement des Stacks
+
+# --- TRAEFIK ---
+- name: Configuration Traefik (Template)
+  template:
+    src: traefik.yaml.j2
+    dest: /srv/docker/traefik/docker-compose.yml
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Déploiement Stack Traefik
+  community.docker.docker_stack:
+    state: present
+    name: traefik
+    compose:
+      - /srv/docker/traefik/docker-compose.yml
+    prune: yes
+    with_registry_auth: yes
+
+# --- PORTAINER ---
+- name: Configuration Portainer (Template)
+  template:
+    src: portainer.yaml.j2
+    dest: /srv/docker/portainer/docker-compose.yml
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Déploiement Stack Portainer
+  community.docker.docker_stack:
+    state: present
+    name: portainer
+    compose:
+      - /srv/docker/portainer/docker-compose.yml
+    prune: yes
+    with_registry_auth: yes
+
+# --- MONITORING ---
+# A. Config Prometheus
+- name: Configuration Prometheus (prometheus.yml)
+  template:
+    src: prometheus.yml.j2
+    dest: /srv/docker/monitoring/prometheus/prometheus.yml
+    owner: "{{ remap_uid }}"
+    group: "{{ remap_gid }}"
+    mode: '0644'
+
+# B. Config Promtail
+- name: Configuration Promtail Cluster-wide (promtail.yaml)
+  template:
+    src: promtail.yaml.j2
+    dest: /srv/docker/monitoring/promtail/config.yaml
+    owner: "{{ remap_uid }}"
+    group: "{{ remap_gid }}"
+    mode: '0644'
+  loop: "{{ groups['swarm_nodes'] }}"
+  delegate_to: "{{ item }}"
+
+# C. Compose Monitoring
+- name: Configuration Monitoring (Template)
+  template:
+    src: monitoring.yaml.j2
+    dest: /srv/docker/monitoring/docker-compose.yml
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Déploiement Stack Monitoring
+  community.docker.docker_stack:
+    state: present
+    name: monitoring
+    compose:
+      - /srv/docker/monitoring/docker-compose.yml
+    prune: yes
+    with_registry_auth: yes

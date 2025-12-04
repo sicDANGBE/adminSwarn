@@ -1,0 +1,44 @@
+---
+# --- ETAPE 1 : INSTALLATION DES PRÉREQUIS (Sur tous les noeuds) ---
+- name: Installation du SDK Python Docker
+  hosts: swarm_nodes
+  become: yes
+  tasks:
+    - name: Installation de python3-docker
+      apt:
+        pkg:
+          - python3-docker # Le SDK officiel via APT (Recommandé sur Debian 12)
+          - python3-pip    # Toujours utile
+        state: present
+        update_cache: yes
+
+# --- ETAPE 2 : INITIALISATION DU MANAGER ---
+- name: Initialisation du Manager (ovh.core)
+  hosts: ovh.core
+  become: yes
+  tasks:
+    - name: Initialiser le Swarm
+      community.docker.docker_swarm:
+        state: present
+        # advertise_addr est crucial pour que les workers sachent qui contacter
+        advertise_addr: "{{ ansible_default_ipv4.address }}"
+      register: swarm_info
+
+    - name: Récupération du Token Worker
+      set_fact:
+        worker_token: "{{ swarm_info.swarm_facts.JoinTokens.Worker }}"
+
+# --- ETAPE 3 : JONCTION DES WORKERS ---
+- name: Jonction des Workers au Cluster
+  hosts: ovh.worker.01, ovh.worker.02
+  become: yes
+  vars:
+    # On récupère l'IP et le Token depuis les "facts" du Manager
+    manager_ip: "{{ hostvars['ovh.core']['ansible_default_ipv4']['address'] }}"
+    token: "{{ hostvars['ovh.core']['worker_token'] }}"
+  tasks:
+    - name: Rejoindre le Swarm en tant que Worker
+      community.docker.docker_swarm:
+        state: join
+        join_token: "{{ token }}"
+        remote_addrs: [ "{{ manager_ip }}:2377" ]

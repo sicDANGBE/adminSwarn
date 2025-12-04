@@ -1,0 +1,36 @@
+#!/usr/sbin/nft -f
+flush ruleset
+
+table inet filter {
+  chain input {
+    type filter hook input priority 0; policy drop;
+    
+    # --- TRAFIC DE CONFIANCE (Loopback) ---
+    iifname "lo" accept
+    ct state established,related accept
+    ip protocol icmp accept
+    ip6 nexthdr icmpv6 accept
+
+    # --- SSH ADMIN (Global) ---
+    tcp dport {{ ansible_port }} accept
+  }
+
+  chain forward {
+    type filter hook forward priority 0; policy drop;
+    ct state established,related accept
+  }
+
+  chain output {
+    type filter hook output priority 0; policy accept;
+  }
+}
+
+# 1. On charge les règles spécifiques (Swarm, Apps...)
+# Elles s'ajoutent à la suite des règles ci-dessus
+include "/etc/nftables.d/*.conf"
+
+# 2. LOGGING FINAL (Global)
+# Cette règle est ajoutée TOUT À LA FIN de la chaîne input.
+# Tout paquet qui n'a pas été accepté par le SSH ou par les includes (*) arrivera ici.
+# On le logue dans /var/log/nftables.log (via rsyslog) avant qu'il soit jeté par la "policy drop".
+add rule inet filter input limit rate 10/minute log prefix "[NFT-DROP] " flags all

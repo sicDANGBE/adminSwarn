@@ -1,0 +1,26 @@
+# Règles spécifiques Swarm
+# Injectées dans la table "inet filter" définie dans nftables.conf
+
+# Définition de la liste des IPs du cluster
+define SWARM_NODES = { {{ groups['swarm_nodes'] | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | join(', ') }} }
+
+# Ajout à la chaîne INPUT existante
+add rule inet filter input ip saddr $SWARM_NODES tcp dport { 2377, 7946 } accept
+add rule inet filter input ip saddr $SWARM_NODES udp dport { 7946, 4789 } accept
+add rule inet filter input ip protocol esp accept
+
+# Ajout à la chaîne FORWARD existante (Pour les conteneurs et l'Overlay)
+add rule inet filter forward iifname "docker0" accept
+add rule inet filter forward oifname "docker0" accept
+add rule inet filter forward iifname "docker_gwbridge" accept
+add rule inet filter forward oifname "docker_gwbridge" accept
+
+# Autoriser le trafic INTER-CONTENEURS sur les réseaux custom (Stacks)
+# Docker nomme ces interfaces "br-<id_reseau>"
+add rule inet filter forward iifname "br-*" accept
+add rule inet filter forward oifname "br-*" accept
+
+# Web Public (Uniquement sur le Manager)
+{% if inventory_hostname == manager_host %}
+add rule inet filter input tcp dport { 80, 443 } accept
+{% endif %}

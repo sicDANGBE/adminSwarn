@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Auto-découverte des Node Exporters via le DNS Docker Swarm
+  - job_name: 'node-exporter'
+    dns_sd_configs:
+      - names:
+          - 'tasks.node-exporter'
+        type: 'A'
+        port: 9100

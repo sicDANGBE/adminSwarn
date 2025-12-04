@@ -1,0 +1,127 @@
+---
+# --- 1. INSTALLATION & PRÉREQUIS ---
+
+- name: Installation des dépendances système pour Docker
+  apt:
+    pkg:
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+    update_cache: true
+
+- name: Création du dossier pour les clés GPG (si absent)
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Ajout de la clé GPG officielle Docker
+  get_url:
+    url: https://download.docker.com/linux/debian/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+    force: true
+
+- name: Ajout du dépôt Docker stable
+  shell: |
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+    tee /etc/apt/sources.list.d/docker.list > /dev/null
+  args:
+    creates: /etc/apt/sources.list.d/docker.list
+
+- name: Mise à jour du cache APT après ajout du dépôt
+  apt:
+    update_cache: true
+
+- name: Installation Docker Engine & Outils
+  apt:
+    pkg:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+      - python3-docker   # Requis pour les modules Ansible Docker
+      - iptables         # Requis pour la compatibilité nftables
+    state: present
+
+# --- 2. CONFIGURATION UTILISATEUR & SÉCURITÉ ---
+
+- name: Création utilisateur système dockremap
+  user:
+    name: dockremap
+    system: yes
+    state: present
+    # Note : Les subuids sont gérés par le rôle 'common', on ne touche pas ici.
+
+- name: Configuration Daemon Docker (UserNS + Logs + No Live Restore)
+  copy:
+    dest: /etc/docker/daemon.json
+    content: |
+      {
+        "userns-remap": "default",
+        "log-driver": "json-file",
+        "log-opts": { "max-size": "10m", "max-file": "3" },
+        "no-new-privileges": true,
+        "min-api-version": "1.24"
+      }
+    mode: '0644'
+  register: docker_config
+
+# --- 3. GESTION INTELLIGENTE DU CHANGEMENT D'UID ---
+# Si on change le subuid ou active le remap, il faut nettoyer /var/lib/docker
+# sinon Docker plante au démarrage à cause des mauvaises permissions.
+
+- name: Vérification existence dossier Docker
+  stat:
+    path: /var/lib/docker
+  register: docker_dir
+
+# - name: Nettoyage Docker si changement d'architecture UserNS
+#   file:
+#     path: /var/lib/docker
+#     state: absent
+#   # On supprime uniquement si la config daemon.json a changé ET que le dossier existait déjà
+#   when: docker_config.changed and docker_dir.stat.exists
+#   notify: Restart Docker
+
+# --- 4. COMPATIBILITÉ RÉSEAU & SWARM ---
+
+- name: Configuration alternatives iptables-nft (Fix Swarm Debian 12)
+  alternatives:
+    name: iptables
+    path: /usr/sbin/iptables-nft
+  notify: Restart Docker
+
+# --- 5. DÉMARRAGE & FINALISATION ---
+
+- name: Démarrage et Activation de Docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Ajout de l'Admin au groupe Docker
+  user:
+    name: "{{ sysadmin_user }}"
+    groups: docker
+    append: yes
+
+# --- 6. GESTION PERMISSIONS SOCKET (CRITIQUE POUR PORTAINER/TRAEFIK) ---
+
+- name: Récupération de l'UID remappé (dockremap)
+  shell: 'grep "^dockremap:" /etc/subuid | cut -d: -f2'
+  register: dockremap_uid_check
+  changed_when: false
+  check_mode: no
+
+- name: Application ACL sur le socket Docker pour le user remappé
+  acl:
+    path: /var/run/docker.sock
+    entity: "{{ dockremap_uid_check.stdout }}"
+    etype: user
+    permissions: rw
+    state: present
+  when: dockremap_uid_check.stdout != ""

@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  # --- STOCKAGE DES LOGS ---
+  loki:
+    image: grafana/loki:3.0.0
+    user: "0:0"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - monitoring
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+
+  # --- COLLECTEUR DE LOGS (Remplace le plugin Docker) ---
+  promtail:
+    image: grafana/promtail:2.9.0
+    user: "0:0" # Root requis pour lire /var/lib/docker
+    command: -config.file=/etc/promtail/config.yaml
+    volumes:
+      - /srv/docker/monitoring/promtail/config.yaml:/etc/promtail/config.yaml:ro
+      - /var/lib/docker/{{ remap_uid }}.{{ remap_gid }}/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - monitoring
+    deploy:
+      mode: global # UN PAR NOEUD (Agent)
+      placement:
+        constraints: [node.platform.os == linux]
+
+  # --- STOCKAGE DES MÉTRIQUES ---
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    user: "0:0"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=15d'
+    volumes:
+      # CORRECTION : On monte le FICHIER explicitement
+      - /srv/docker/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      # On garde le dossier pour la data (si tu veux persister la TSDB, ajoute un volume ici)
+      # - prometheus_data:/prometheus
+    networks:
+      - monitoring
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+
+  # --- COLLECTEUR DE MÉTRIQUES SYSTÈME ---
+  node-exporter:
+    image: prom/node-exporter:v1.8.0
+    user: "0:0" # Root souvent nécessaire pour les accès /proc /sys complets
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/host/root'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/host/root:ro,rslave
+    networks:
+      - monitoring
+    deploy:
+      mode: global # UN PAR NOEUD
+      placement:
+        constraints: [node.platform.os == linux]
+
+  # --- VISUALISATION ---
+  grafana:
+    image: grafana/grafana:11.0.0
+    user: "0:0"
+    volumes:
+      - /srv/docker/monitoring/grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://grafana.{{ main_domain }}
+      - GF_SERVER_DOMAIN=grafana.{{ main_domain }}
+      - GF_SERVER_SERVE_FROM_SUB_PATH=false
+    networks:
+      - monitoring
+      - traefik-public
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.grafana.rule=Host(`grafana.{{ main_domain }}`)"
+        - "traefik.http.routers.grafana.entrypoints=web,websecure"
+        #- "traefik.http.routers.grafana.tls.certresolver=myresolver"
+        - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+
+networks:
+  monitoring:
+    driver: overlay
+    driver_opts:
+      com.docker.network.driver.mtu: "1350"
+  traefik-public:
+    external: true

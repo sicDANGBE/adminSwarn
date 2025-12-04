@@ -1,0 +1,83 @@
+---
+# -------------------------------------------------------
+# ETAPE : NETTOYAGE NUCLÉAIRE (AUTOMATISÉ)
+# -------------------------------------------------------
+
+- name: Arrêt des services Docker (Socket & Service)
+  service:
+    name: "{{ item }}"
+    state: stopped
+  loop:
+    - docker.socket
+    - docker
+  ignore_errors: true
+
+- name: Kill de sécurité des processus (shim, runc, containerd)
+  shell: |
+    pkill -9 dockerd || true
+    pkill -9 containerd || true
+    pkill -9 containerd-shim || true
+    pkill -9 runc || true
+  ignore_errors: true
+  changed_when: false
+
+# --- LA CORRECTION EST ICI ---
+# On boucle sur /proc/mounts pour trouver TOUT ce qui est lié à Docker
+# (Network namespaces, Overlay2, Containers, Volumes...)
+# On trie à l'envers (-r) pour démonter les enfants avant les parents.
+- name: Démontage FORCÉ de tous les points de montage Docker (Run & Lib)
+  shell: |
+    grep -E '/var/run/docker|/var/lib/docker' /proc/mounts | awk '{print $2}' | sort -r | xargs -r umount -f -l
+  changed_when: false
+  ignore_errors: true
+  register: umount_result
+
+- name: Debug du démontage
+  debug:
+    msg: "Nettoyage des montages terminé."
+  when: umount_result.rc == 0
+
+- name: Démontage SPÉCIFIQUE des Network Namespaces (Anti-Zombie)
+  shell: |
+    # 1. On démonte explicitement chaque fichier de namespace réseau
+    # C'est souvent là que ça bloque (le fameux '1-zv77tswb8w')
+    find /var/run/docker/netns -type f 2>/dev/null | xargs -r -I {} umount -l {}
+    
+    # 2. On démonte le dossier netns lui-même s'il est monté
+    umount -l /var/run/docker/netns 2>/dev/null || true
+
+    # 3. On finit par le balayage large classique
+    grep -E '/var/run/docker|/var/lib/docker' /proc/mounts | awk '{print $2}' | sort -r | xargs -r umount -f -l
+  changed_when: false
+  ignore_errors: true
+  args:
+    executable: /bin/bash
+
+# -----------------------------
+
+- name: Destruction du stockage interne Docker (/var/lib/docker)
+  file:
+    path: /var/lib/docker
+    state: absent
+
+- name: Nettoyage des dossiers runtimes (/var/run/docker)
+  file:
+    path: /var/run/docker
+    state: absent
+
+- name: Suppression des données persistantes SaaS (/srv/docker)
+  file:
+    path: /srv/docker
+    state: absent
+
+# On redémarre Docker pour qu'il régénère ses dossiers proprement
+- name: Redémarrage de Docker (Vierge)
+  service:
+    name: docker
+    state: started
+
+- name: Préparation dossier racine /srv/docker
+  file:
+    path: /srv/docker
+    state: directory
+    mode: '0755'

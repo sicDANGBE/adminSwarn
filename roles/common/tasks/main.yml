@@ -1,0 +1,151 @@
+---
+- name: Mise à jour du système
+  apt:
+    update_cache: true
+    upgrade: dist
+    autoremove: true
+
+- name: Installation des paquets de base
+  apt:
+    pkg:
+      - acl
+      - curl
+      - sudo
+      - nftables
+      - fail2ban
+      - python3-pip
+      - python3-yaml
+      - python3-jsondiff
+    state: present
+
+# --- GESTION UTILISATEURS ---
+
+- name: Verrouillage de l'utilisateur 'debian' (Sécurité)
+  user:
+    name: debian
+    password_lock: true
+    shell: /usr/sbin/nologin
+    # On ne supprime pas pour éviter de casser cloud-init
+
+- name: Création utilisateur Admin {{ sysadmin_user }}
+  user:
+    name: "{{ sysadmin_user }}"
+    groups: sudo
+    shell: /bin/bash
+    append: yes
+    state: present
+
+- name: Clé SSH pour {{ sysadmin_user }}
+  authorized_key:
+    user: "{{ sysadmin_user }}"
+    state: present
+    # On ajoute un default pour éviter le crash si la variable manque
+    key: "{{ lookup('file', local_public_key | default('~/.ssh/id_rsa.pub')) }}"
+
+- name: Sudo sans mot de passe
+  copy:
+    dest: "/etc/sudoers.d/{{ sysadmin_user }}"
+    content: "{{ sysadmin_user }} ALL=(ALL) NOPASSWD: ALL"
+    mode: '0440'
+    validate: 'visudo -cf %s'
+
+# --- GESTION SUBUID / SUBGID (Séparation stricte) ---
+# debian: 100000
+# supadmin: 165536
+# dockremap: 231072 (165536 + 65536)
+
+- name: Configuration des SubUIDs
+  copy:
+    dest: /etc/subuid
+    content: |
+      debian:100000:65536
+      {{ sysadmin_user }}:165536:65536
+      dockremap:231072:65536
+    mode: '0644'
+
+- name: Configuration des SubGIDs
+  copy:
+    dest: /etc/subgid
+    content: |
+      debian:100000:65536
+      {{ sysadmin_user }}:165536:65536
+      dockremap:231072:65536
+    mode: '0644'
+
+# --- NFTABLES (Architecture Modulaire) ---
+
+- name: Création du dossier de configuration modulaire NFTables
+  file:
+    path: /etc/nftables.d
+    state: directory
+    mode: '0755'
+
+- name: Configuration Base NFTables (SSH uniquement)
+  template:
+    src: nftables_base.j2
+    dest: /etc/nftables.conf
+    mode: '0755'
+    validate: '/usr/sbin/nft -c -f %s'
+  notify: Reload NFTables
+
+- name: Activation et Démarrage de NFTables
+  service:
+    name: nftables
+    state: started
+    enabled: yes
+
+# --- CONFIGURATION SSHD ---
+
+- name: Configuration SSHD
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    validate: 'sshd -t -f %s' # Validation avant restart !
+  loop:
+    - { regexp: '^#?Port', line: "Port {{ ansible_port }}" }
+    - { regexp: '^#?PermitRootLogin', line: "PermitRootLogin no" }
+    - { regexp: '^#?PasswordAuthentication', line: "PasswordAuthentication no" }
+  notify: Restart SSH
+
+# --- FAIL2BAN ---
+
+- name: Activation et Démarrage de Fail2Ban
+  service:
+    name: fail2ban
+    state: started
+    enabled: yes
+
+# --- LOGGING NFTABLES ---
+
+- name: Installation de Rsyslog
+  apt:
+    pkg: rsyslog
+    state: present
+
+- name: Configuration redirection logs NFTables
+  copy:
+    dest: /etc/rsyslog.d/10-nftables.conf
+    content: |
+      # Redirection des logs NFTables vers un fichier dédié
+      :msg, contains, "[NFT-DROP]" -/var/log/nftables.log
+      & stop
+    mode: '0644'
+  notify: Restart Rsyslog
+
+- name: Configuration Logrotate pour NFTables (Évite de saturer le disque)
+  copy:
+    dest: /etc/logrotate.d/nftables
+    content: |
+      /var/log/nftables.log {
+          rotate 7
+          daily
+          missingok
+          notifempty
+          delaycompress
+          compress
+          postrotate
+              /usr/lib/rsyslog/rsyslog-rotate
+          endscript
+      }
+    mode: '0644'

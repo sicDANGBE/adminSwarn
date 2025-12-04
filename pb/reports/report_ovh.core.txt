@@ -1,0 +1,147 @@
+=============================================
+RAPPORT D'AUDIT : ovh.core
+Date : 2025-12-02T18:31:36Z
+IP : 151.80.147.175
+=============================================
+
+[1] NOYAU & OS
+---------------------------------------------
+Linux vps-940a692a 6.1.0-40-cloud-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.153-1 (2025-09-20) x86_64 GNU/Linux
+
+[2] UTILISATEURS CLES
+---------------------------------------------
+root:x:0:0:root:/root:/bin/bash
+debian:x:1000:1000:Debian:/home/debian:/bin/bash
+supadmin:x:1001:1001::/home/supadmin:/bin/bash
+dockremap:x:999:994::/home/dockremap:/usr/sbin/nologin
+
+[3] DOCKER : CONFIGURATION
+---------------------------------------------
+>> daemon.json :
+{
+  "userns-remap": "default",
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3"
+  },
+  "no-new-privileges": true
+}
+
+>> subuid mapping :
+debian:100000:65536
+supadmin:165536:65536
+dockremap:165536:65536
+
+>> Permissions /var/lib/docker :
+drwx--x--- 3 root 165536 4096 Dec  2 18:20 /var/lib/docker
+
+[4] DOCKER : SANTE
+---------------------------------------------
+>> Status SystemD :
+● docker.service - Docker Application Container Engine
+     Loaded: loaded (/lib/systemd/system/docker.service; enabled; preset: enabled)
+     Active: active (running) since Tue 2025-12-02 18:20:38 UTC; 11min ago
+TriggeredBy: ● docker.socket
+       Docs: https://docs.docker.com
+   Main PID: 18193 (dockerd)
+      Tasks: 11
+     Memory: 44.3M
+        CPU: 7.426s
+     CGroup: /system.slice/docker.service
+             └─18193 /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+
+Dec 02 18:21:03 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:03.818570238Z" level=info msg="sbJoin: gwep4 ''->'cef5a1a49839', gwep6 ''->''" eid=cef5a1a49839 ep=gateway_ingress-sbox net=docker_gwbridge nid=dbf523416848
+Dec 02 18:21:03 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:03.829682237Z" level=info msg="sbJoin: gwep4 ''->'cef5a1a49839', gwep6 ''->''" eid=85050cbf4cea ep=ingress-endpoint net=ingress nid=3gu1hsyme8x8
+Dec 02 18:21:05 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:05.665421496Z" level=info msg="worker qmpr8hijiu95mafd88xinwgen was successfully registered" method="(*Dispatcher).register"
+Dec 02 18:21:05 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:05.665928330Z" level=info msg="worker kohp6n6zegz6r1hnkcuhsoew1 was successfully registered" method="(*Dispatcher).register"
+Dec 02 18:21:05 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:05.682129891Z" level=info msg="Node ed3a6b16b0ce/151.80.144.195, joined gossip cluster"
+Dec 02 18:21:05 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:05.682266493Z" level=info msg="Node ed3a6b16b0ce/151.80.144.195, added to nodes list"
+Dec 02 18:21:05 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:05.683205218Z" level=info msg="Node 65de0ea72bfb/151.80.146.40, joined gossip cluster"
+Dec 02 18:21:05 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:05.683286093Z" level=info msg="Node 65de0ea72bfb/151.80.146.40, added to nodes list"
+Dec 02 18:26:03 vps-940a692a dockerd[18193]: time="2025-12-02T18:26:03.253409850Z" level=info msg="NetworkDB stats vps-940a692a(535ca91ded85) - netID:3gu1hsyme8x889rtytxgqm3lr leaving:false netPeers:3 entries:3 Queue qLen:0+0 netMsg/s:0"
+Dec 02 18:31:03 vps-940a692a dockerd[18193]: time="2025-12-02T18:31:03.453096669Z" level=info msg="NetworkDB stats vps-940a692a(535ca91ded85) - netID:3gu1hsyme8x889rtytxgqm3lr leaving:false netPeers:3 entries:3 Queue qLen:0+0 netMsg/s:0"
+
+>> Derniers Logs (Erreurs potentielles) :
+Dec 02 18:21:02 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:02.640447053Z" level=info msg="dispatcher starting" module=dispatcher node.id=vlflk1nflcz8dj3ok7opa91vm
+Dec 02 18:21:03 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:03.154768701Z" level=info msg="manager selected by agent for new session: { }" module=node/agent node.id=vlflk1nflcz8dj3ok7opa91vm
+Dec 02 18:21:03 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:03.154978494Z" level=info msg="waiting 0s before registering session" module=node/agent node.id=vlflk1nflcz8dj3ok7opa91vm
+Dec 02 18:21:03 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:03.247533103Z" level=info msg="worker vlflk1nflcz8dj3ok7opa91vm was successfully registered" method="(*Dispatcher).register"
+Dec 02 18:21:03 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:03.250978922Z" level=info msg="Initializing Libnetwork Agent" advertise-addr=151.80.147.175 data-path-addr= listen-addr=0.0.0.0 local-addr=151.80.147.175 network-control-plane-mtu=1500 remote-addr-list="[]"
+Dec 02 18:21:03 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:03.251185482Z" level=info msg="New memberlist node - Node:vps-940a692a will use memberlist nodeID:535ca91ded85 with config:&{NodeID:535ca91ded85 Hostname:vps-940a692a BindAddr:0.0.0.0 AdvertiseAddr:151.80.147.175 BindPort:0 Keys:[[34 43 73 188 29 234 85 2 42 207 143 77 148 130 194 109] [110 234 157 124 18 188 214 97 80 123 34 88 86 113 168 29] [165 15 103 40 8 128 158 217 104 152 213 245 92 110 196 169]] PacketBufferSize:1400 reapEntryInterval:1800000000000 reapNetworkInterval:1825000000000 rejoinClusterDuration:10000000000 rejoinClusterInterval:60000000000 StatsPrintPeriod:5m0s HealthPrintPeriod:1m0s}"
+Dec 02 18:21:03 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:03.251163822Z" level=info msg="initialized VXLAN UDP port to 4789 " module=node node.id=vlflk1nflcz8dj3ok7opa91vm
+Dec 02 18:21:03 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:03.252069002Z" level=info msg="Node 535ca91ded85/151.80.147.175, joined gossip cluster"
+Dec 02 18:21:03 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:03.252253772Z" level=info msg="Node 535ca91ded85/151.80.147.175, added to nodes list"
+Dec 02 18:21:03 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:03.256792551Z" level=info msg="cluster update event" module=dispatcher node.id=vlflk1nflcz8dj3ok7opa91vm
+Dec 02 18:21:03 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:03.818570238Z" level=info msg="sbJoin: gwep4 ''->'cef5a1a49839', gwep6 ''->''" eid=cef5a1a49839 ep=gateway_ingress-sbox net=docker_gwbridge nid=dbf523416848
+Dec 02 18:21:03 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:03.829682237Z" level=info msg="sbJoin: gwep4 ''->'cef5a1a49839', gwep6 ''->''" eid=85050cbf4cea ep=ingress-endpoint net=ingress nid=3gu1hsyme8x8
+Dec 02 18:21:05 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:05.665421496Z" level=info msg="worker qmpr8hijiu95mafd88xinwgen was successfully registered" method="(*Dispatcher).register"
+Dec 02 18:21:05 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:05.665928330Z" level=info msg="worker kohp6n6zegz6r1hnkcuhsoew1 was successfully registered" method="(*Dispatcher).register"
+Dec 02 18:21:05 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:05.682129891Z" level=info msg="Node ed3a6b16b0ce/151.80.144.195, joined gossip cluster"
+Dec 02 18:21:05 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:05.682266493Z" level=info msg="Node ed3a6b16b0ce/151.80.144.195, added to nodes list"
+Dec 02 18:21:05 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:05.683205218Z" level=info msg="Node 65de0ea72bfb/151.80.146.40, joined gossip cluster"
+Dec 02 18:21:05 vps-940a692a dockerd[18193]: time="2025-12-02T18:21:05.683286093Z" level=info msg="Node 65de0ea72bfb/151.80.146.40, added to nodes list"
+Dec 02 18:26:03 vps-940a692a dockerd[18193]: time="2025-12-02T18:26:03.253409850Z" level=info msg="NetworkDB stats vps-940a692a(535ca91ded85) - netID:3gu1hsyme8x889rtytxgqm3lr leaving:false netPeers:3 entries:3 Queue qLen:0+0 netMsg/s:0"
+Dec 02 18:31:03 vps-940a692a dockerd[18193]: time="2025-12-02T18:31:03.453096669Z" level=info msg="NetworkDB stats vps-940a692a(535ca91ded85) - netID:3gu1hsyme8x889rtytxgqm3lr leaving:false netPeers:3 entries:3 Queue qLen:0+0 netMsg/s:0"
+
+[5] PARE-FEU (NFTABLES)
+---------------------------------------------
+table inet filter {
+	chain input {
+		type filter hook input priority filter; policy drop;
+		iifname "lo" accept
+		ct state established,related accept
+		ip protocol icmp accept
+		ip6 nexthdr ipv6-icmp accept
+		tcp dport 49281 accept
+		ip saddr { 151.80.144.195, 151.80.146.40, 151.80.147.175 } tcp dport { 2377, 7946 } accept
+		ip saddr { 151.80.144.195, 151.80.146.40, 151.80.147.175 } udp dport { 4789, 7946 } accept
+		ip protocol esp accept
+	}
+
+	chain forward {
+		type filter hook forward priority filter; policy drop;
+		ct state established,related accept
+		iifname "docker0" accept
+		oifname "docker0" accept
+		iifname "docker_gwbridge" accept
+		oifname "docker_gwbridge" accept
+	}
+
+	chain output {
+		type filter hook output priority filter; policy accept;
+	}
+}
+
+[6] PORTS OUVERTS
+---------------------------------------------
+Netid State  Recv-Q Send-Q       Local Address:Port  Peer Address:PortProcess                                   
+udp   UNCONN 0      0                  0.0.0.0:5355       0.0.0.0:*    users:(("systemd-resolve",pid=450,fd=11))
+udp   UNCONN 0      0               127.0.0.54:53         0.0.0.0:*    users:(("systemd-resolve",pid=450,fd=20))
+udp   UNCONN 0      0            127.0.0.53%lo:53         0.0.0.0:*    users:(("systemd-resolve",pid=450,fd=18))
+udp   UNCONN 0      0      151.80.147.175%ens3:68         0.0.0.0:*    users:(("systemd-network",pid=477,fd=10))
+udp   UNCONN 0      0                  0.0.0.0:4789       0.0.0.0:*                                             
+udp   UNCONN 0      0                     [::]:5355          [::]:*    users:(("systemd-resolve",pid=450,fd=13))
+udp   UNCONN 0      0                        *:7946             *:*    users:(("dockerd",pid=18193,fd=34))      
+tcp   LISTEN 0      4096            127.0.0.54:53         0.0.0.0:*    users:(("systemd-resolve",pid=450,fd=21))
+tcp   LISTEN 0      4096               0.0.0.0:5355       0.0.0.0:*    users:(("systemd-resolve",pid=450,fd=12))
+tcp   LISTEN 0      4096         127.0.0.53%lo:53         0.0.0.0:*    users:(("systemd-resolve",pid=450,fd=19))
+tcp   LISTEN 0      128                0.0.0.0:49281      0.0.0.0:*    users:(("sshd",pid=13523,fd=3))          
+tcp   LISTEN 0      4096                     *:7946             *:*    users:(("dockerd",pid=18193,fd=32))      
+tcp   LISTEN 0      4096                     *:2377             *:*    users:(("dockerd",pid=18193,fd=27))      
+tcp   LISTEN 0      4096                  [::]:5355          [::]:*    users:(("systemd-resolve",pid=450,fd=14))
+tcp   LISTEN 0      128                   [::]:49281         [::]:*    users:(("sshd",pid=13523,fd=4))          
+
+[7] CONFIG SSH
+---------------------------------------------
+Port 49281
+PermitRootLogin no
+PubkeyAuthentication yes
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+UsePAM yes
+X11Forwarding no
+PrintMotd no
+AcceptEnv LANG LC_*
+Subsystem	sftp	/usr/lib/openssh/sftp-server
+ClientAliveInterval 120

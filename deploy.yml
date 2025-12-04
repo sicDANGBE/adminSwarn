@@ -1,0 +1,6 @@
+---
+- name: Déploiement de la Stack d'Administration (Manager)
+  hosts: ovh.core
+  become: yes
+  roles:
+    - deploy

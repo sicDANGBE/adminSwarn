@@ -1,0 +1,77 @@
+---
+# -------------------------------------------------------
+# ETAPE 1 : MANAGER
+# -------------------------------------------------------
+
+- name: Initialisation du Swarm (Manager)
+  community.docker.docker_swarm:
+    state: present
+    advertise_addr: "{{ ansible_default_ipv4.address }}"
+  register: swarm_init_result
+  when: "'manager' in group_names"  # <--- CIBLAGE PAR GROUPE
+
+- name: Récupération des Infos du Cluster (Token)
+  community.docker.docker_swarm_info:
+  register: swarm_facts
+  delegate_to: "{{ groups['manager'][0] }}"
+  run_once: true
+
+# -------------------------------------------------------
+# ETAPE 2 : PARE-FEU
+# -------------------------------------------------------
+# (Pas de changement ici, ça s'applique à tout le monde)
+- name: Déploiement règles NFTables Swarm
+  template:
+    src: nftables_swarm.conf.j2
+    dest: /etc/nftables.d/10-swarm.conf
+    mode: '0644'
+  notify: Reload NFTables
+
+- name: Application immédiate du Pare-feu
+  meta: flush_handlers
+
+# -------------------------------------------------------
+# ETAPE 3 : WORKERS - JONCTION ET NETTOYAGE
+# -------------------------------------------------------
+
+- name: Vérification état Swarm local du Worker
+  community.docker.docker_host_info:
+  register: worker_info
+  when: "'workers' in group_names" # <--- CIBLAGE PAR GROUPE
+
+- name: Quitter le mauvais Swarm
+  command: docker swarm leave --force
+  when:
+    - "'workers' in group_names"
+    - worker_info.host_info.Swarm.LocalNodeState == 'active'
+    - worker_info.host_info.Swarm.Cluster.ID is defined
+    - worker_info.host_info.Swarm.Cluster.ID != swarm_facts.swarm_facts.ID
+  notify: Restart Docker
+
+- name: Force restart Docker si nettoyage
+  meta: flush_handlers
+
+- name: Rejoindre le Swarm
+  community.docker.docker_swarm:
+    state: join
+    join_token: "{{ swarm_facts.swarm_facts.JoinTokens.Worker }}"
+    remote_addrs: [ "{{ hostvars[groups['manager'][0]]['ansible_default_ipv4']['address'] }}:2377" ]
+  when:
+    - "'workers' in group_names"
+    - (worker_info.host_info.Swarm.LocalNodeState != 'active') or
+      (worker_info.host_info.Swarm.Cluster.ID is defined and worker_info.host_info.Swarm.Cluster.ID != swarm_facts.swarm_facts.ID)
+
+# -------------------------------------------------------
+# ETAPE 6 : RÉSEAU GLOBAL (INFRASTRUCTURE)
+# -------------------------------------------------------
+- name: Création du réseau overlay 'traefik-public'
+  community.docker.docker_network:
+    name: traefik-public
+    driver: overlay
+    attachable: true # Important pour le debugging ou les conteneurs hors-stack
+    driver_options:
+      # encrypted: "yes"
+      # FIX MTU CRITIQUE (OVH/OpenStack VXLAN)
+      com.docker.network.driver.mtu: "1350"
+  when: "'manager' in group_names"
+  run_once: true

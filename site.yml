@@ -1,0 +1,42 @@
+---
+- name: "Déploiement Infrastructure Swarm"
+  hosts: swarm_nodes
+  become: true
+  
+  # 1. On définit les handlers ici, au niveau global du Play
+  handlers:
+    - name: Restart Rsyslog
+      service: name=rsyslog state=restarted
+
+    - name: Reload NFTables
+      service: name=nftables state=reloaded
+      
+    - name: Restart Docker
+      service: name=docker state=restarted
+      
+    - name: Restart SSH
+      service: name=ssh state=restarted
+
+  # 2. On appelle les rôles
+  roles:
+    - role: clean
+      tags: ["clean"]
+    - role: common
+      tags: ["common", "system"]
+    - role: docker
+      tags: ["docker", "engine"]
+    - role: swarm
+      tags: ["swarm", "network"]
+    
+- name: "Déploiement Applications"
+  hosts: ovh.core
+  become: true
+  tags: ["apps", "deploy"]
+  
+  # On doit répéter les handlers ici car c'est un nouveau "Play"
+  handlers:
+    - name: Reload NFTables
+      service: name=nftables state=reloaded
+      
+  roles:
+    - apps

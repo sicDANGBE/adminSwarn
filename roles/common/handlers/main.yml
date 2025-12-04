@@ -1,0 +1,6 @@
+---
+- name: Restart SSH
+  service: name=ssh state=restarted
+
+- name: Reload NFTables
+  service: name=nftables state=reloaded

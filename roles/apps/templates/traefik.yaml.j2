@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v3.3
+    command:
+      # NOUVELLE SYNTAXE V3
+      - --providers.swarm=true
+      - --providers.swarm.endpoint=unix:///var/run/docker.sock
+      - --providers.swarm.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --api.dashboard=true
+      - --api.insecure=true
+      - --accesslog=true
+      - --metrics.prometheus=true
+      - --metrics.prometheus.buckets=0.1,0.3,1.2,5.0
+      - --accesslog=true
+      - --log.level=INFO
+      # Résolveur de certificats (à décommenter pour la prod)
+      - --certificatesresolvers.myresolver.acme.email=admin@dgsynthex.online
+      - --certificatesresolvers.myresolver.acme.storage=/acme/acme.json
+      - --certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /srv/docker/traefik/acme:/acme
+    networks:
+      - traefik-public
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        # On active Traefik pour lui-même
+        - "traefik.enable=true"
+        
+        # On définit la règle de routage (Ton domaine)
+        - "traefik.http.routers.dashboard.rule=Host(`traefik.{{ main_domain }}`)"
+        
+        # MAGIE : On pointe vers le service interne de l'API (pas besoin de port)
+        - "traefik.http.routers.dashboard.service=api@internal"
+        
+        # On écoute sur le port 80 (web) et 443 (websecure)
+        - "traefik.http.routers.dashboard.entrypoints=web,websecure"
+        
+        # (Optionnel) Authentification basique pour sécuriser l'IHM plus tard
+        # - "traefik.http.routers.dashboard.middlewares=auth"
+        - "traefik.http.services.dashboard.loadbalancer.server.port=8080"
+
+networks:
+  traefik-public:
+    external: true

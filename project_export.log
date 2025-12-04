@@ -1,0 +1,32 @@
+[2025-12-04 22:56:15] Source  : .
+[2025-12-04 22:56:15] Sortie  : project_export.md
+[2025-12-04 22:56:15] Fichiers trouvés (avant filtre): 26
+[2025-12-04 22:56:15] Fichiers à concaténer (après filtre): 25 (exclus auto:1 dir:0 file:0)
+[2025-12-04 22:56:15] Concatène [1] deploy.yml (size=117)
+[2025-12-04 22:56:15] Concatène [2] inventory.yml (size=887)
+[2025-12-04 22:56:15] Concatène [3] pb/audit_security.yml (size=3561)
+[2025-12-04 22:56:15] Concatène [4] pb/configure_firewall_swarm.yml (size=3897)
+[2025-12-04 22:56:15] Concatène [5] pb/init_swarm.yml (size=1470)
+[2025-12-04 22:56:15] Concatène [6] pb/reports/report_ovh.core.txt (size=10872)
+[2025-12-04 22:56:15] Concatène [7] pb/reports/report_ovh.worker.01.txt (size=10677)
+[2025-12-04 22:56:15] Concatène [8] pb/reports/report_ovh.worker.02.txt (size=10658)
+[2025-12-04 22:56:15] Concatène [9] pb/secure_servers.yml (size=4293)
+[2025-12-04 22:56:15] Concatène [10] project_export.log (size=902)
+[2025-12-04 22:56:15] Concatène [11] roles/apps/tasks/main.yml (size=4169)
+[2025-12-04 22:56:15] Concatène [12] roles/apps/templates/monitoring.yaml.j2 (size=3365)
+[2025-12-04 22:56:15] Concatène [13] roles/apps/templates/portainer.yaml.j2 (size=1219)
+[2025-12-04 22:56:15] Concatène [14] roles/apps/templates/prometheus.yml.j2 (size=331)
+[2025-12-04 22:56:15] Concatène [15] roles/apps/templates/promtail.yaml.j2 (size=1671)
+[2025-12-04 22:56:15] Concatène [16] roles/apps/templates/traefik.yaml.j2 (size=2061)
+[2025-12-04 22:56:15] Concatène [17] roles/clean/tasks/main.yml (size=2512)
+[2025-12-04 22:56:15] Concatène [18] roles/common/handlers/main.yml (size=124)
+[2025-12-04 22:56:15] Concatène [19] roles/common/tasks/main.yml (size=3571)
+[2025-12-04 22:56:15] Concatène [20] roles/common/templates/nftables_base.j2 (size=1077)
+[2025-12-04 22:56:15] Concatène [21] roles/docker/handlers/main.yml (size=65)
+[2025-12-04 22:56:15] Concatène [22] roles/docker/tasks/main.yml (size=3545)
+[2025-12-04 22:56:15] Concatène [23] roles/swarm/tasks/main.yml (size=2769)
+[2025-12-04 22:56:15] Concatène [24] roles/swarm/templates/nftables_swarm.conf.j2 (size=1208)
+[2025-12-04 22:56:15] Concatène [25] site.yml (size=969)
+[2025-12-04 22:56:15] Concaténation Markdown terminée : 25 fichier(s), 75990 octets.
+[2025-12-04 22:56:15] Aucune règle d’anonymisation — étape sautée.
+[2025-12-04 22:56:15] Terminé. Log détaillé: project_export.log
