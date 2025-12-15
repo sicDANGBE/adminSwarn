@@ -4,3 +4,7 @@
 
 - name: Reload NFTables
   service: name=nftables state=reloaded
+  notify: Restart Docker
+
+- name: Restart Docker
+  service: name=docker state=restarted

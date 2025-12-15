@@ -1,0 +1,151 @@
+---
+# roles/k8s/tasks/main.yml
+
+# --- 1. PRÉPARATION SYSTÈME ---
+
+- name: Désactivation du Swap (Requis pour K8s)
+  shell: |
+    swapoff -a
+    sed -i '/swap/d' /etc/fstab
+  when: ansible_facts['swaptotal_mb'] | default(0) > 0
+
+- name: Chargement des modules noyau requis
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
+
+- name: Configuration Sysctl pour K8s
+  sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: yes
+  loop:
+    - { key: 'net.bridge.bridge-nf-call-iptables', value: '1' }
+    - { key: 'net.ipv4.ip_forward', value: '1' }
+    - { key: 'net.bridge.bridge-nf-call-ip6tables', value: '1' }
+
+# --- 2. GESTION FIREWALL ---
+
+- name: Nettoyage des règles Firewall Swarm (Obsolètes)
+  file:
+    path: /etc/nftables.d/10-swarm.conf
+    state: absent
+  notify: Reload NFTables
+
+- name: Déploiement règles NFTables K8s
+  template:
+    # CORRECTION ICI : Chemin relatif au rôle k8s (Ansible cherche auto dans roles/k8s/templates)
+    src: nftables_k8s.conf.j2
+    dest: /etc/nftables.d/20-k8s.conf
+    mode: '0644'
+  notify: Reload NFTables
+
+- name: Application immédiate du Pare-feu
+  meta: flush_handlers
+
+# --- 3. INSTALLATION DU SERVER (MASTER) ---
+
+- name: Installation K3s Server
+  shell: >
+    curl -sfL https://get.k3s.io | 
+    INSTALL_K3S_VERSION="{{ k3s_version }}" 
+    INSTALL_K3S_EXEC="server --node-ip {{ ansible_facts['default_ipv4']['address'] }} --flannel-iface {{ k3s_flannel_iface }} --disable-cloud-controller --write-kubeconfig-mode 644" 
+    sh -
+  args:
+    creates: /var/lib/rancher/k3s/server/node-token
+  when: "'server' in group_names"
+
+- name: Attente de la création du fichier Token
+  wait_for:
+    path: /var/lib/rancher/k3s/server/node-token
+    state: present
+    timeout: 300
+    msg: "Le fichier node-token n'a pas été créé à temps. Vérifiez 'systemctl status k3s'."
+  when: "'server' in group_names"
+
+- name: Récupération du Token du Cluster
+  slurp:
+    src: /var/lib/rancher/k3s/server/node-token
+  register: k3s_token_b64
+  when: "'server' in group_names"
+
+- name: Sauvegarde du Token en local (Contrôleur)
+  copy:
+    content: "{{ k3s_token_b64['content'] | b64decode | trim }}"
+    dest: "/tmp/k3s_cluster_token"
+    mode: '0644'
+  delegate_to: localhost
+  become: false
+  when: "'server' in group_names"
+
+# --- 4. INSTALLATION DES AGENTS (WORKERS) ---
+
+- name: Installation K3s Agent
+  vars:
+    master_host_name: "{{ groups['server'][0] }}"
+    master_url: "{{ hostvars[master_host_name]['ansible_host'] }}"
+    master_token: "{{ lookup('file', '/tmp/k3s_cluster_token') }}"
+    my_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
+  shell: >
+    curl -sfL https://get.k3s.io | 
+    K3S_URL=https://{{ master_url }}:6443 
+    K3S_TOKEN={{ master_token }} 
+    INSTALL_K3S_VERSION="{{ k3s_version }}" 
+    INSTALL_K3S_EXEC="agent --node-ip {{ my_ip }} --flannel-iface {{ k3s_flannel_iface }}" 
+    sh -
+  args:
+    creates: /var/lib/rancher/k3s/agent/client-kubelet.crt
+  when: "'agents' in group_names"
+
+# --- 5. CONFORT ADMIN ---
+
+- name: Création dossier .kube pour {{ sysadmin_user }}
+  file:
+    path: "/home/{{ sysadmin_user }}/.kube"
+    state: directory
+    owner: "{{ sysadmin_user }}"
+    group: "{{ sysadmin_user }}"
+    mode: '0750'
+  when: "'server' in group_names"
+
+- name: Copie de la config Kube pour l'utilisateur
+  copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: "/home/{{ sysadmin_user }}/.kube/config"
+    remote_src: yes
+    owner: "{{ sysadmin_user }}"
+    group: "{{ sysadmin_user }}"
+    mode: '0600'
+  when: "'server' in group_names"
+
+- name: Ajout de l'alias et autocompletion
+  blockinfile:
+    path: "/home/{{ sysadmin_user }}/.bashrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK K8S"
+    block: |
+      alias k='kubectl'
+      source <(kubectl completion bash)
+      complete -o default -F __start_kubectl k
+      export KUBECONFIG=/home/{{ sysadmin_user }}/.kube/config
+  when: "'server' in group_names"
+
+# --- 6. NETTOYAGE ---
+
+- name: Suppression du token local (Sécurité)
+  file:
+    path: "/tmp/k3s_cluster_token"
+    state: absent
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+- name: Configuration Traefik ACME (Let's Encrypt)
+  template:
+    src: traefik-config.yaml.j2
+    dest: /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
+    mode: '0644'
+  when: "'server' in group_names"

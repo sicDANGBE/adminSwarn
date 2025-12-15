@@ -1,0 +1,46 @@
+# /etc/nftables.d/20-k8s.conf
+# Règles pour Kubernetes (K3s)
+
+# 1. Liste des IPs Physiques (Tes serveurs OVH)
+define K8S_NODES = { {{ groups['k8s_cluster'] | map('extract', hostvars, ['ansible_host']) | join(', ') }} }
+
+# 2. Réseaux Internes K3s (Valeurs par défaut)
+# Pods CIDR: 10.42.0.0/16
+# Services CIDR: 10.43.0.0/16
+define K8S_PODS = 10.42.0.0/16
+define K8S_SVCS = 10.43.0.0/16
+
+table inet filter {
+  chain input {
+    # --- API SERVER (6443) ---
+    # Autoriser les Nœuds ET les Pods à parler au Master
+    ip saddr $K8S_NODES tcp dport 6443 accept
+    ip saddr $K8S_PODS tcp dport 6443 accept
+
+    # --- KUBELET & METRICS (10250) ---
+    ip saddr $K8S_NODES tcp dport 10250 accept
+    ip saddr $K8S_PODS tcp dport 10250 accept
+
+    # --- FLANNEL VXLAN (8472) ---
+    # Réseau Overlay (Vital pour que les pods se parlent entre noeuds)
+    ip saddr $K8S_NODES udp dport 8472 accept
+
+    # --- ACCÈS CLIENTS (Traefik) ---
+    # Uniquement sur le Master (ou partout si Traefik est en DaemonSet hostPort)
+    # K3s par défaut expose Traefik sur les ports 80/443 du noeud
+    tcp dport { 80, 443 } accept
+  }
+
+  chain forward {
+    # --- ROUTAGE INTERNE K8S ---
+    # On autorise tout le trafic qui vient des pods ou va vers les pods
+    ip saddr $K8S_PODS accept
+    ip daddr $K8S_PODS accept
+    
+    # On garde la confiance sur les interfaces CNI
+    iifname "cni0" accept
+    oifname "cni0" accept
+    iifname "flannel.1" accept
+    oifname "flannel.1" accept
+  }
+}

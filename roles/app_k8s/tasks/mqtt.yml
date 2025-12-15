@@ -1,0 +1,45 @@
+---
+# 1. On ajoute un dépôt qui CONTIENT vraiment Mosquitto
+- name: Ajout Repo Helm bdclark (Mosquitto)
+  kubernetes.core.helm_repository:
+    name: bdclark
+    repo_url: https://bdclark.github.io/helm-charts
+    force_update: yes
+
+# 2. Mise à jour cache (Sécurité)
+- name: Force mise à jour du cache Helm
+  command: /usr/local/bin/helm repo update
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+  changed_when: false
+
+# 3. Déploiement
+- name: Déploiement Mosquitto (Broker MQTT)
+  kubernetes.core.helm:
+    name: mosquitto
+    chart_ref: bdclark/mosquitto
+    release_namespace: apps
+    create_namespace: true
+    values:
+      # Authentification (Attention, ce chart utilise une syntaxe différente de Bitnami)
+      auth:
+        enabled: true
+        # On crée un utilisateur admin/secret
+        # En prod, utilise des secrets k8s existants
+        users:
+          - username: "mqtt_user"
+            password: "mqtt_password"
+      
+      # Exposition Service
+      service:
+        type: LoadBalancer
+        ports:
+          mqtt:
+            port: 1883
+            nodePort: 31883 # Optionnel, pour fixer le port si besoin
+      
+      # Persistance
+      persistence:
+        enabled: true
+        storageClass: "{{ storage_class }}"
+        size: 1Gi

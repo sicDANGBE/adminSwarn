@@ -1,0 +1,86 @@
+---
+# roles/app_k8s/tasks/main.yml
+
+# -----------------------------------------------------------
+# 0. FIX DNS (CRITIQUE : Réparation post-install K3s)
+# -----------------------------------------------------------
+- name: "FIX DNS : Configuration de resolv.conf (Google/Cloudflare)"
+  copy:
+    dest: /etc/resolv.conf
+    content: |
+      nameserver 1.1.1.1
+      nameserver 8.8.8.8
+      nameserver 213.186.33.99
+    owner: root
+    group: root
+    mode: '0644'
+
+# -----------------------------------------------------------
+# 1. INSTALLATION HELM (Via Script Officiel)
+# -----------------------------------------------------------
+
+- name: Téléchargement du script d'installation Helm (v3)
+  get_url:
+    # C'est bien get-helm-3, la v4 n'existe pas encore
+    url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+    dest: /tmp/get_helm.sh
+    mode: '0700'
+
+- name: Exécution du script d'installation Helm
+  command: /tmp/get_helm.sh
+  args:
+    # Idempotence : Si ce fichier existe, on ne relance pas l'install
+    creates: /usr/local/bin/helm
+  environment:
+    # Optionnel : permet d'éviter des erreurs de vérification GPG dans certains cas
+    HELM_INSTALL_DIR: /usr/local/bin
+
+- name: Nettoyage du script d'installation
+  file:
+    path: /tmp/get_helm.sh
+    state: absent
+
+# -----------------------------------------------------------
+# 2. DÉPENDANCES PYTHON (Pour les modules Ansible K8s)
+# -----------------------------------------------------------
+
+- name: Installation librairies Python pour K8s
+  apt:
+    pkg:
+      - python3-kubernetes
+      - python3-jsonpatch
+      - python3-yaml
+    state: present
+    update_cache: yes
+
+# -----------------------------------------------------------
+# 3. CRÉATION NAMESPACES
+# -----------------------------------------------------------
+
+- name: Création des Namespaces K8s
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    name: "{{ item }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+  loop:
+    - portainer
+    - apps
+    - monitoring
+
+# -----------------------------------------------------------
+# 4. DÉPLOIEMENT DES APPS
+# -----------------------------------------------------------
+
+- module_defaults:
+    group/kubernetes.core.helm:
+      kubeconfig: /etc/rancher/k3s/k3s.yaml
+    group/kubernetes.core.k8s:
+      kubeconfig: /etc/rancher/k3s/k3s.yaml
+  block:
+    - include_tasks: portainer.yml
+    - include_tasks: rabbitmq.yml
+    - include_tasks: n8n.yml
+    - include_tasks: mqtt.yml
+    - include_tasks: monitoring.yml

@@ -49,6 +49,22 @@
     mode: '0440'
     validate: 'visudo -cf %s'
 
+- name: Configuration Sysctl (Optimisations Docker & Loki)
+  sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: yes
+  loop:
+    # Réduit l'utilisation du SWAP (préserve les perfs)
+    - { key: 'vm.swappiness', value: '10' }
+    # Indispensable pour Loki / Elasticsearch / SonarQube
+    - { key: 'vm.max_map_count', value: '262144' }
+    # Augmente le nombre de fichiers inotify (Monitoring fichiers logs)
+    - { key: 'fs.inotify.max_user_instances', value: '8192' }
+    # Routing IPv4 (Requis Docker)
+    - { key: 'net.ipv4.ip_forward', value: '1' }
+
 # --- GESTION SUBUID / SUBGID (Séparation stricte) ---
 # debian: 100000
 # supadmin: 165536
@@ -86,6 +102,13 @@
     dest: /etc/nftables.conf
     mode: '0755'
     validate: '/usr/sbin/nft -c -f %s'
+  notify: Reload NFTables
+
+- name: Configuration Logging Rejets Silencieux (Fichier modulaire)
+  template:
+    src: nftables_logging.conf.j2
+    dest: /etc/nftables.d/99-logging.conf
+    mode: '0644'
   notify: Reload NFTables
 
 - name: Activation et Démarrage de NFTables
@@ -127,8 +150,9 @@
   copy:
     dest: /etc/rsyslog.d/10-nftables.conf
     content: |
-      # Redirection des logs NFTables vers un fichier dédié
-      :msg, contains, "[NFT-DROP]" -/var/log/nftables.log
+      # Redirection de TOUS les logs commençant par [NFT- vers le fichier dédié
+      # Cela capture [NFT-DROP], [NFT-FWD-DROP], [NFT-INPUT-DROP], etc.
+      :msg, contains, "[NFT-" -/var/log/nftables.log
       & stop
     mode: '0644'
   notify: Restart Rsyslog

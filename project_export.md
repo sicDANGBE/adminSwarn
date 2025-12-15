@@ -1,6 +1,1236 @@
 # Export de projet
 
-_Généré le 2025-12-04T22:56:15+01:00_
+_Généré le 2025-12-15T07:57:13+01:00_
+
+## .git/COMMIT_EDITMSG
+
+```text
+first commit
+
+```
+
+## .git/HEAD
+
+```text
+ref: refs/heads/main
+
+```
+
+## .git/config
+
+```text
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[remote "origin"]
+	url = https://github.com/sicDANGBE/adminSwarn.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "main"]
+	remote = origin
+	merge = refs/heads/main
+
+```
+
+## .git/description
+
+```text
+Unnamed repository; edit this file 'description' to name the repository.
+
+```
+
+## .git/hooks/applypatch-msg.sample
+
+```text
+#!/bin/sh
+#
+# An example hook script to check the commit log message taken by
+# applypatch from an e-mail message.
+#
+# The hook should exit with non-zero status after issuing an
+# appropriate message if it wants to stop the commit.  The hook is
+# allowed to edit the commit message file.
+#
+# To enable this hook, rename this file to "applypatch-msg".
+
+. git-sh-setup
+commitmsg="$(git rev-parse --git-path hooks/commit-msg)"
+test -x "$commitmsg" && exec "$commitmsg" ${1+"$@"}
+:
+
+```
+
+## .git/hooks/commit-msg.sample
+
+```text
+#!/bin/sh
+#
+# An example hook script to check the commit log message.
+# Called by "git commit" with one argument, the name of the file
+# that has the commit message.  The hook should exit with non-zero
+# status after issuing an appropriate message if it wants to stop the
+# commit.  The hook is allowed to edit the commit message file.
+#
+# To enable this hook, rename this file to "commit-msg".
+
+# Uncomment the below to add a Signed-off-by line to the message.
+# Doing this in a hook is a bad idea in general, but the prepare-commit-msg
+# hook is more suited to it.
+#
+# SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
+# grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
+
+# This example catches duplicate Signed-off-by lines.
+
+test "" = "$(grep '^Signed-off-by: ' "$1" |
+	 sort | uniq -c | sed -e '/^[ 	]*1[ 	]/d')" || {
+	echo >&2 Duplicate Signed-off-by lines.
+	exit 1
+}
+
+```
+
+## .git/hooks/fsmonitor-watchman.sample
+
+```text
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use IPC::Open2;
+
+# An example hook script to integrate Watchman
+# (https://facebook.github.io/watchman/) with git to speed up detecting
+# new and modified files.
+#
+# The hook is passed a version (currently 2) and last update token
+# formatted as a string and outputs to stdout a new update token and
+# all files that have been modified since the update token. Paths must
+# be relative to the root of the working tree and separated by a single NUL.
+#
+# To enable this hook, rename this file to "query-watchman" and set
+# 'git config core.fsmonitor .git/hooks/query-watchman'
+#
+my ($version, $last_update_token) = @ARGV;
+
+# Uncomment for debugging
+# print STDERR "$0 $version $last_update_token\n";
+
+# Check the hook interface version
+if ($version ne 2) {
+	die "Unsupported query-fsmonitor hook version '$version'.\n" .
+	    "Falling back to scanning...\n";
+}
+
+my $git_work_tree = get_working_dir();
+
+my $retry = 1;
+
+my $json_pkg;
+eval {
+	require JSON::XS;
+	$json_pkg = "JSON::XS";
+	1;
+} or do {
+	require JSON::PP;
+	$json_pkg = "JSON::PP";
+};
+
+launch_watchman();
+
+sub launch_watchman {
+	my $o = watchman_query();
+	if (is_work_tree_watched($o)) {
+		output_result($o->{clock}, @{$o->{files}});
+	}
+}
+
+sub output_result {
+	my ($clockid, @files) = @_;
+
+	# Uncomment for debugging watchman output
+	# open (my $fh, ">", ".git/watchman-output.out");
+	# binmode $fh, ":utf8";
+	# print $fh "$clockid\n@files\n";
+	# close $fh;
+
+	binmode STDOUT, ":utf8";
+	print $clockid;
+	print "\0";
+	local $, = "\0";
+	print @files;
+}
+
+sub watchman_clock {
+	my $response = qx/watchman clock "$git_work_tree"/;
+	die "Failed to get clock id on '$git_work_tree'.\n" .
+		"Falling back to scanning...\n" if $? != 0;
+
+	return $json_pkg->new->utf8->decode($response);
+}
+
+sub watchman_query {
+	my $pid = open2(\*CHLD_OUT, \*CHLD_IN, 'watchman -j --no-pretty')
+	or die "open2() failed: $!\n" .
+	"Falling back to scanning...\n";
+
+	# In the query expression below we're asking for names of files that
+	# changed since $last_update_token but not from the .git folder.
+	#
+	# To accomplish this, we're using the "since" generator to use the
+	# recency index to select candidate nodes and "fields" to limit the
+	# output to file names only. Then we're using the "expression" term to
+	# further constrain the results.
+	my $last_update_line = "";
+	if (substr($last_update_token, 0, 1) eq "c") {
+		$last_update_token = "\"$last_update_token\"";
+		$last_update_line = qq[\n"since": $last_update_token,];
+	}
+	my $query = <<"	END";
+		["query", "$git_work_tree", {$last_update_line
+			"fields": ["name"],
+			"expression": ["not", ["dirname", ".git"]]
+		}]
+	END
+
+	# Uncomment for debugging the watchman query
+	# open (my $fh, ">", ".git/watchman-query.json");
+	# print $fh $query;
+	# close $fh;
+
+	print CHLD_IN $query;
+	close CHLD_IN;
+	my $response = do {local $/; <CHLD_OUT>};
+
+	# Uncomment for debugging the watch response
+	# open ($fh, ">", ".git/watchman-response.json");
+	# print $fh $response;
+	# close $fh;
+
+	die "Watchman: command returned no output.\n" .
+	"Falling back to scanning...\n" if $response eq "";
+	die "Watchman: command returned invalid output: $response\n" .
+	"Falling back to scanning...\n" unless $response =~ /^\{/;
+
+	return $json_pkg->new->utf8->decode($response);
+}
+
+sub is_work_tree_watched {
+	my ($output) = @_;
+	my $error = $output->{error};
+	if ($retry > 0 and $error and $error =~ m/unable to resolve root .* directory (.*) is not watched/) {
+		$retry--;
+		my $response = qx/watchman watch "$git_work_tree"/;
+		die "Failed to make watchman watch '$git_work_tree'.\n" .
+		    "Falling back to scanning...\n" if $? != 0;
+		$output = $json_pkg->new->utf8->decode($response);
+		$error = $output->{error};
+		die "Watchman: $error.\n" .
+		"Falling back to scanning...\n" if $error;
+
+		# Uncomment for debugging watchman output
+		# open (my $fh, ">", ".git/watchman-output.out");
+		# close $fh;
+
+		# Watchman will always return all files on the first query so
+		# return the fast "everything is dirty" flag to git and do the
+		# Watchman query just to get it over with now so we won't pay
+		# the cost in git to look up each individual file.
+		my $o = watchman_clock();
+		$error = $output->{error};
+
+		die "Watchman: $error.\n" .
+		"Falling back to scanning...\n" if $error;
+
+		output_result($o->{clock}, ("/"));
+		$last_update_token = $o->{clock};
+
+		eval { launch_watchman() };
+		return 0;
+	}
+
+	die "Watchman: $error.\n" .
+	"Falling back to scanning...\n" if $error;
+
+	return 1;
+}
+
+sub get_working_dir {
+	my $working_dir;
+	if ($^O =~ 'msys' || $^O =~ 'cygwin') {
+		$working_dir = Win32::GetCwd();
+		$working_dir =~ tr/\\/\//;
+	} else {
+		require Cwd;
+		$working_dir = Cwd::cwd();
+	}
+
+	return $working_dir;
+}
+
+```
+
+## .git/hooks/post-update.sample
+
+```text
+#!/bin/sh
+#
+# An example hook script to prepare a packed repository for use over
+# dumb transports.
+#
+# To enable this hook, rename this file to "post-update".
+
+exec git update-server-info
+
+```
+
+## .git/hooks/pre-applypatch.sample
+
+```text
+#!/bin/sh
+#
+# An example hook script to verify what is about to be committed
+# by applypatch from an e-mail message.
+#
+# The hook should exit with non-zero status after issuing an
+# appropriate message if it wants to stop the commit.
+#
+# To enable this hook, rename this file to "pre-applypatch".
+
+. git-sh-setup
+precommit="$(git rev-parse --git-path hooks/pre-commit)"
+test -x "$precommit" && exec "$precommit" ${1+"$@"}
+:
+
+```
+
+## .git/hooks/pre-commit.sample
+
+```text
+#!/bin/sh
+#
+# An example hook script to verify what is about to be committed.
+# Called by "git commit" with no arguments.  The hook should
+# exit with non-zero status after issuing an appropriate message if
+# it wants to stop the commit.
+#
+# To enable this hook, rename this file to "pre-commit".
+
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+	against=HEAD
+else
+	# Initial commit: diff against an empty tree object
+	against=$(git hash-object -t tree /dev/null)
+fi
+
+# If you want to allow non-ASCII filenames set this variable to true.
+allownonascii=$(git config --type=bool hooks.allownonascii)
+
+# Redirect output to stderr.
+exec 1>&2
+
+# Cross platform projects tend to avoid non-ASCII filenames; prevent
+# them from being added to the repository. We exploit the fact that the
+# printable range starts at the space character and ends with tilde.
+if [ "$allownonascii" != "true" ] &&
+	# Note that the use of brackets around a tr range is ok here, (it's
+	# even required, for portability to Solaris 10's /usr/bin/tr), since
+	# the square bracket bytes happen to fall in the designated range.
+	test $(git diff --cached --name-only --diff-filter=A -z $against |
+	  LC_ALL=C tr -d '[ -~]\0' | wc -c) != 0
+then
+	cat <<\EOF
+Error: Attempt to add a non-ASCII file name.
+
+This can cause problems if you want to work with people on other platforms.
+
+To be portable it is advisable to rename the file.
+
+If you know what you are doing you can disable this check using:
+
+  git config hooks.allownonascii true
+EOF
+	exit 1
+fi
+
+# If there are whitespace errors, print the offending file names and fail.
+exec git diff-index --check --cached $against --
+
+```
+
+## .git/hooks/pre-merge-commit.sample
+
+```text
+#!/bin/sh
+#
+# An example hook script to verify what is about to be committed.
+# Called by "git merge" with no arguments.  The hook should
+# exit with non-zero status after issuing an appropriate message to
+# stderr if it wants to stop the merge commit.
+#
+# To enable this hook, rename this file to "pre-merge-commit".
+
+. git-sh-setup
+test -x "$GIT_DIR/hooks/pre-commit" &&
+        exec "$GIT_DIR/hooks/pre-commit"
+:
+
+```
+
+## .git/hooks/pre-push.sample
+
+```text
+#!/bin/sh
+
+# An example hook script to verify what is about to be pushed.  Called by "git
+# push" after it has checked the remote status, but before anything has been
+# pushed.  If this script exits with a non-zero status nothing will be pushed.
+#
+# This hook is called with the following parameters:
+#
+# $1 -- Name of the remote to which the push is being done
+# $2 -- URL to which the push is being done
+#
+# If pushing without using a named remote those arguments will be equal.
+#
+# Information about the commits which are being pushed is supplied as lines to
+# the standard input in the form:
+#
+#   <local ref> <local oid> <remote ref> <remote oid>
+#
+# This sample shows how to prevent push of commits where the log message starts
+# with "WIP" (work in progress).
+
+remote="$1"
+url="$2"
+
+zero=$(git hash-object --stdin </dev/null | tr '[0-9a-f]' '0')
+
+while read local_ref local_oid remote_ref remote_oid
+do
+	if test "$local_oid" = "$zero"
+	then
+		# Handle delete
+		:
+	else
+		if test "$remote_oid" = "$zero"
+		then
+			# New branch, examine all commits
+			range="$local_oid"
+		else
+			# Update to existing branch, examine new commits
+			range="$remote_oid..$local_oid"
+		fi
+
+		# Check for WIP commit
+		commit=$(git rev-list -n 1 --grep '^WIP' "$range")
+		if test -n "$commit"
+		then
+			echo >&2 "Found WIP commit in $local_ref, not pushing"
+			exit 1
+		fi
+	fi
+done
+
+exit 0
+
+```
+
+## .git/hooks/pre-rebase.sample
+
+```text
+#!/bin/sh
+#
+# Copyright (c) 2006, 2008 Junio C Hamano
+#
+# The "pre-rebase" hook is run just before "git rebase" starts doing
+# its job, and can prevent the command from running by exiting with
+# non-zero status.
+#
+# The hook is called with the following parameters:
+#
+# $1 -- the upstream the series was forked from.
+# $2 -- the branch being rebased (or empty when rebasing the current branch).
+#
+# This sample shows how to prevent topic branches that are already
+# merged to 'next' branch from getting rebased, because allowing it
+# would result in rebasing already published history.
+
+publish=next
+basebranch="$1"
+if test "$#" = 2
+then
+	topic="refs/heads/$2"
+else
+	topic=`git symbolic-ref HEAD` ||
+	exit 0 ;# we do not interrupt rebasing detached HEAD
+fi
+
+case "$topic" in
+refs/heads/??/*)
+	;;
+*)
+	exit 0 ;# we do not interrupt others.
+	;;
+esac
+
+# Now we are dealing with a topic branch being rebased
+# on top of master.  Is it OK to rebase it?
+
+# Does the topic really exist?
+git show-ref -q "$topic" || {
+	echo >&2 "No such branch $topic"
+	exit 1
+}
+
+# Is topic fully merged to master?
+not_in_master=`git rev-list --pretty=oneline ^master "$topic"`
+if test -z "$not_in_master"
+then
+	echo >&2 "$topic is fully merged to master; better remove it."
+	exit 1 ;# we could allow it, but there is no point.
+fi
+
+# Is topic ever merged to next?  If so you should not be rebasing it.
+only_next_1=`git rev-list ^master "^$topic" ${publish} | sort`
+only_next_2=`git rev-list ^master           ${publish} | sort`
+if test "$only_next_1" = "$only_next_2"
+then
+	not_in_topic=`git rev-list "^$topic" master`
+	if test -z "$not_in_topic"
+	then
+		echo >&2 "$topic is already up to date with master"
+		exit 1 ;# we could allow it, but there is no point.
+	else
+		exit 0
+	fi
+else
+	not_in_next=`git rev-list --pretty=oneline ^${publish} "$topic"`
+	/usr/bin/perl -e '
+		my $topic = $ARGV[0];
+		my $msg = "* $topic has commits already merged to public branch:\n";
+		my (%not_in_next) = map {
+			/^([0-9a-f]+) /;
+			($1 => 1);
+		} split(/\n/, $ARGV[1]);
+		for my $elem (map {
+				/^([0-9a-f]+) (.*)$/;
+				[$1 => $2];
+			} split(/\n/, $ARGV[2])) {
+			if (!exists $not_in_next{$elem->[0]}) {
+				if ($msg) {
+					print STDERR $msg;
+					undef $msg;
+				}
+				print STDERR " $elem->[1]\n";
+			}
+		}
+	' "$topic" "$not_in_next" "$not_in_master"
+	exit 1
+fi
+
+<<\DOC_END
+
+This sample hook safeguards topic branches that have been
+published from being rewound.
+
+The workflow assumed here is:
+
+ * Once a topic branch forks from "master", "master" is never
+   merged into it again (either directly or indirectly).
+
+ * Once a topic branch is fully cooked and merged into "master",
+   it is deleted.  If you need to build on top of it to correct
+   earlier mistakes, a new topic branch is created by forking at
+   the tip of the "master".  This is not strictly necessary, but
+   it makes it easier to keep your history simple.
+
+ * Whenever you need to test or publish your changes to topic
+   branches, merge them into "next" branch.
+
+The script, being an example, hardcodes the publish branch name
+to be "next", but it is trivial to make it configurable via
+$GIT_DIR/config mechanism.
+
+With this workflow, you would want to know:
+
+(1) ... if a topic branch has ever been merged to "next".  Young
+    topic branches can have stupid mistakes you would rather
+    clean up before publishing, and things that have not been
+    merged into other branches can be easily rebased without
+    affecting other people.  But once it is published, you would
+    not want to rewind it.
+
+(2) ... if a topic branch has been fully merged to "master".
+    Then you can delete it.  More importantly, you should not
+    build on top of it -- other people may already want to
+    change things related to the topic as patches against your
+    "master", so if you need further changes, it is better to
+    fork the topic (perhaps with the same name) afresh from the
+    tip of "master".
+
+Let's look at this example:
+
+		   o---o---o---o---o---o---o---o---o---o "next"
+		  /       /           /           /
+		 /   a---a---b A     /           /
+		/   /               /           /
+	       /   /   c---c---c---c B         /
+	      /   /   /             \         /
+	     /   /   /   b---b C     \       /
+	    /   /   /   /             \     /
+    ---o---o---o---o---o---o---o---o---o---o---o "master"
+
+
+A, B and C are topic branches.
+
+ * A has one fix since it was merged up to "next".
+
+ * B has finished.  It has been fully merged up to "master" and "next",
+   and is ready to be deleted.
+
+ * C has not merged to "next" at all.
+
+We would want to allow C to be rebased, refuse A, and encourage
+B to be deleted.
+
+To compute (1):
+
+	git rev-list ^master ^topic next
+	git rev-list ^master        next
+
+	if these match, topic has not merged in next at all.
+
+To compute (2):
+
+	git rev-list master..topic
+
+	if this is empty, it is fully merged to "master".
+
+DOC_END
+
+```
+
+## .git/hooks/pre-receive.sample
+
+```text
+#!/bin/sh
+#
+# An example hook script to make use of push options.
+# The example simply echoes all push options that start with 'echoback='
+# and rejects all pushes when the "reject" push option is used.
+#
+# To enable this hook, rename this file to "pre-receive".
+
+if test -n "$GIT_PUSH_OPTION_COUNT"
+then
+	i=0
+	while test "$i" -lt "$GIT_PUSH_OPTION_COUNT"
+	do
+		eval "value=\$GIT_PUSH_OPTION_$i"
+		case "$value" in
+		echoback=*)
+			echo "echo from the pre-receive-hook: ${value#*=}" >&2
+			;;
+		reject)
+			exit 1
+		esac
+		i=$((i + 1))
+	done
+fi
+
+```
+
+## .git/hooks/prepare-commit-msg.sample
+
+```text
+#!/bin/sh
+#
+# An example hook script to prepare the commit log message.
+# Called by "git commit" with the name of the file that has the
+# commit message, followed by the description of the commit
+# message's source.  The hook's purpose is to edit the commit
+# message file.  If the hook fails with a non-zero status,
+# the commit is aborted.
+#
+# To enable this hook, rename this file to "prepare-commit-msg".
+
+# This hook includes three examples. The first one removes the
+# "# Please enter the commit message..." help message.
+#
+# The second includes the output of "git diff --name-status -r"
+# into the message, just before the "git status" output.  It is
+# commented because it doesn't cope with --amend or with squashed
+# commits.
+#
+# The third example adds a Signed-off-by line to the message, that can
+# still be edited.  This is rarely a good idea.
+
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+SHA1=$3
+
+/usr/bin/perl -i.bak -ne 'print unless(m/^. Please enter the commit message/..m/^#$/)' "$COMMIT_MSG_FILE"
+
+# case "$COMMIT_SOURCE,$SHA1" in
+#  ,|template,)
+#    /usr/bin/perl -i.bak -pe '
+#       print "\n" . `git diff --cached --name-status -r`
+# 	 if /^#/ && $first++ == 0' "$COMMIT_MSG_FILE" ;;
+#  *) ;;
+# esac
+
+# SOB=$(git var GIT_COMMITTER_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
+# git interpret-trailers --in-place --trailer "$SOB" "$COMMIT_MSG_FILE"
+# if test -z "$COMMIT_SOURCE"
+# then
+#   /usr/bin/perl -i.bak -pe 'print "\n" if !$first_line++' "$COMMIT_MSG_FILE"
+# fi
+
+```
+
+## .git/hooks/push-to-checkout.sample
+
+```text
+#!/bin/sh
+
+# An example hook script to update a checked-out tree on a git push.
+#
+# This hook is invoked by git-receive-pack(1) when it reacts to git
+# push and updates reference(s) in its repository, and when the push
+# tries to update the branch that is currently checked out and the
+# receive.denyCurrentBranch configuration variable is set to
+# updateInstead.
+#
+# By default, such a push is refused if the working tree and the index
+# of the remote repository has any difference from the currently
+# checked out commit; when both the working tree and the index match
+# the current commit, they are updated to match the newly pushed tip
+# of the branch. This hook is to be used to override the default
+# behaviour; however the code below reimplements the default behaviour
+# as a starting point for convenient modification.
+#
+# The hook receives the commit with which the tip of the current
+# branch is going to be updated:
+commit=$1
+
+# It can exit with a non-zero status to refuse the push (when it does
+# so, it must not modify the index or the working tree).
+die () {
+	echo >&2 "$*"
+	exit 1
+}
+
+# Or it can make any necessary changes to the working tree and to the
+# index to bring them to the desired state when the tip of the current
+# branch is updated to the new commit, and exit with a zero status.
+#
+# For example, the hook can simply run git read-tree -u -m HEAD "$1"
+# in order to emulate git fetch that is run in the reverse direction
+# with git push, as the two-tree form of git read-tree -u -m is
+# essentially the same as git switch or git checkout that switches
+# branches while keeping the local changes in the working tree that do
+# not interfere with the difference between the branches.
+
+# The below is a more-or-less exact translation to shell of the C code
+# for the default behaviour for git's push-to-checkout hook defined in
+# the push_to_deploy() function in builtin/receive-pack.c.
+#
+# Note that the hook will be executed from the repository directory,
+# not from the working tree, so if you want to perform operations on
+# the working tree, you will have to adapt your code accordingly, e.g.
+# by adding "cd .." or using relative paths.
+
+if ! git update-index -q --ignore-submodules --refresh
+then
+	die "Up-to-date check failed"
+fi
+
+if ! git diff-files --quiet --ignore-submodules --
+then
+	die "Working directory has unstaged changes"
+fi
+
+# This is a rough translation of:
+#
+#   head_has_history() ? "HEAD" : EMPTY_TREE_SHA1_HEX
+if git cat-file -e HEAD 2>/dev/null
+then
+	head=HEAD
+else
+	head=$(git hash-object -t tree --stdin </dev/null)
+fi
+
+if ! git diff-index --quiet --cached --ignore-submodules $head --
+then
+	die "Working directory has staged changes"
+fi
+
+if ! git read-tree -u -m "$commit"
+then
+	die "Could not update working tree to new HEAD"
+fi
+
+```
+
+## .git/hooks/sendemail-validate.sample
+
+```text
+#!/bin/sh
+
+# An example hook script to validate a patch (and/or patch series) before
+# sending it via email.
+#
+# The hook should exit with non-zero status after issuing an appropriate
+# message if it wants to prevent the email(s) from being sent.
+#
+# To enable this hook, rename this file to "sendemail-validate".
+#
+# By default, it will only check that the patch(es) can be applied on top of
+# the default upstream branch without conflicts in a secondary worktree. After
+# validation (successful or not) of the last patch of a series, the worktree
+# will be deleted.
+#
+# The following config variables can be set to change the default remote and
+# remote ref that are used to apply the patches against:
+#
+#   sendemail.validateRemote (default: origin)
+#   sendemail.validateRemoteRef (default: HEAD)
+#
+# Replace the TODO placeholders with appropriate checks according to your
+# needs.
+
+validate_cover_letter () {
+	file="$1"
+	# TODO: Replace with appropriate checks (e.g. spell checking).
+	true
+}
+
+validate_patch () {
+	file="$1"
+	# Ensure that the patch applies without conflicts.
+	git am -3 "$file" || return
+	# TODO: Replace with appropriate checks for this patch
+	# (e.g. checkpatch.pl).
+	true
+}
+
+validate_series () {
+	# TODO: Replace with appropriate checks for the whole series
+	# (e.g. quick build, coding style checks, etc.).
+	true
+}
+
+# main -------------------------------------------------------------------------
+
+if test "$GIT_SENDEMAIL_FILE_COUNTER" = 1
+then
+	remote=$(git config --default origin --get sendemail.validateRemote) &&
+	ref=$(git config --default HEAD --get sendemail.validateRemoteRef) &&
+	worktree=$(mktemp --tmpdir -d sendemail-validate.XXXXXXX) &&
+	git worktree add -fd --checkout "$worktree" "refs/remotes/$remote/$ref" &&
+	git config --replace-all sendemail.validateWorktree "$worktree"
+else
+	worktree=$(git config --get sendemail.validateWorktree)
+fi || {
+	echo "sendemail-validate: error: failed to prepare worktree" >&2
+	exit 1
+}
+
+unset GIT_DIR GIT_WORK_TREE
+cd "$worktree" &&
+
+if grep -q "^diff --git " "$1"
+then
+	validate_patch "$1"
+else
+	validate_cover_letter "$1"
+fi &&
+
+if test "$GIT_SENDEMAIL_FILE_COUNTER" = "$GIT_SENDEMAIL_FILE_TOTAL"
+then
+	git config --unset-all sendemail.validateWorktree &&
+	trap 'git worktree remove -ff "$worktree"' EXIT &&
+	validate_series
+fi
+
+```
+
+## .git/hooks/update.sample
+
+```text
+#!/bin/sh
+#
+# An example hook script to block unannotated tags from entering.
+# Called by "git receive-pack" with arguments: refname sha1-old sha1-new
+#
+# To enable this hook, rename this file to "update".
+#
+# Config
+# ------
+# hooks.allowunannotated
+#   This boolean sets whether unannotated tags will be allowed into the
+#   repository.  By default they won't be.
+# hooks.allowdeletetag
+#   This boolean sets whether deleting tags will be allowed in the
+#   repository.  By default they won't be.
+# hooks.allowmodifytag
+#   This boolean sets whether a tag may be modified after creation. By default
+#   it won't be.
+# hooks.allowdeletebranch
+#   This boolean sets whether deleting branches will be allowed in the
+#   repository.  By default they won't be.
+# hooks.denycreatebranch
+#   This boolean sets whether remotely creating branches will be denied
+#   in the repository.  By default this is allowed.
+#
+
+# --- Command line
+refname="$1"
+oldrev="$2"
+newrev="$3"
+
+# --- Safety check
+if [ -z "$GIT_DIR" ]; then
+	echo "Don't run this script from the command line." >&2
+	echo " (if you want, you could supply GIT_DIR then run" >&2
+	echo "  $0 <ref> <oldrev> <newrev>)" >&2
+	exit 1
+fi
+
+if [ -z "$refname" -o -z "$oldrev" -o -z "$newrev" ]; then
+	echo "usage: $0 <ref> <oldrev> <newrev>" >&2
+	exit 1
+fi
+
+# --- Config
+allowunannotated=$(git config --type=bool hooks.allowunannotated)
+allowdeletebranch=$(git config --type=bool hooks.allowdeletebranch)
+denycreatebranch=$(git config --type=bool hooks.denycreatebranch)
+allowdeletetag=$(git config --type=bool hooks.allowdeletetag)
+allowmodifytag=$(git config --type=bool hooks.allowmodifytag)
+
+# check for no description
+projectdesc=$(sed -e '1q' "$GIT_DIR/description")
+case "$projectdesc" in
+"Unnamed repository"* | "")
+	echo "*** Project description file hasn't been set" >&2
+	exit 1
+	;;
+esac
+
+# --- Check types
+# if $newrev is 0000...0000, it's a commit to delete a ref.
+zero=$(git hash-object --stdin </dev/null | tr '[0-9a-f]' '0')
+if [ "$newrev" = "$zero" ]; then
+	newrev_type=delete
+else
+	newrev_type=$(git cat-file -t $newrev)
+fi
+
+case "$refname","$newrev_type" in
+	refs/tags/*,commit)
+		# un-annotated tag
+		short_refname=${refname##refs/tags/}
+		if [ "$allowunannotated" != "true" ]; then
+			echo "*** The un-annotated tag, $short_refname, is not allowed in this repository" >&2
+			echo "*** Use 'git tag [ -a | -s ]' for tags you want to propagate." >&2
+			exit 1
+		fi
+		;;
+	refs/tags/*,delete)
+		# delete tag
+		if [ "$allowdeletetag" != "true" ]; then
+			echo "*** Deleting a tag is not allowed in this repository" >&2
+			exit 1
+		fi
+		;;
+	refs/tags/*,tag)
+		# annotated tag
+		if [ "$allowmodifytag" != "true" ] && git rev-parse $refname > /dev/null 2>&1
+		then
+			echo "*** Tag '$refname' already exists." >&2
+			echo "*** Modifying a tag is not allowed in this repository." >&2
+			exit 1
+		fi
+		;;
+	refs/heads/*,commit)
+		# branch
+		if [ "$oldrev" = "$zero" -a "$denycreatebranch" = "true" ]; then
+			echo "*** Creating a branch is not allowed in this repository" >&2
+			exit 1
+		fi
+		;;
+	refs/heads/*,delete)
+		# delete branch
+		if [ "$allowdeletebranch" != "true" ]; then
+			echo "*** Deleting a branch is not allowed in this repository" >&2
+			exit 1
+		fi
+		;;
+	refs/remotes/*,commit)
+		# tracking branch
+		;;
+	refs/remotes/*,delete)
+		# delete tracking branch
+		if [ "$allowdeletebranch" != "true" ]; then
+			echo "*** Deleting a tracking branch is not allowed in this repository" >&2
+			exit 1
+		fi
+		;;
+	*)
+		# Anything else (is there anything else?)
+		echo "*** Update hook: unknown type of update to ref $refname of type $newrev_type" >&2
+		exit 1
+		;;
+esac
+
+# --- Finished
+exit 0
+
+```
+
+## .git/index
+
+> Fichier binaire non inclus (3081 octets)
+
+## .git/info/exclude
+
+```text
+# git ls-files --others --exclude-from=.git/info/exclude
+# Lines that start with '#' are comments.
+# For a project mostly in C, the following would be a good set of
+# exclude patterns (uncomment them if you want to use them):
+# *.[oa]
+# *~
+
+```
+
+## .git/logs/HEAD
+
+```text
+0000000000000000000000000000000000000000 baffdc9b2df085ac01f9c0420213a40f6da944ff sicDANGBE <dansoug@gmail.com> 1764885915 +0100	commit (initial): first commit
+baffdc9b2df085ac01f9c0420213a40f6da944ff 0000000000000000000000000000000000000000 sicDANGBE <dansoug@gmail.com> 1764885921 +0100	Branch: renamed refs/heads/master to refs/heads/main
+0000000000000000000000000000000000000000 baffdc9b2df085ac01f9c0420213a40f6da944ff sicDANGBE <dansoug@gmail.com> 1764885921 +0100	Branch: renamed refs/heads/master to refs/heads/main
+
+```
+
+## .git/logs/refs/heads/main
+
+```text
+0000000000000000000000000000000000000000 baffdc9b2df085ac01f9c0420213a40f6da944ff sicDANGBE <dansoug@gmail.com> 1764885915 +0100	commit (initial): first commit
+baffdc9b2df085ac01f9c0420213a40f6da944ff baffdc9b2df085ac01f9c0420213a40f6da944ff sicDANGBE <dansoug@gmail.com> 1764885921 +0100	Branch: renamed refs/heads/master to refs/heads/main
+
+```
+
+## .git/logs/refs/remotes/origin/main
+
+```text
+0000000000000000000000000000000000000000 baffdc9b2df085ac01f9c0420213a40f6da944ff sicDANGBE <dansoug@gmail.com> 1764885950 +0100	update by push
+
+```
+
+## .git/objects/01/d2167d3d10068dc2e103cc760a9924a34960dd
+
+> Fichier binaire non inclus (69 octets)
+
+## .git/objects/12/dd915be4a8210d5e1f76057b21a4d05af18278
+
+> Fichier binaire non inclus (195 octets)
+
+## .git/objects/13/a733caa16cec86e457f57dbaf9b8c58385247e
+
+> Fichier binaire non inclus (1284 octets)
+
+## .git/objects/18/d034bdec206eba68b4493753af53947030b372
+
+> Fichier binaire non inclus (79 octets)
+
+## .git/objects/1c/1473c234147fe7fc247d23fa080183f873340f
+
+> Fichier binaire non inclus (53 octets)
+
+## .git/objects/1d/bdc784eee7f8adc4af6b772c03ebc34b52641b
+
+> Fichier binaire non inclus (434 octets)
+
+## .git/objects/23/b57a36608a8df344086ad7e4b606034537cf12
+
+> Fichier binaire non inclus (53 octets)
+
+## .git/objects/26/535a0c9d10d5f68d0ef58a108717721a32f60e
+
+> Fichier binaire non inclus (610 octets)
+
+## .git/objects/2d/844f814c96306db61a7c566a5c2ea2d93e33e9
+
+> Fichier binaire non inclus (225 octets)
+
+## .git/objects/30/2920dfd5650225d34cb7f6db2bdd8cd7da4fbf
+
+> Fichier binaire non inclus (67 octets)
+
+## .git/objects/30/a331ae73eef7bb48e0325edb589bced8056792
+
+> Fichier binaire non inclus (60 octets)
+
+## .git/objects/32/909a6b02edc8ac9be3e2fa054bfc8e18123961
+
+> Fichier binaire non inclus (53 octets)
+
+## .git/objects/3e/32478c54689abc143e1802215a81fc6c795e13
+
+> Fichier binaire non inclus (47 octets)
+
+## .git/objects/3f/fdc8b7a539862d9eaa85544d6d323d687c28d3
+
+> Fichier binaire non inclus (79 octets)
+
+## .git/objects/43/9e2595364aa6224f96f8fea9ec40297a2bf4c7
+
+> Fichier binaire non inclus (531 octets)
+
+## .git/objects/4a/7c295e715efc972d9ed4de7c0a25028f5e1c3b
+
+> Fichier binaire non inclus (1117 octets)
+
+## .git/objects/4b/1bbe276df1c05ea6efcac02cec07c6fe5907c2
+
+> Fichier binaire non inclus (746 octets)
+
+## .git/objects/51/3d92feb277350e20774e6cec81e830fe2b4be6
+
+> Fichier binaire non inclus (80 octets)
+
+## .git/objects/56/a69a15619c856a37fef233d278b4dc930fce3b
+
+> Fichier binaire non inclus (53 octets)
+
+## .git/objects/58/682fefefd32a7170683511b9bf7f0d11b2a809
+
+> Fichier binaire non inclus (52 octets)
+
+## .git/objects/5c/4877258f52a852c61950b075199a351d78804d
+
+> Fichier binaire non inclus (706 octets)
+
+## .git/objects/66/2cdad636335aa7ddf87ecc104425ae2a03645b
+
+> Fichier binaire non inclus (163 octets)
+
+## .git/objects/6a/fc057e641164c8f51ae71ffb807f658fd8d4de
+
+> Fichier binaire non inclus (113 octets)
+
+## .git/objects/7a/469c898b6c29c5529444b2a460cded43955950
+
+```text
+x�1�0�����R!�C���g�D,l�YHy��c\��)fC��e��s�C�����]$s�6���_H�5�ܲ�N#K��N���O�����z���L�({oc5�RX��Y��?&�(�
+```
+
+## .git/objects/96/16032d6011eb0cda6fce84acf48c78ec8505de
+
+> Fichier binaire non inclus (1508 octets)
+
+## .git/objects/97/42a5926e1be55a42e870e00305824e2b13ffd5
+
+> Fichier binaire non inclus (1114 octets)
+
+## .git/objects/97/d5407c91f933f0e6e7ffdb77224c4ab0a97364
+
+> Fichier binaire non inclus (244 octets)
+
+## .git/objects/a2/5ca07857e74c16aa08409574d02a04b7aee99f
+
+> Fichier binaire non inclus (211 octets)
+
+## .git/objects/b3/107607c4998ca8746787a6d21009e795dee3c5
+
+> Fichier binaire non inclus (894 octets)
+
+## .git/objects/b3/a7ab66fd51da17c193ed7a15ba22771183cd7c
+
+> Fichier binaire non inclus (53 octets)
+
+## .git/objects/b7/9df636fb4d1a1b11336ff0fc3e7855af93fea9
+
+> Fichier binaire non inclus (415 octets)
+
+## .git/objects/ba/ffdc9b2df085ac01f9c0420213a40f6da944ff
+
+> Fichier binaire non inclus (130 octets)
+
+## .git/objects/bc/d9d8c1d40153407dbbdc4d703fc44ce55de36d
+
+> Fichier binaire non inclus (1747 octets)
+
+## .git/objects/be/757d3459959944bbb1537ec4ca355a165ac7d0
+
+> Fichier binaire non inclus (2975 octets)
+
+## .git/objects/c1/89664be7eef83178050a13fc0797ab0a50971d
+
+> Fichier binaire non inclus (2961 octets)
+
+## .git/objects/d2/208d333d9003c158229765ee6203b4afe16603
+
+> Fichier binaire non inclus (1802 octets)
+
+## .git/objects/d4/0cf7f44e7c20ef0b41948b2faa84215effa7da
+
+> Fichier binaire non inclus (1424 octets)
+
+## .git/objects/d7/0f80bc342ea8e3e75964586ed312b4c3e3a9f1
+
+> Fichier binaire non inclus (584 octets)
+
+## .git/objects/da/bf50e0d613b431ad27422ee424607a8cbadc77
+
+> Fichier binaire non inclus (125 octets)
+
+## .git/objects/dc/8dbb8bee9e0ca3103db0641ebb26a2461ff8ab
+
+> Fichier binaire non inclus (53 octets)
+
+## .git/objects/e4/3e39d095f25c76733e3168a4b8fec4d5a22361
+
+> Fichier binaire non inclus (97 octets)
+
+## .git/objects/e4/9cd7abf024e83d1e07e882cf7d6caa6b2f4682
+
+> Fichier binaire non inclus (1272 octets)
+
+## .git/objects/f7/5944e8e80d3243882751be31084ac16eeb5290
+
+> Fichier binaire non inclus (1695 octets)
+
+## .git/objects/f9/565c084436b011278bf3461b07574d3a5eb644
+
+> Fichier binaire non inclus (20126 octets)
+
+## .git/objects/fa/33a4be7bdede970da452b912dd072a56793df5
+
+> Fichier binaire non inclus (709 octets)
+
+## .git/objects/fa/648d77f788a63c178b93dea39c0842dbe528d8
+
+> Fichier binaire non inclus (2994 octets)
+
+## .git/refs/heads/main
+
+```text
+baffdc9b2df085ac01f9c0420213a40f6da944ff
+
+```
+
+## .git/refs/remotes/origin/main
+
+```text
+baffdc9b2df085ac01f9c0420213a40f6da944ff
+
+```
 
 ## deploy.yml
 
@@ -17,8 +1247,20 @@ _Généré le 2025-12-04T22:56:15+01:00_
 
 ```yaml
 all:
+  # --- VARIABLES GLOBALES (Appliquées à TOUT le monde) ---
+  vars:
+    sysadmin_user: supadmin
+    ansible_user: supadmin
+    ansible_port: 49281
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_become: yes
+    local_public_key: "~/.ssh/id_rsa.pub"
+    main_domain: dgsynthex.online
+    
+    # Manager Swarm dynamique (pour compatibilité rôles existants)
+    manager_host: "{{ groups['manager'][0] | default('') }}" 
+
   children:
-    # Groupe global
     swarm_nodes:
       children:
         manager:
@@ -31,20 +1273,20 @@ all:
               ansible_host: vps-255dab72.vps.ovh.net
             ovh.worker.02:
               ansible_host: vps-9e3ed523.vps.ovh.net
-      vars:
-        sysadmin_user: supadmin
-        # Le manager est maintenant défini dynamiquement par le groupe
-        manager_host: "{{ groups['manager'][0] }}"
-        main_domain: dgsynthex.online
-        
-        # --- CONFIGURATION CONNEXION ---
-        ansible_user: supadmin
-        ansible_port: 49281
-        ansible_python_interpreter: /usr/bin/python3
-        ansible_become: yes
-        local_public_key: "~/.ssh/id_rsa.pub"
-        docker_hub_user: spadmdck
-        docker_hub_pat: "Irmapil-1989"
+        # Les vars spécifiques à Docker/Swarm peuvent rester ici si besoin
+        vars:
+          docker_hub_user: spadmdck
+          docker_hub_pat: "Irmapil-1989"
+
+    k8s_cluster:
+      children:
+        server:
+          hosts:
+            ovh.core:
+        agents:
+          hosts:
+            ovh.worker.01:
+            ovh.worker.02:
 ```
 
 ## pb/audit_security.yml
@@ -945,20 +2187,464 @@ ClientAliveInterval 120
 ## project_export.log
 
 ```text
-[2025-12-04 22:56:15] Source  : .
-[2025-12-04 22:56:15] Sortie  : project_export.md
-[2025-12-04 22:56:15] Fichiers trouvés (avant filtre): 26
-[2025-12-04 22:56:15] Fichiers à concaténer (après filtre): 25 (exclus auto:1 dir:0 file:0)
-[2025-12-04 22:56:15] Concatène [1] deploy.yml (size=117)
-[2025-12-04 22:56:15] Concatène [2] inventory.yml (size=887)
-[2025-12-04 22:56:15] Concatène [3] pb/audit_security.yml (size=3561)
-[2025-12-04 22:56:15] Concatène [4] pb/configure_firewall_swarm.yml (size=3897)
-[2025-12-04 22:56:15] Concatène [5] pb/init_swarm.yml (size=1470)
-[2025-12-04 22:56:15] Concatène [6] pb/reports/report_ovh.core.txt (size=10872)
-[2025-12-04 22:56:15] Concatène [7] pb/reports/report_ovh.worker.01.txt (size=10677)
-[2025-12-04 22:56:15] Concatène [8] pb/reports/report_ovh.worker.02.txt (size=10658)
-[2025-12-04 22:56:15] Concatène [9] pb/secure_servers.yml (size=4293)
+[2025-12-15 07:57:13] Source  : .
+[2025-12-15 07:57:13] Sortie  : project_export.md
+[2025-12-15 07:57:13] Fichiers trouvés (avant filtre): 109
+[2025-12-15 07:57:13] Fichiers à concaténer (après filtre): 108 (exclus auto:1 dir:0 file:0)
+[2025-12-15 07:57:13] Concatène [1] .git/COMMIT_EDITMSG (size=13)
+[2025-12-15 07:57:13] Concatène [2] .git/HEAD (size=21)
+[2025-12-15 07:57:13] Concatène [3] .git/config (size=264)
+[2025-12-15 07:57:13] Concatène [4] .git/description (size=73)
+[2025-12-15 07:57:13] Concatène [5] .git/hooks/applypatch-msg.sample (size=478)
+[2025-12-15 07:57:13] Concatène [6] .git/hooks/commit-msg.sample (size=896)
+[2025-12-15 07:57:13] Concatène [7] .git/hooks/fsmonitor-watchman.sample (size=4726)
+[2025-12-15 07:57:13] Concatène [8] .git/hooks/post-update.sample (size=189)
+[2025-12-15 07:57:13] Concatène [9] .git/hooks/pre-applypatch.sample (size=424)
+[2025-12-15 07:57:13] Concatène [10] .git/hooks/pre-commit.sample (size=1643)
+[2025-12-15 07:57:13] Concatène [11] .git/hooks/pre-merge-commit.sample (size=416)
+[2025-12-15 07:57:13] Concatène [12] .git/hooks/pre-push.sample (size=1374)
+[2025-12-15 07:57:13] Concatène [13] .git/hooks/pre-rebase.sample (size=4898)
+[2025-12-15 07:57:13] Concatène [14] .git/hooks/pre-receive.sample (size=544)
+[2025-12-15 07:57:13] Concatène [15] .git/hooks/prepare-commit-msg.sample (size=1492)
+[2025-12-15 07:57:13] Concatène [16] .git/hooks/push-to-checkout.sample (size=2783)
+[2025-12-15 07:57:13] Concatène [17] .git/hooks/sendemail-validate.sample (size=2308)
+[2025-12-15 07:57:13] Concatène [18] .git/hooks/update.sample (size=3650)
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/index — référencé mais non inclus
+[2025-12-15 07:57:13] Concatène [20] .git/info/exclude (size=240)
+[2025-12-15 07:57:13] Concatène [21] .git/logs/HEAD (size=524)
+[2025-12-15 07:57:13] Concatène [22] .git/logs/refs/heads/main (size=342)
+[2025-12-15 07:57:13] Concatène [23] .git/logs/refs/remotes/origin/main (size=144)
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/01/d2167d3d10068dc2e103cc760a9924a34960dd — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/12/dd915be4a8210d5e1f76057b21a4d05af18278 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/13/a733caa16cec86e457f57dbaf9b8c58385247e — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/18/d034bdec206eba68b4493753af53947030b372 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/1c/1473c234147fe7fc247d23fa080183f873340f — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/1d/bdc784eee7f8adc4af6b772c03ebc34b52641b — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/23/b57a36608a8df344086ad7e4b606034537cf12 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/26/535a0c9d10d5f68d0ef58a108717721a32f60e — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/2d/844f814c96306db61a7c566a5c2ea2d93e33e9 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/30/2920dfd5650225d34cb7f6db2bdd8cd7da4fbf — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/30/a331ae73eef7bb48e0325edb589bced8056792 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/32/909a6b02edc8ac9be3e2fa054bfc8e18123961 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/3e/32478c54689abc143e1802215a81fc6c795e13 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/3f/fdc8b7a539862d9eaa85544d6d323d687c28d3 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/43/9e2595364aa6224f96f8fea9ec40297a2bf4c7 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/4a/7c295e715efc972d9ed4de7c0a25028f5e1c3b — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/4b/1bbe276df1c05ea6efcac02cec07c6fe5907c2 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/51/3d92feb277350e20774e6cec81e830fe2b4be6 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/56/a69a15619c856a37fef233d278b4dc930fce3b — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/58/682fefefd32a7170683511b9bf7f0d11b2a809 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/5c/4877258f52a852c61950b075199a351d78804d — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/66/2cdad636335aa7ddf87ecc104425ae2a03645b — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/6a/fc057e641164c8f51ae71ffb807f658fd8d4de — référencé mais non inclus
+[2025-12-15 07:57:13] Concatène [47] .git/objects/7a/469c898b6c29c5529444b2a460cded43955950 (size=122)
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/96/16032d6011eb0cda6fce84acf48c78ec8505de — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/97/42a5926e1be55a42e870e00305824e2b13ffd5 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/97/d5407c91f933f0e6e7ffdb77224c4ab0a97364 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/a2/5ca07857e74c16aa08409574d02a04b7aee99f — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/b3/107607c4998ca8746787a6d21009e795dee3c5 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/b3/a7ab66fd51da17c193ed7a15ba22771183cd7c — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/b7/9df636fb4d1a1b11336ff0fc3e7855af93fea9 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/ba/ffdc9b2df085ac01f9c0420213a40f6da944ff — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/bc/d9d8c1d40153407dbbdc4d703fc44ce55de36d — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/be/757d3459959944bbb1537ec4ca355a165ac7d0 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/c1/89664be7eef83178050a13fc0797ab0a50971d — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/d2/208d333d9003c158229765ee6203b4afe16603 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/d4/0cf7f44e7c20ef0b41948b2faa84215effa7da — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/d7/0f80bc342ea8e3e75964586ed312b4c3e3a9f1 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/da/bf50e0d613b431ad27422ee424607a8cbadc77 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/dc/8dbb8bee9e0ca3103db0641ebb26a2461ff8ab — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/e4/3e39d095f25c76733e3168a4b8fec4d5a22361 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/e4/9cd7abf024e83d1e07e882cf7d6caa6b2f4682 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/f7/5944e8e80d3243882751be31084ac16eeb5290 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/f9/565c084436b011278bf3461b07574d3a5eb644 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/fa/33a4be7bdede970da452b912dd072a56793df5 — référencé mais non inclus
+[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/fa/648d77f788a63c178b93dea39c0842dbe528d8 — référencé mais non inclus
+[2025-12-15 07:57:13] Concatène [70] .git/refs/heads/main (size=41)
+[2025-12-15 07:57:13] Concatène [71] .git/refs/remotes/origin/main (size=41)
+[2025-12-15 07:57:13] Concatène [72] deploy.yml (size=117)
+[2025-12-15 07:57:13] Concatène [73] inventory.yml (size=1131)
+[2025-12-15 07:57:13] Concatène [74] pb/audit_security.yml (size=3561)
+[2025-12-15 07:57:13] Concatène [75] pb/configure_firewall_swarm.yml (size=3897)
+[2025-12-15 07:57:13] Concatène [76] pb/init_swarm.yml (size=1470)
+[2025-12-15 07:57:13] Concatène [77] pb/reports/report_ovh.core.txt (size=10872)
+[2025-12-15 07:57:13] Concatène [78] pb/reports/report_ovh.worker.01.txt (size=10677)
+[2025-12-15 07:57:13] Concatène [79] pb/reports/report_ovh.worker.02.txt (size=10658)
+[2025-12-15 07:57:13] Concatène [80] pb/secure_servers.yml (size=4293)
 
+```
+
+## roles/app_k8s/tasks/main.yml
+
+```yaml
+---
+# roles/app_k8s/tasks/main.yml
+
+# -----------------------------------------------------------
+# 0. FIX DNS (CRITIQUE : Réparation post-install K3s)
+# -----------------------------------------------------------
+- name: "FIX DNS : Configuration de resolv.conf (Google/Cloudflare)"
+  copy:
+    dest: /etc/resolv.conf
+    content: |
+      nameserver 1.1.1.1
+      nameserver 8.8.8.8
+      nameserver 213.186.33.99
+    owner: root
+    group: root
+    mode: '0644'
+
+# -----------------------------------------------------------
+# 1. INSTALLATION HELM (Via Script Officiel)
+# -----------------------------------------------------------
+
+- name: Téléchargement du script d'installation Helm (v3)
+  get_url:
+    # C'est bien get-helm-3, la v4 n'existe pas encore
+    url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+    dest: /tmp/get_helm.sh
+    mode: '0700'
+
+- name: Exécution du script d'installation Helm
+  command: /tmp/get_helm.sh
+  args:
+    # Idempotence : Si ce fichier existe, on ne relance pas l'install
+    creates: /usr/local/bin/helm
+  environment:
+    # Optionnel : permet d'éviter des erreurs de vérification GPG dans certains cas
+    HELM_INSTALL_DIR: /usr/local/bin
+
+- name: Nettoyage du script d'installation
+  file:
+    path: /tmp/get_helm.sh
+    state: absent
+
+# -----------------------------------------------------------
+# 2. DÉPENDANCES PYTHON (Pour les modules Ansible K8s)
+# -----------------------------------------------------------
+
+- name: Installation librairies Python pour K8s
+  apt:
+    pkg:
+      - python3-kubernetes
+      - python3-jsonpatch
+      - python3-yaml
+    state: present
+    update_cache: yes
+
+# -----------------------------------------------------------
+# 3. CRÉATION NAMESPACES
+# -----------------------------------------------------------
+
+- name: Création des Namespaces K8s
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    name: "{{ item }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+  loop:
+    - portainer
+    - apps
+    - monitoring
+
+# -----------------------------------------------------------
+# 4. DÉPLOIEMENT DES APPS
+# -----------------------------------------------------------
+
+- module_defaults:
+    group/kubernetes.core.helm:
+      kubeconfig: /etc/rancher/k3s/k3s.yaml
+    group/kubernetes.core.k8s:
+      kubeconfig: /etc/rancher/k3s/k3s.yaml
+  block:
+    - include_tasks: portainer.yml
+    - include_tasks: rabbitmq.yml
+    - include_tasks: n8n.yml
+    - include_tasks: mqtt.yml
+    - include_tasks: monitoring.yml
+```
+
+## roles/app_k8s/tasks/monitoring.yml
+
+```yaml
+---
+- name: Ajout Repo Prometheus Community
+  kubernetes.core.helm_repository:
+    name: prometheus-community
+    repo_url: https://prometheus-community.github.io/helm-charts
+
+- name: Déploiement Stack Monitoring (Prometheus + Grafana)
+  kubernetes.core.helm:
+    name: monitoring
+    chart_ref: prometheus-community/kube-prometheus-stack
+    release_namespace: monitoring
+    values:
+      grafana:
+        enabled: true
+        adminPassword: "admin" # A changer !
+        ingress:
+          enabled: true
+          ingressClassName: "traefik"
+          hosts:
+            - "grafana.{{ main_domain }}"
+          annotations:
+            traefik.ingress.kubernetes.io/router.entrypoints: websecure
+            traefik.ingress.kubernetes.io/router.tls: "true"
+        persistence:
+          enabled: true
+          storageClass: "{{ storage_class }}"
+          size: 5Gi
+      
+      prometheus:
+        prometheusSpec:
+          storageSpec:
+            volumeClaimTemplate:
+              spec:
+                storageClassName: "{{ storage_class }}"
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 10Gi
+          # Configuration de la rétention
+          retention: 10d
+```
+
+## roles/app_k8s/tasks/mqtt.yml
+
+```yaml
+---
+# 1. On ajoute un dépôt qui CONTIENT vraiment Mosquitto
+- name: Ajout Repo Helm bdclark (Mosquitto)
+  kubernetes.core.helm_repository:
+    name: bdclark
+    repo_url: https://bdclark.github.io/helm-charts
+    force_update: yes
+
+# 2. Mise à jour cache (Sécurité)
+- name: Force mise à jour du cache Helm
+  command: /usr/local/bin/helm repo update
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+  changed_when: false
+
+# 3. Déploiement
+- name: Déploiement Mosquitto (Broker MQTT)
+  kubernetes.core.helm:
+    name: mosquitto
+    chart_ref: bdclark/mosquitto
+    release_namespace: apps
+    create_namespace: true
+    values:
+      # Authentification (Attention, ce chart utilise une syntaxe différente de Bitnami)
+      auth:
+        enabled: true
+        # On crée un utilisateur admin/secret
+        # En prod, utilise des secrets k8s existants
+        users:
+          - username: "mqtt_user"
+            password: "mqtt_password"
+      
+      # Exposition Service
+      service:
+        type: LoadBalancer
+        ports:
+          mqtt:
+            port: 1883
+            nodePort: 31883 # Optionnel, pour fixer le port si besoin
+      
+      # Persistance
+      persistence:
+        enabled: true
+        storageClass: "{{ storage_class }}"
+        size: 1Gi
+```
+
+## roles/app_k8s/tasks/n8n.yml
+
+```yaml
+---
+# On utilise le chart '8gears' ou similaire qui est populaire pour n8n
+- name: Ajout Repo Helm n8n
+  kubernetes.core.helm_repository:
+    name: cnrancher
+    repo_url: https://charts.rancher.io
+
+# Note : Il n'y a pas de Chart "Officiel" n8n parfait, souvent on le fait en YAML pur.
+# Mais pour rester dans l'esprit Helm, on va utiliser une définition Deployment simple via le module k8s
+# car les charts n8n tiers sont souvent instables.
+
+- name: Déploiement n8n (Deployment + Service + Ingress)
+  kubernetes.core.k8s:
+    state: present
+    namespace: apps
+    definition:
+      apiVersion: v1
+      kind: List
+      items:
+        - apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            name: n8n-data
+            namespace: apps
+          spec:
+            accessModes: [ "ReadWriteOnce" ]
+            storageClassName: "{{ storage_class }}"
+            resources:
+              requests:
+                storage: 5Gi
+
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: n8n
+            namespace: apps
+            labels:
+              app: n8n
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: n8n
+            template:
+              metadata:
+                labels:
+                  app: n8n
+              spec:
+                containers:
+                  - name: n8n
+                    image: n8nio/n8n:latest
+                    ports:
+                      - containerPort: 5678
+                    env:
+                      - name: N8N_HOST
+                        value: "n8n.{{ main_domain }}"
+                      - name: WEBHOOK_URL
+                        value: "https://n8n.{{ main_domain }}/"
+                    volumeMounts:
+                      - name: data
+                        mountPath: /home/node/.n8n
+                volumes:
+                  - name: data
+                    persistentVolumeClaim:
+                      claimName: n8n-data
+
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: n8n
+            namespace: apps
+          spec:
+            selector:
+              app: n8n
+            ports:
+              - port: 80
+                targetPort: 5678
+
+        - apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: n8n
+            namespace: apps
+            annotations:
+              traefik.ingress.kubernetes.io/router.entrypoints: websecure
+              traefik.ingress.kubernetes.io/router.tls: "true"
+              traefik.ingress.kubernetes.io/router.tls.certresolver: "le"
+          spec:
+            rules:
+              - host: "n8n.{{ main_domain }}"
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: n8n
+                          port:
+                            number: 80
+```
+
+## roles/app_k8s/tasks/portainer.yml
+
+```yaml
+- name: Ajout Repo Helm Portainer
+  kubernetes.core.helm_repository:
+    name: portainer
+    repo_url: https://portainer.github.io/k8s/
+
+- name: Déploiement Portainer CE
+  kubernetes.core.helm:
+    name: portainer
+    chart_ref: portainer/portainer
+    release_namespace: portainer
+    create_namespace: true
+    values:
+      ingress:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          # HTTPS automatique via Traefik (CertResolver à configurer si prod)
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.tls: "true"
+          traefik.ingress.kubernetes.io/router.tls.certresolver: "le"
+        hosts:
+          - host: "portainer.{{ main_domain }}"
+            paths:
+              - path: "/"
+      persistence:
+        enabled: true
+        size: 10Gi
+        storageClass: "{{ storage_class }}"
+```
+
+## roles/app_k8s/tasks/rabbitmq.yml
+
+```yaml
+---
+- name: Ajout Repo Helm Bitnami
+  kubernetes.core.helm_repository:
+    name: bitnami
+    repo_url: https://charts.bitnami.com/bitnami
+
+- name: Déploiement RabbitMQ Cluster
+  kubernetes.core.helm:
+    name: rabbitmq
+    chart_ref: bitnami/rabbitmq
+    release_namespace: apps
+    values:
+      replicaCount: 3 # 1 par noeud pour la haute dispo
+      auth:
+        username: admin
+        password: "cdosiuhqsdoifuhqsdoiufh" # A mettre dans un vault idéalement
+        erlangCookie: "cdosi_uhq_sd_o_i_f_u_h__q__s_doi_gqmsdofguqsdhfpmuihufh"
+      ingress:
+        enabled: true
+        hostname: "rabbitmq.{{ main_domain }}"
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.tls: "true"
+          traefik.ingress.kubernetes.io/router.tls.certresolver: "le"
+      persistence:
+        enabled: true
+        storageClass: "{{ storage_class }}"
+        size: 8Gi
+```
+
+## roles/app_k8s/vars/main.yml
+
+```yaml
+
+# Versions des Charts Helm (À jour Fin 2025)
+helm_versions:
+  portainer: "2.21.5"
+  rabbitmq: "12.0.0" # Bitnami
+  n8n: "0.14.0"      # OCI ou Community
+  mosquitto: "4.0.0" # Bitnami
+  monitoring: "45.0.0" # Kube-Prometheus-Stack
+
+# Persistance
+storage_class: "local-path" # Le stockage par défaut de K3s
 ```
 
 ## roles/apps/tasks/main.yml
@@ -1199,7 +2885,7 @@ services:
 
   # --- VISUALISATION ---
   grafana:
-    image: grafana/grafana:11.0.0
+    image: grafana/grafana:main
     user: "0:0"
     volumes:
       - /srv/docker/monitoring/grafana:/var/lib/grafana
@@ -1220,15 +2906,15 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.grafana.rule=Host(`grafana.{{ main_domain }}`)"
-        - "traefik.http.routers.grafana.entrypoints=web,websecure"
-        #- "traefik.http.routers.grafana.tls.certresolver=myresolver"
+        - "traefik.http.routers.grafana.entrypoints=websecure"
+        - "traefik.http.routers.grafana.tls.certresolver=myresolver"
         - "traefik.http.services.grafana.loadbalancer.server.port=3000"
 
 networks:
   monitoring:
     driver: overlay
     driver_opts:
-      com.docker.network.driver.mtu: "1350"
+      com.docker.network.driver.mtu: "1300"
   traefik-public:
     external: true
 ```
@@ -1280,7 +2966,7 @@ networks:
     driver: overlay
     attachable: true
     driver_opts:
-      com.docker.network.driver.mtu: "1350"
+      com.docker.network.driver.mtu: "1300"
 ```
 
 ## roles/apps/templates/prometheus.yml.j2
@@ -1368,8 +3054,15 @@ services:
       - --providers.swarm=true
       - --providers.swarm.endpoint=unix:///var/run/docker.sock
       - --providers.swarm.exposedbydefault=false
+
+      # --- CONFIGURATION HTTP (80) AVEC REDIRECTION HTTPS ---
       - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+
+      # --- CONFIGURATION HTTPS (443) ---
       - --entrypoints.websecure.address=:443
+
       - --api.dashboard=true
       - --api.insecure=true
       - --accesslog=true
@@ -1519,6 +3212,10 @@ networks:
 
 - name: Reload NFTables
   service: name=nftables state=reloaded
+  notify: Restart Docker
+
+- name: Restart Docker
+  service: name=docker state=restarted
 ```
 
 ## roles/common/tasks/main.yml
@@ -1575,6 +3272,22 @@ networks:
     mode: '0440'
     validate: 'visudo -cf %s'
 
+- name: Configuration Sysctl (Optimisations Docker & Loki)
+  sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: yes
+  loop:
+    # Réduit l'utilisation du SWAP (préserve les perfs)
+    - { key: 'vm.swappiness', value: '10' }
+    # Indispensable pour Loki / Elasticsearch / SonarQube
+    - { key: 'vm.max_map_count', value: '262144' }
+    # Augmente le nombre de fichiers inotify (Monitoring fichiers logs)
+    - { key: 'fs.inotify.max_user_instances', value: '8192' }
+    # Routing IPv4 (Requis Docker)
+    - { key: 'net.ipv4.ip_forward', value: '1' }
+
 # --- GESTION SUBUID / SUBGID (Séparation stricte) ---
 # debian: 100000
 # supadmin: 165536
@@ -1612,6 +3325,13 @@ networks:
     dest: /etc/nftables.conf
     mode: '0755'
     validate: '/usr/sbin/nft -c -f %s'
+  notify: Reload NFTables
+
+- name: Configuration Logging Rejets Silencieux (Fichier modulaire)
+  template:
+    src: nftables_logging.conf.j2
+    dest: /etc/nftables.d/99-logging.conf
+    mode: '0644'
   notify: Reload NFTables
 
 - name: Activation et Démarrage de NFTables
@@ -1653,8 +3373,9 @@ networks:
   copy:
     dest: /etc/rsyslog.d/10-nftables.conf
     content: |
-      # Redirection des logs NFTables vers un fichier dédié
-      :msg, contains, "[NFT-DROP]" -/var/log/nftables.log
+      # Redirection de TOUS les logs commençant par [NFT- vers le fichier dédié
+      # Cela capture [NFT-DROP], [NFT-FWD-DROP], [NFT-INPUT-DROP], etc.
+      :msg, contains, "[NFT-" -/var/log/nftables.log
       & stop
     mode: '0644'
   notify: Restart Rsyslog
@@ -1715,7 +3436,30 @@ include "/etc/nftables.d/*.conf"
 # Cette règle est ajoutée TOUT À LA FIN de la chaîne input.
 # Tout paquet qui n'a pas été accepté par le SSH ou par les includes (*) arrivera ici.
 # On le logue dans /var/log/nftables.log (via rsyslog) avant qu'il soit jeté par la "policy drop".
-add rule inet filter input limit rate 10/minute log prefix "[NFT-DROP] " flags all
+# add rule inet filter input limit rate 10/minute log prefix "[NFT-DROP] " flags all
+
+```
+
+## roles/common/templates/nftables_logging.conf.j2
+
+```text
+# Configuration des logs pour les paquets rejetés (Silent Drops)
+# Ce fichier est chargé en dernier (99-logging).
+
+table inet filter {
+    # On ajoute ces règles aux chaînes existantes sans les écraser
+
+    chain input {
+        # Log des paquets entrants rejetés avant la policy drop
+        limit rate 10/minute log prefix "[NFT-INPUT-DROP] " flags all
+    }
+
+    chain forward {
+        # Log des paquets traversants (Docker/Swarm) rejetés
+        # C'est ici que tu verras si le pare-feu bloque Traefik <-> Grafana
+        limit rate 20/minute log prefix "[NFT-FWD-DROP] " flags all
+    }
+}
 ```
 
 ## roles/docker/handlers/main.yml
@@ -1731,6 +3475,7 @@ add rule inet filter input limit rate 10/minute log prefix "[NFT-DROP] " flags a
 ```yaml
 ---
 # --- 1. INSTALLATION & PRÉREQUIS ---
+
 
 - name: Installation des dépendances système pour Docker
   apt:
@@ -1796,7 +3541,8 @@ add rule inet filter input limit rate 10/minute log prefix "[NFT-DROP] " flags a
         "log-driver": "json-file",
         "log-opts": { "max-size": "10m", "max-file": "3" },
         "no-new-privileges": true,
-        "min-api-version": "1.24"
+        "min-api-version": "1.24",
+        "mtu": 1300
       }
     mode: '0644'
   register: docker_config
@@ -1840,6 +3586,16 @@ add rule inet filter input limit rate 10/minute log prefix "[NFT-DROP] " flags a
     groups: docker
     append: yes
 
+- name: Fix MSS Clamping (Docker User Chain) - TCPMSS
+  shell: |
+    # Vérifie si la règle existe déjà pour éviter les doublons
+    iptables -t filter -C DOCKER-USER -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1200 2>/dev/null || \
+    # Si elle n'existe pas, on l'insère en première position
+    iptables -t filter -I DOCKER-USER -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1200
+  changed_when: false
+  # On ignore les erreurs si iptables-legacy vs nft pose souci, mais sur Debian 12 ça passe via le wrapper
+  ignore_errors: true
+
 # --- 6. GESTION PERMISSIONS SOCKET (CRITIQUE POUR PORTAINER/TRAEFIK) ---
 
 - name: Récupération de l'UID remappé (dockremap)
@@ -1856,6 +3612,258 @@ add rule inet filter input limit rate 10/minute log prefix "[NFT-DROP] " flags a
     permissions: rw
     state: present
   when: dockremap_uid_check.stdout != ""
+```
+
+## roles/k8s/defaults/main.yml
+
+```yaml
+---
+# roles/k8s/defaults/main.yml
+
+# Version de K3s (Pinnée pour la stabilité)
+k3s_version: "v1.28.5+k3s1"
+
+# Interface réseau pour Flannel (Overlay)
+k3s_flannel_iface: "ens3"
+```
+
+## roles/k8s/tasks/main.yml
+
+```yaml
+---
+# roles/k8s/tasks/main.yml
+
+# --- 1. PRÉPARATION SYSTÈME ---
+
+- name: Désactivation du Swap (Requis pour K8s)
+  shell: |
+    swapoff -a
+    sed -i '/swap/d' /etc/fstab
+  when: ansible_facts['swaptotal_mb'] | default(0) > 0
+
+- name: Chargement des modules noyau requis
+  modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
+
+- name: Configuration Sysctl pour K8s
+  sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: yes
+  loop:
+    - { key: 'net.bridge.bridge-nf-call-iptables', value: '1' }
+    - { key: 'net.ipv4.ip_forward', value: '1' }
+    - { key: 'net.bridge.bridge-nf-call-ip6tables', value: '1' }
+
+# --- 2. GESTION FIREWALL ---
+
+- name: Nettoyage des règles Firewall Swarm (Obsolètes)
+  file:
+    path: /etc/nftables.d/10-swarm.conf
+    state: absent
+  notify: Reload NFTables
+
+- name: Déploiement règles NFTables K8s
+  template:
+    # CORRECTION ICI : Chemin relatif au rôle k8s (Ansible cherche auto dans roles/k8s/templates)
+    src: nftables_k8s.conf.j2
+    dest: /etc/nftables.d/20-k8s.conf
+    mode: '0644'
+  notify: Reload NFTables
+
+- name: Application immédiate du Pare-feu
+  meta: flush_handlers
+
+# --- 3. INSTALLATION DU SERVER (MASTER) ---
+
+- name: Installation K3s Server
+  shell: >
+    curl -sfL https://get.k3s.io | 
+    INSTALL_K3S_VERSION="{{ k3s_version }}" 
+    INSTALL_K3S_EXEC="server --node-ip {{ ansible_facts['default_ipv4']['address'] }} --flannel-iface {{ k3s_flannel_iface }} --disable-cloud-controller --write-kubeconfig-mode 644" 
+    sh -
+  args:
+    creates: /var/lib/rancher/k3s/server/node-token
+  when: "'server' in group_names"
+
+- name: Attente de la création du fichier Token
+  wait_for:
+    path: /var/lib/rancher/k3s/server/node-token
+    state: present
+    timeout: 300
+    msg: "Le fichier node-token n'a pas été créé à temps. Vérifiez 'systemctl status k3s'."
+  when: "'server' in group_names"
+
+- name: Récupération du Token du Cluster
+  slurp:
+    src: /var/lib/rancher/k3s/server/node-token
+  register: k3s_token_b64
+  when: "'server' in group_names"
+
+- name: Sauvegarde du Token en local (Contrôleur)
+  copy:
+    content: "{{ k3s_token_b64['content'] | b64decode | trim }}"
+    dest: "/tmp/k3s_cluster_token"
+    mode: '0644'
+  delegate_to: localhost
+  become: false
+  when: "'server' in group_names"
+
+# --- 4. INSTALLATION DES AGENTS (WORKERS) ---
+
+- name: Installation K3s Agent
+  vars:
+    master_host_name: "{{ groups['server'][0] }}"
+    master_url: "{{ hostvars[master_host_name]['ansible_host'] }}"
+    master_token: "{{ lookup('file', '/tmp/k3s_cluster_token') }}"
+    my_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
+  shell: >
+    curl -sfL https://get.k3s.io | 
+    K3S_URL=https://{{ master_url }}:6443 
+    K3S_TOKEN={{ master_token }} 
+    INSTALL_K3S_VERSION="{{ k3s_version }}" 
+    INSTALL_K3S_EXEC="agent --node-ip {{ my_ip }} --flannel-iface {{ k3s_flannel_iface }}" 
+    sh -
+  args:
+    creates: /var/lib/rancher/k3s/agent/client-kubelet.crt
+  when: "'agents' in group_names"
+
+# --- 5. CONFORT ADMIN ---
+
+- name: Création dossier .kube pour {{ sysadmin_user }}
+  file:
+    path: "/home/{{ sysadmin_user }}/.kube"
+    state: directory
+    owner: "{{ sysadmin_user }}"
+    group: "{{ sysadmin_user }}"
+    mode: '0750'
+  when: "'server' in group_names"
+
+- name: Copie de la config Kube pour l'utilisateur
+  copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: "/home/{{ sysadmin_user }}/.kube/config"
+    remote_src: yes
+    owner: "{{ sysadmin_user }}"
+    group: "{{ sysadmin_user }}"
+    mode: '0600'
+  when: "'server' in group_names"
+
+- name: Ajout de l'alias et autocompletion
+  blockinfile:
+    path: "/home/{{ sysadmin_user }}/.bashrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK K8S"
+    block: |
+      alias k='kubectl'
+      source <(kubectl completion bash)
+      complete -o default -F __start_kubectl k
+      export KUBECONFIG=/home/{{ sysadmin_user }}/.kube/config
+  when: "'server' in group_names"
+
+# --- 6. NETTOYAGE ---
+
+- name: Suppression du token local (Sécurité)
+  file:
+    path: "/tmp/k3s_cluster_token"
+    state: absent
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+- name: Configuration Traefik ACME (Let's Encrypt)
+  template:
+    src: traefik-config.yaml.j2
+    dest: /var/lib/rancher/k3s/server/manifests/traefik-config.yaml
+    mode: '0644'
+  when: "'server' in group_names"
+```
+
+## roles/k8s/templates/nftables_k8s.conf.j2
+
+```text
+# /etc/nftables.d/20-k8s.conf
+# Règles pour Kubernetes (K3s)
+
+# 1. Liste des IPs Physiques (Tes serveurs OVH)
+define K8S_NODES = { {{ groups['k8s_cluster'] | map('extract', hostvars, ['ansible_host']) | join(', ') }} }
+
+# 2. Réseaux Internes K3s (Valeurs par défaut)
+# Pods CIDR: 10.42.0.0/16
+# Services CIDR: 10.43.0.0/16
+define K8S_PODS = 10.42.0.0/16
+define K8S_SVCS = 10.43.0.0/16
+
+table inet filter {
+  chain input {
+    # --- API SERVER (6443) ---
+    # Autoriser les Nœuds ET les Pods à parler au Master
+    ip saddr $K8S_NODES tcp dport 6443 accept
+    ip saddr $K8S_PODS tcp dport 6443 accept
+
+    # --- KUBELET & METRICS (10250) ---
+    ip saddr $K8S_NODES tcp dport 10250 accept
+    ip saddr $K8S_PODS tcp dport 10250 accept
+
+    # --- FLANNEL VXLAN (8472) ---
+    # Réseau Overlay (Vital pour que les pods se parlent entre noeuds)
+    ip saddr $K8S_NODES udp dport 8472 accept
+
+    # --- ACCÈS CLIENTS (Traefik) ---
+    # Uniquement sur le Master (ou partout si Traefik est en DaemonSet hostPort)
+    # K3s par défaut expose Traefik sur les ports 80/443 du noeud
+    tcp dport { 80, 443 } accept
+  }
+
+  chain forward {
+    # --- ROUTAGE INTERNE K8S ---
+    # On autorise tout le trafic qui vient des pods ou va vers les pods
+    ip saddr $K8S_PODS accept
+    ip daddr $K8S_PODS accept
+    
+    # On garde la confiance sur les interfaces CNI
+    iifname "cni0" accept
+    oifname "cni0" accept
+    iifname "flannel.1" accept
+    oifname "flannel.1" accept
+  }
+}
+```
+
+## roles/k8s/templates/traefik-config.yaml.j2
+
+```text
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    # On active les logs pour debugger
+    logs:
+      general:
+        level: INFO
+      access:
+        enabled: true
+
+    # Configuration Let's Encrypt (ACME)
+    additionalArguments:
+      - "--certificatesresolvers.le.acme.tlschallenge=true"
+      - "--certificatesresolvers.le.acme.email=admin@dgsynthex.online"
+      - "--certificatesresolvers.le.acme.storage=/data/acme.json"
+      # Utilise le serveur de staging pour tester (évite le ban), commente pour la prod
+      # - "--certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+
+    # Persistance du fichier acme.json (pour ne pas perdre les certs au reboot)
+    persistence:
+      enabled: true
+      path: /data
+      size: 128Mi
 ```
 
 ## roles/swarm/tasks/main.yml
@@ -1935,9 +3943,48 @@ add rule inet filter input limit rate 10/minute log prefix "[NFT-DROP] " flags a
     driver_options:
       # encrypted: "yes"
       # FIX MTU CRITIQUE (OVH/OpenStack VXLAN)
-      com.docker.network.driver.mtu: "1350"
+      com.docker.network.driver.mtu: "1300"
   when: "'manager' in group_names"
   run_once: true
+
+- name: Vérification MTU docker_gwbridge (Ingress)
+  shell: docker network inspect docker_gwbridge --format '{{ '{{' }} index .Options "com.docker.network.driver.mtu" {{ '}}' }}'
+  register: gwbridge_mtu
+  ignore_errors: true
+  changed_when: false
+  when: "'manager' in group_names"
+
+# # Cette tâche est un peu "brutale" mais nécessaire si le gwbridge est en 1500
+# # Elle ne se lancera que si le MTU est mauvais.
+# - name: Force Recréation docker_gwbridge et Ingress en MTU 1300
+#   shell: |
+#     # 1. On supprime d'abord le réseau Ingress (qui verrouille le gwbridge)
+#     # Le "|| true" permet de continuer si le réseau n'existe pas ou bug
+#     docker network rm ingress || true
+    
+#     # 2. Maintenant on peut supprimer le gwbridge
+#     docker network rm docker_gwbridge || true
+    
+#     # 3. On recrée le gwbridge avec le bon MTU (1300)
+#     docker network create \
+#       --subnet 172.18.0.0/16 \
+#       --gateway 172.18.0.1 \
+#       --opt com.docker.network.bridge.name=docker_gwbridge \
+#       --opt com.docker.network.bridge.enable_icc=false \
+#       --opt com.docker.network.driver.mtu=1300 \
+#       docker_gwbridge
+      
+#     # 4. CRITIQUE : On recrée immédiatement le réseau Ingress
+#     # Sinon tes services ne pourront plus publier de ports
+#     docker network create \
+#       --driver overlay \
+#       --ingress \
+#       --opt com.docker.network.driver.mtu=1300 \
+#       ingress
+#   when: 
+#     - "'manager' in group_names"
+#     - gwbridge_mtu.stdout != "1300"
+#     # On enlève la condition rc==0 pour forcer si besoin, le script gère les erreurs via || true
 ```
 
 ## roles/swarm/templates/nftables_swarm.conf.j2
@@ -1975,11 +4022,15 @@ add rule inet filter input tcp dport { 80, 443 } accept
 
 ```yaml
 ---
-- name: "Déploiement Infrastructure Swarm"
+# -----------------------------------------------------------------------
+# PLAY 1 : INFRASTRUCTURE BASE & SWARM (Legacy / Nettoyage)
+# Cible : swarm_nodes (Tous les serveurs)
+# -----------------------------------------------------------------------
+- name: "Déploiement Infrastructure Swarm & Système"
   hosts: swarm_nodes
   become: true
   
-  # 1. On définit les handlers ici, au niveau global du Play
+  # Les handlers sont propres à ce Play
   handlers:
     - name: Restart Rsyslog
       service: name=rsyslog state=restarted
@@ -1993,28 +4044,72 @@ add rule inet filter input tcp dport { 80, 443 } accept
     - name: Restart SSH
       service: name=ssh state=restarted
 
-  # 2. On appelle les rôles
   roles:
+    # 1. Nettoyage (A lancer AVANT d'installer k8s)
+    # Commande : ansible-playbook site.yml --tags "clean"
     - role: clean
       tags: ["clean"]
+
+    # 2. Configuration Système (Utilisateurs, Firewall Base, Fail2Ban)
+    # Commande : ansible-playbook site.yml --tags "common"
     - role: common
       tags: ["common", "system"]
+
+    # 3. Moteur Docker (Requis pour Swarm, optionnel pour k8s qui utilise containerd)
+    # Commande : ansible-playbook site.yml --tags "docker"
     - role: docker
       tags: ["docker", "engine"]
+
+    # 4. Orchestration Swarm (Incompatible avec k8s sur le même nœud)
+    # Commande : ansible-playbook site.yml --tags "swarm"
     - role: swarm
       tags: ["swarm", "network"]
-    
-- name: "Déploiement Applications"
+
+# -----------------------------------------------------------------------
+# PLAY 2 : APPLICATIONS SWARM (Legacy)
+# Cible : Manager uniquement
+# -----------------------------------------------------------------------
+- name: "Déploiement Applications (Swarm Stacks)"
   hosts: ovh.core
   become: true
   tags: ["apps", "deploy"]
   
-  # On doit répéter les handlers ici car c'est un nouveau "Play"
   handlers:
     - name: Reload NFTables
       service: name=nftables state=reloaded
       
   roles:
     - apps
+
+# -----------------------------------------------------------------------
+# PLAY 3 : INFRASTRUCTURE KUBERNETES (k8s) - FUTUR
+# Cible : k8s_cluster (Server + Agents)
+# -----------------------------------------------------------------------
+- name: "Déploiement Cluster Kubernetes (k8s)"
+  hosts: k8s_cluster
+  become: true
+  tags: ["k8s", "kubernetes"]
+  
+  # Handlers spécifiques au contexte k8s
+  handlers:
+    - name: Reload NFTables
+      service: name=nftables state=reloaded
+
+  roles:
+    # Installe le Master puis les Workers
+    # Commande : ansible-playbook site.yml --tags "k8s"
+    - k8s
+
+# -----------------------------------------------------------------------
+# PLAY 4 : APPS KUBERNETES (HELM)
+# Cible : server (UNIQUEMENT LE MANAGER)
+# -----------------------------------------------------------------------
+- name: "Déploiement Applications Kubernetes"
+  hosts: server  # <--- CHANGEMENT ICI (Avant c'était k8s_cluster ou non défini)
+  become: true
+  tags: ["app_k8s"]
+  
+  roles:
+    - app_k8s
 ```
 

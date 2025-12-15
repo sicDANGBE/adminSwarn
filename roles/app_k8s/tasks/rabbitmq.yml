@@ -1,0 +1,29 @@
+---
+- name: Ajout Repo Helm Bitnami
+  kubernetes.core.helm_repository:
+    name: bitnami
+    repo_url: https://charts.bitnami.com/bitnami
+
+- name: Déploiement RabbitMQ Cluster
+  kubernetes.core.helm:
+    name: rabbitmq
+    chart_ref: bitnami/rabbitmq
+    release_namespace: apps
+    values:
+      replicaCount: 3 # 1 par noeud pour la haute dispo
+      auth:
+        username: admin
+        password: "cdosiuhqsdoifuhqsdoiufh" # A mettre dans un vault idéalement
+        erlangCookie: "cdosi_uhq_sd_o_i_f_u_h__q__s_doi_gqmsdofguqsdhfpmuihufh"
+      ingress:
+        enabled: true
+        hostname: "rabbitmq.{{ main_domain }}"
+        ingressClassName: "traefik"
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.tls: "true"
+          traefik.ingress.kubernetes.io/router.tls.certresolver: "le"
+      persistence:
+        enabled: true
+        storageClass: "{{ storage_class }}"
+        size: 8Gi

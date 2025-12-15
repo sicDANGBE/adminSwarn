@@ -1,0 +1,27 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    # On active les logs pour debugger
+    logs:
+      general:
+        level: INFO
+      access:
+        enabled: true
+
+    # Configuration Let's Encrypt (ACME)
+    additionalArguments:
+      - "--certificatesresolvers.le.acme.tlschallenge=true"
+      - "--certificatesresolvers.le.acme.email=admin@dgsynthex.online"
+      - "--certificatesresolvers.le.acme.storage=/data/acme.json"
+      # Utilise le serveur de staging pour tester (évite le ban), commente pour la prod
+      # - "--certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+
+    # Persistance du fichier acme.json (pour ne pas perdre les certs au reboot)
+    persistence:
+      enabled: true
+      path: /data
+      size: 128Mi

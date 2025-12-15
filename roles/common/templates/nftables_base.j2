@@ -33,4 +33,4 @@ include "/etc/nftables.d/*.conf"
 # Cette règle est ajoutée TOUT À LA FIN de la chaîne input.
 # Tout paquet qui n'a pas été accepté par le SSH ou par les includes (*) arrivera ici.
 # On le logue dans /var/log/nftables.log (via rsyslog) avant qu'il soit jeté par la "policy drop".
-add rule inet filter input limit rate 10/minute log prefix "[NFT-DROP] " flags all
+# add rule inet filter input limit rate 10/minute log prefix "[NFT-DROP] " flags all

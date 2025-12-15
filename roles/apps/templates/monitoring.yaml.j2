@@ -72,7 +72,7 @@ services:
 
   # --- VISUALISATION ---
   grafana:
-    image: grafana/grafana:11.0.0
+    image: grafana/grafana:main
     user: "0:0"
     volumes:
       - /srv/docker/monitoring/grafana:/var/lib/grafana
@@ -93,14 +93,14 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.grafana.rule=Host(`grafana.{{ main_domain }}`)"
-        - "traefik.http.routers.grafana.entrypoints=web,websecure"
-        #- "traefik.http.routers.grafana.tls.certresolver=myresolver"
+        - "traefik.http.routers.grafana.entrypoints=websecure"
+        - "traefik.http.routers.grafana.tls.certresolver=myresolver"
         - "traefik.http.services.grafana.loadbalancer.server.port=3000"
 
 networks:
   monitoring:
     driver: overlay
     driver_opts:
-      com.docker.network.driver.mtu: "1350"
+      com.docker.network.driver.mtu: "1300"
   traefik-public:
     external: true

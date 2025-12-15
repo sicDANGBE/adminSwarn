@@ -1,0 +1,28 @@
+- name: Ajout Repo Helm Portainer
+  kubernetes.core.helm_repository:
+    name: portainer
+    repo_url: https://portainer.github.io/k8s/
+
+- name: Déploiement Portainer CE
+  kubernetes.core.helm:
+    name: portainer
+    chart_ref: portainer/portainer
+    release_namespace: portainer
+    create_namespace: true
+    values:
+      ingress:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          # HTTPS automatique via Traefik (CertResolver à configurer si prod)
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.tls: "true"
+          traefik.ingress.kubernetes.io/router.tls.certresolver: "le"
+        hosts:
+          - host: "portainer.{{ main_domain }}"
+            paths:
+              - path: "/"
+      persistence:
+        enabled: true
+        size: 10Gi
+        storageClass: "{{ storage_class }}"

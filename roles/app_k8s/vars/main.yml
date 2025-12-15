@@ -1,0 +1,11 @@
+
+# Versions des Charts Helm (À jour Fin 2025)
+helm_versions:
+  portainer: "2.21.5"
+  rabbitmq: "12.0.0" # Bitnami
+  n8n: "0.14.0"      # OCI ou Community
+  mosquitto: "4.0.0" # Bitnami
+  monitoring: "45.0.0" # Kube-Prometheus-Stack
+
+# Persistance
+storage_class: "local-path" # Le stockage par défaut de K3s

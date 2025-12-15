@@ -1,6 +1,7 @@
 ---
 # --- 1. INSTALLATION & PRÉREQUIS ---
 
+
 - name: Installation des dépendances système pour Docker
   apt:
     pkg:
@@ -65,7 +66,8 @@
         "log-driver": "json-file",
         "log-opts": { "max-size": "10m", "max-file": "3" },
         "no-new-privileges": true,
-        "min-api-version": "1.24"
+        "min-api-version": "1.24",
+        "mtu": 1300
       }
     mode: '0644'
   register: docker_config
@@ -108,6 +110,16 @@
     name: "{{ sysadmin_user }}"
     groups: docker
     append: yes
+
+- name: Fix MSS Clamping (Docker User Chain) - TCPMSS
+  shell: |
+    # Vérifie si la règle existe déjà pour éviter les doublons
+    iptables -t filter -C DOCKER-USER -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1200 2>/dev/null || \
+    # Si elle n'existe pas, on l'insère en première position
+    iptables -t filter -I DOCKER-USER -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1200
+  changed_when: false
+  # On ignore les erreurs si iptables-legacy vs nft pose souci, mais sur Debian 12 ça passe via le wrapper
+  ignore_errors: true
 
 # --- 6. GESTION PERMISSIONS SOCKET (CRITIQUE POUR PORTAINER/TRAEFIK) ---
 

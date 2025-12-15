@@ -1,0 +1,99 @@
+---
+# On utilise le chart '8gears' ou similaire qui est populaire pour n8n
+- name: Ajout Repo Helm n8n
+  kubernetes.core.helm_repository:
+    name: cnrancher
+    repo_url: https://charts.rancher.io
+
+# Note : Il n'y a pas de Chart "Officiel" n8n parfait, souvent on le fait en YAML pur.
+# Mais pour rester dans l'esprit Helm, on va utiliser une définition Deployment simple via le module k8s
+# car les charts n8n tiers sont souvent instables.
+
+- name: Déploiement n8n (Deployment + Service + Ingress)
+  kubernetes.core.k8s:
+    state: present
+    namespace: apps
+    definition:
+      apiVersion: v1
+      kind: List
+      items:
+        - apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            name: n8n-data
+            namespace: apps
+          spec:
+            accessModes: [ "ReadWriteOnce" ]
+            storageClassName: "{{ storage_class }}"
+            resources:
+              requests:
+                storage: 5Gi
+
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: n8n
+            namespace: apps
+            labels:
+              app: n8n
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: n8n
+            template:
+              metadata:
+                labels:
+                  app: n8n
+              spec:
+                containers:
+                  - name: n8n
+                    image: n8nio/n8n:latest
+                    ports:
+                      - containerPort: 5678
+                    env:
+                      - name: N8N_HOST
+                        value: "n8n.{{ main_domain }}"
+                      - name: WEBHOOK_URL
+                        value: "https://n8n.{{ main_domain }}/"
+                    volumeMounts:
+                      - name: data
+                        mountPath: /home/node/.n8n
+                volumes:
+                  - name: data
+                    persistentVolumeClaim:
+                      claimName: n8n-data
+
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: n8n
+            namespace: apps
+          spec:
+            selector:
+              app: n8n
+            ports:
+              - port: 80
+                targetPort: 5678
+
+        - apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: n8n
+            namespace: apps
+            annotations:
+              traefik.ingress.kubernetes.io/router.entrypoints: websecure
+              traefik.ingress.kubernetes.io/router.tls: "true"
+              traefik.ingress.kubernetes.io/router.tls.certresolver: "le"
+          spec:
+            rules:
+              - host: "n8n.{{ main_domain }}"
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: n8n
+                          port:
+                            number: 80

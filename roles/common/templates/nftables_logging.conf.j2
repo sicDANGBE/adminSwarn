@@ -1,0 +1,17 @@
+# Configuration des logs pour les paquets rejetés (Silent Drops)
+# Ce fichier est chargé en dernier (99-logging).
+
+table inet filter {
+    # On ajoute ces règles aux chaînes existantes sans les écraser
+
+    chain input {
+        # Log des paquets entrants rejetés avant la policy drop
+        limit rate 10/minute log prefix "[NFT-INPUT-DROP] " flags all
+    }
+
+    chain forward {
+        # Log des paquets traversants (Docker/Swarm) rejetés
+        # C'est ici que tu verras si le pare-feu bloque Traefik <-> Grafana
+        limit rate 20/minute log prefix "[NFT-FWD-DROP] " flags all
+    }
+}

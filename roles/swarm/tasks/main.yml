@@ -72,6 +72,45 @@
     driver_options:
       # encrypted: "yes"
       # FIX MTU CRITIQUE (OVH/OpenStack VXLAN)
-      com.docker.network.driver.mtu: "1350"
+      com.docker.network.driver.mtu: "1300"
   when: "'manager' in group_names"
   run_once: true
+
+- name: Vérification MTU docker_gwbridge (Ingress)
+  shell: docker network inspect docker_gwbridge --format '{{ '{{' }} index .Options "com.docker.network.driver.mtu" {{ '}}' }}'
+  register: gwbridge_mtu
+  ignore_errors: true
+  changed_when: false
+  when: "'manager' in group_names"
+
+# # Cette tâche est un peu "brutale" mais nécessaire si le gwbridge est en 1500
+# # Elle ne se lancera que si le MTU est mauvais.
+# - name: Force Recréation docker_gwbridge et Ingress en MTU 1300
+#   shell: |
+#     # 1. On supprime d'abord le réseau Ingress (qui verrouille le gwbridge)
+#     # Le "|| true" permet de continuer si le réseau n'existe pas ou bug
+#     docker network rm ingress || true
+    
+#     # 2. Maintenant on peut supprimer le gwbridge
+#     docker network rm docker_gwbridge || true
+    
+#     # 3. On recrée le gwbridge avec le bon MTU (1300)
+#     docker network create \
+#       --subnet 172.18.0.0/16 \
+#       --gateway 172.18.0.1 \
+#       --opt com.docker.network.bridge.name=docker_gwbridge \
+#       --opt com.docker.network.bridge.enable_icc=false \
+#       --opt com.docker.network.driver.mtu=1300 \
+#       docker_gwbridge
+      
+#     # 4. CRITIQUE : On recrée immédiatement le réseau Ingress
+#     # Sinon tes services ne pourront plus publier de ports
+#     docker network create \
+#       --driver overlay \
+#       --ingress \
+#       --opt com.docker.network.driver.mtu=1300 \
+#       ingress
+#   when: 
+#     - "'manager' in group_names"
+#     - gwbridge_mtu.stdout != "1300"
+#     # On enlève la condition rc==0 pour forcer si besoin, le script gère les erreurs via || true
