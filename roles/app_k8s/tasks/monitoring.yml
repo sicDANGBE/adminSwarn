@@ -12,7 +12,7 @@
     values:
       grafana:
         enabled: true
-        adminPassword: "admin" # A changer !
+        adminPassword: "{{ grafana_admin_password }}" # Utilise Ansible Vault
         ingress:
           enabled: true
           ingressClassName: "traefik"
@@ -26,9 +26,30 @@
           enabled: true
           storageClass: "{{ storage_class }}"
           size: 5Gi
+
+        additionalDataSources:
+          - name: Loki
+            type: loki
+            url: http://loki-gateway.monitoring.svc.cluster.local
+            access: proxy
+            jsonData: 
+              maxLines: 1000
       
       prometheus:
         prometheusSpec:
+          # IMPORTANT : Permet de scraper les ServiceMonitors de TOUS les namespaces (ex: PostgreSQL dans sgcb)
+          serviceMonitorSelectorNilUsesHelmValues: false
+          podMonitorSelectorNilUsesHelmValues: false
+          ruleSelectorNilUsesHelmValues: false
+          # Configuration de la rétention
+          retention: 15d
+          retentionSize: "8GB" # Sécurité pour ne pas saturer le disque
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "200m"
+            limits:
+              memory: "2Gi"
           storageSpec:
             volumeClaimTemplate:
               spec:
@@ -37,5 +58,64 @@
                 resources:
                   requests:
                     storage: 10Gi
-          # Configuration de la rétention
-          retention: 10d
+
+        alertmanager:
+        config:
+          global:
+            resolve_timeout: 5m
+          route:
+            group_by: ['alertname', 'job']
+            receiver: "{{user_mail}}" # À remplacer par un webhook (Slack/Discord/Mail)
+
+        
+# - name: Déploiement Loki
+#   kubernetes.core.helm:
+#     name: loki
+#     chart_ref: grafana/loki
+#     release_namespace: monitoring
+#     chart_version: 5.41.0
+#     values:
+#       loki:
+#         auth_enabled: false
+#         commonConfig:
+#           replication_factor: 1
+        
+#         # Configuration du stockage S3
+#         storage:
+#           type: s3
+#           s3:
+#             endpoint: "{{ s3_endpoint }}" # ex: s3.gra.io.cloud.ovh.net
+#             region: "{{ s3_region }}"     # ex: gra
+#             bucketnames: "{{ loki_bucket_name }}"
+#             access_key_id: "{{ s3_access_key }}"
+#             secret_access_key: "{{ s3_secret_key }}"
+#             s3forcepathstyle: true
+
+#         schemaConfig:
+#           configs:
+#             - from: "2024-01-01"
+#               store: tsdb
+#               object_store: s3
+#               schema: v13
+#               index:
+#                 prefix: index_
+#                 period: 24h
+
+#       # Persistence locale pour le cache d'index
+#       deploymentMode: SingleBinary
+#       singleBinary:
+#         replicas: 1
+#         persistence:
+#           enabled: true
+#           size: 5Gi
+#           storageClass: "{{ storage_class }}"
+
+# - name: Déploiement Promtail
+#   kubernetes.core.helm:
+#     name: promtail
+#     chart_ref: grafana/promtail
+#     release_namespace: monitoring
+#     values:
+#       config:
+#         clients:
+#           - url: http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push
