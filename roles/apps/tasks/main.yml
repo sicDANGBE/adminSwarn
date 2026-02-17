@@ -75,7 +75,7 @@
 - name: Login Docker Hub (Manager)
   community.docker.docker_login:
     username: "{{ docker_hub_user | default(omit) }}"
-    password: "{{ docker_hub_pat | default(omit) }}"
+    password: "{{ docker_hub_path | default(omit) }}"
   when: docker_hub_user is defined
 
 # 5. Déploiement des Stacks
