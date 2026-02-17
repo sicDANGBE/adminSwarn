@@ -1,0 +1,64 @@
+# infra/runners/deployment.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: actions-runner-system
+
+---
+# 1. Compte de Service (L'identité du Runner)
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: deploy-runner-sa
+  namespace: actions-runner-system
+
+---
+# 2. Rôle (Les permissions : Admin du cluster pour pouvoir tout déployer)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: deploy-runner-admin
+subjects:
+  - kind: ServiceAccount
+    name: deploy-runner-sa
+    namespace: actions-runner-system
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin # On lui donne les pleins pouvoirs pour gérer les apps
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# 3. Le Runner lui-même
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-runner-klaro
+  namespace: actions-runner-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: github-runner-klaro
+  template:
+    metadata:
+      labels:
+        app: github-runner-klaro
+    spec:
+      serviceAccountName: deploy-runner-sa
+      containers:
+      - name: runner
+        image: spadmdck/k8s-deploy-runner:v1
+        imagePullPolicy: Always
+        env:
+          - name: GITHUB_REPOSITORY
+            value: "sicDANGBE/klaro" # Ton repo d'application
+          - name: GITHUB_TOKEN
+            value: "AUQKCEL5H6TFEO6QQFTICVLJIPVEA" 
+        
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            # Enregistrement (si pas déjà fait)
+            ./config.sh --url https://github.com/sicDANGBE/klaro --token ${GITHUB_TOKEN} --unattended --replace --name k8s-runner-01 --labels k8s-deploy
+            # Lancement
+            ./run.sh
