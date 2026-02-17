@@ -68,6 +68,7 @@
     - portainer
     - apps
     - monitoring
+    - ollama-system
 
 # -----------------------------------------------------------
 # 4. DÉPLOIEMENT DES APPS
@@ -79,8 +80,12 @@
     group/kubernetes.core.k8s:
       kubeconfig: /etc/rancher/k3s/k3s.yaml
   block:
+    - include_tasks: traefik.yml
     - include_tasks: portainer.yml
     - include_tasks: rabbitmq.yml
     - include_tasks: n8n.yml
+    - include_tasks: nodered.yml
     - include_tasks: mqtt.yml
     - include_tasks: monitoring.yml
+    - include_tasks: postgres.yml
+    - include_tasks: ollama.yml
