@@ -1,11 +1,18 @@
 # Export de projet
 
-_GÃ©nÃ©rÃ© le 2025-12-15T07:57:13+01:00_
+_GÃ©nÃ©rÃ© le 2025-12-29T22:46:30+01:00_
 
 ## .git/COMMIT_EDITMSG
 
 ```text
-first commit
+a
+
+```
+
+## .git/FETCH_HEAD
+
+```text
+baffdc9b2df085ac01f9c0420213a40f6da944ff		branch 'main' of https://github.com/sicDANGBE/adminSwarn
 
 ```
 
@@ -13,6 +20,13 @@ first commit
 
 ```text
 ref: refs/heads/main
+
+```
+
+## .git/ORIG_HEAD
+
+```text
+b4f74b85225b9ef3a4019de98593c4b2da875297
 
 ```
 
@@ -30,6 +44,7 @@ ref: refs/heads/main
 [branch "main"]
 	remote = origin
 	merge = refs/heads/main
+	gk-last-accessed = 2025-12-27T07:41:23.748Z
 
 ```
 
@@ -994,7 +1009,7 @@ exit 0
 
 ## .git/index
 
-> Fichier binaire non inclus (3081 octets)
+> Fichier binaire non inclus (4569 octets)
 
 ## .git/info/exclude
 
@@ -1014,6 +1029,10 @@ exit 0
 0000000000000000000000000000000000000000 baffdc9b2df085ac01f9c0420213a40f6da944ff sicDANGBE <dansoug@gmail.com> 1764885915 +0100	commit (initial): first commit
 baffdc9b2df085ac01f9c0420213a40f6da944ff 0000000000000000000000000000000000000000 sicDANGBE <dansoug@gmail.com> 1764885921 +0100	Branch: renamed refs/heads/master to refs/heads/main
 0000000000000000000000000000000000000000 baffdc9b2df085ac01f9c0420213a40f6da944ff sicDANGBE <dansoug@gmail.com> 1764885921 +0100	Branch: renamed refs/heads/master to refs/heads/main
+baffdc9b2df085ac01f9c0420213a40f6da944ff b4f74b85225b9ef3a4019de98593c4b2da875297 sicDANGBE <dansoug@gmail.com> 1765820519 +0100	commit: cluster fonctionnel Ã  l'exception de rabbitmq
+b4f74b85225b9ef3a4019de98593c4b2da875297 cb9babef9a99f668dfedcd1bdef2ae8e4224a37c sicDANGBE <dansoug@gmail.com> 1766054457 +0100	commit: maj chat version
+cb9babef9a99f668dfedcd1bdef2ae8e4224a37c 31484b05904cad755c238021fd6f87f529738622 sicDANGBE <dansoug@gmail.com> 1766054494 +0100	commit: remove project_*
+31484b05904cad755c238021fd6f87f529738622 3f2af84dbad3bfcbb57afce2aae3fd74e9e0d3c0 sicDANGBE <dansoug@gmail.com> 1766054521 +0100	commit: a
 
 ```
 
@@ -1022,6 +1041,10 @@ baffdc9b2df085ac01f9c0420213a40f6da944ff 000000000000000000000000000000000000000
 ```text
 0000000000000000000000000000000000000000 baffdc9b2df085ac01f9c0420213a40f6da944ff sicDANGBE <dansoug@gmail.com> 1764885915 +0100	commit (initial): first commit
 baffdc9b2df085ac01f9c0420213a40f6da944ff baffdc9b2df085ac01f9c0420213a40f6da944ff sicDANGBE <dansoug@gmail.com> 1764885921 +0100	Branch: renamed refs/heads/master to refs/heads/main
+baffdc9b2df085ac01f9c0420213a40f6da944ff b4f74b85225b9ef3a4019de98593c4b2da875297 sicDANGBE <dansoug@gmail.com> 1765820519 +0100	commit: cluster fonctionnel Ã  l'exception de rabbitmq
+b4f74b85225b9ef3a4019de98593c4b2da875297 cb9babef9a99f668dfedcd1bdef2ae8e4224a37c sicDANGBE <dansoug@gmail.com> 1766054457 +0100	commit: maj chat version
+cb9babef9a99f668dfedcd1bdef2ae8e4224a37c 31484b05904cad755c238021fd6f87f529738622 sicDANGBE <dansoug@gmail.com> 1766054494 +0100	commit: remove project_*
+31484b05904cad755c238021fd6f87f529738622 3f2af84dbad3bfcbb57afce2aae3fd74e9e0d3c0 sicDANGBE <dansoug@gmail.com> 1766054521 +0100	commit: a
 
 ```
 
@@ -1029,6 +1052,9 @@ baffdc9b2df085ac01f9c0420213a40f6da944ff baffdc9b2df085ac01f9c0420213a40f6da944f
 
 ```text
 0000000000000000000000000000000000000000 baffdc9b2df085ac01f9c0420213a40f6da944ff sicDANGBE <dansoug@gmail.com> 1764885950 +0100	update by push
+baffdc9b2df085ac01f9c0420213a40f6da944ff b4f74b85225b9ef3a4019de98593c4b2da875297 sicDANGBE <dansoug@gmail.com> 1765820521 +0100	update by push
+b4f74b85225b9ef3a4019de98593c4b2da875297 cb9babef9a99f668dfedcd1bdef2ae8e4224a37c sicDANGBE <dansoug@gmail.com> 1766054462 +0100	update by push
+cb9babef9a99f668dfedcd1bdef2ae8e4224a37c 3f2af84dbad3bfcbb57afce2aae3fd74e9e0d3c0 sicDANGBE <dansoug@gmail.com> 1766054525 +0100	update by push
 
 ```
 
@@ -1036,13 +1062,29 @@ baffdc9b2df085ac01f9c0420213a40f6da944ff baffdc9b2df085ac01f9c0420213a40f6da944f
 
 > Fichier binaire non inclus (69 octets)
 
+## .git/objects/04/3bf9fef54622a82b0c1489680b71878ee87b26
+
+> Fichier binaire non inclus (1275 octets)
+
+## .git/objects/10/7d589fc91036af8fba1ba129901be91a31897c
+
+> Fichier binaire non inclus (210 octets)
+
 ## .git/objects/12/dd915be4a8210d5e1f76057b21a4d05af18278
 
 > Fichier binaire non inclus (195 octets)
 
+## .git/objects/13/4cc55cc85ba228ff3170946b66003ef438fb53
+
+> Fichier binaire non inclus (1737 octets)
+
 ## .git/objects/13/a733caa16cec86e457f57dbaf9b8c58385247e
 
 > Fichier binaire non inclus (1284 octets)
+
+## .git/objects/14/ca67e6e6b48fc9890bf8d9708b997f19627940
+
+> Fichier binaire non inclus (2756 octets)
 
 ## .git/objects/18/d034bdec206eba68b4493753af53947030b372
 
@@ -1056,6 +1098,10 @@ baffdc9b2df085ac01f9c0420213a40f6da944ff baffdc9b2df085ac01f9c0420213a40f6da944f
 
 > Fichier binaire non inclus (434 octets)
 
+## .git/objects/20/54facaec7935a72e976aebfd6605f5e326e514
+
+> Fichier binaire non inclus (693 octets)
+
 ## .git/objects/23/b57a36608a8df344086ad7e4b606034537cf12
 
 > Fichier binaire non inclus (53 octets)
@@ -1064,9 +1110,21 @@ baffdc9b2df085ac01f9c0420213a40f6da944ff baffdc9b2df085ac01f9c0420213a40f6da944f
 
 > Fichier binaire non inclus (610 octets)
 
+## .git/objects/2c/66c08e7d25653c7d562db99229e37aeda0c365
+
+> Fichier binaire non inclus (53 octets)
+
+## .git/objects/2d/77948267ca47c8eee91713a792b82efbe209de
+
+> Fichier binaire non inclus (217 octets)
+
 ## .git/objects/2d/844f814c96306db61a7c566a5c2ea2d93e33e9
 
 > Fichier binaire non inclus (225 octets)
+
+## .git/objects/2f/e8b10dd366256fcb894488579d0d219e648ed6
+
+> Fichier binaire non inclus (682 octets)
 
 ## .git/objects/30/2920dfd5650225d34cb7f6db2bdd8cd7da4fbf
 
@@ -1076,13 +1134,57 @@ baffdc9b2df085ac01f9c0420213a40f6da944ff baffdc9b2df085ac01f9c0420213a40f6da944f
 
 > Fichier binaire non inclus (60 octets)
 
+## .git/objects/31/484b05904cad755c238021fd6f87f529738622
+
+> Fichier binaire non inclus (166 octets)
+
 ## .git/objects/32/909a6b02edc8ac9be3e2fa054bfc8e18123961
 
 > Fichier binaire non inclus (53 octets)
 
+## .git/objects/35/c80e9a5b06ea9878e8dcffd7cbb64089ba0c83
+
+> Fichier binaire non inclus (566 octets)
+
+## .git/objects/36/03809970396a1fa88991d76975b78cd2a8b053
+
+> Fichier binaire non inclus (1879 octets)
+
+## .git/objects/36/9f29c368049f01a11563ef346b98af2702a221
+
+> Fichier binaire non inclus (53 octets)
+
+## .git/objects/37/640b1bf6239e541e2747193080d79460008cf4
+
+> Fichier binaire non inclus (32 octets)
+
+## .git/objects/3b/342248b6e896d0ed8b1dd20adeb2ec35bc4fec
+
+> Fichier binaire non inclus (107 octets)
+
+## .git/objects/3b/4ca10adc45a5be5f487c8246f3ac180d643717
+
+> Fichier binaire non inclus (76 octets)
+
+## .git/objects/3c/d98bd44d5819a990ef6b6925a10d5d4ed1614a
+
+> Fichier binaire non inclus (977 octets)
+
+## .git/objects/3d/b6b4716de113f5dbf8468ea2e41bd40177dfa9
+
+> Fichier binaire non inclus (42844 octets)
+
 ## .git/objects/3e/32478c54689abc143e1802215a81fc6c795e13
 
 > Fichier binaire non inclus (47 octets)
+
+## .git/objects/3f/275713e446966701409619f1c5528b64e85221
+
+> Fichier binaire non inclus (366 octets)
+
+## .git/objects/3f/2af84dbad3bfcbb57afce2aae3fd74e9e0d3c0
+
+> Fichier binaire non inclus (155 octets)
 
 ## .git/objects/3f/fdc8b7a539862d9eaa85544d6d323d687c28d3
 
@@ -1092,6 +1194,10 @@ baffdc9b2df085ac01f9c0420213a40f6da944ff baffdc9b2df085ac01f9c0420213a40f6da944f
 
 > Fichier binaire non inclus (531 octets)
 
+## .git/objects/46/5665e6fe80703c84b1303751ba339298fb884a
+
+> Fichier binaire non inclus (1850 octets)
+
 ## .git/objects/4a/7c295e715efc972d9ed4de7c0a25028f5e1c3b
 
 > Fichier binaire non inclus (1117 octets)
@@ -1100,9 +1206,17 @@ baffdc9b2df085ac01f9c0420213a40f6da944ff baffdc9b2df085ac01f9c0420213a40f6da944f
 
 > Fichier binaire non inclus (746 octets)
 
+## .git/objects/50/e2d1641e7762cf47166a7afccaacb993949448
+
+> Fichier binaire non inclus (24 octets)
+
 ## .git/objects/51/3d92feb277350e20774e6cec81e830fe2b4be6
 
 > Fichier binaire non inclus (80 octets)
+
+## .git/objects/53/94e6388554f4a9370de79aca4101438c29d813
+
+> Fichier binaire non inclus (113 octets)
 
 ## .git/objects/56/a69a15619c856a37fef233d278b4dc930fce3b
 
@@ -1112,23 +1226,55 @@ baffdc9b2df085ac01f9c0420213a40f6da944ff baffdc9b2df085ac01f9c0420213a40f6da944f
 
 > Fichier binaire non inclus (52 octets)
 
+## .git/objects/59/328ca54a045502fba049aafa1852e66bb5f819
+
+> Fichier binaire non inclus (611 octets)
+
 ## .git/objects/5c/4877258f52a852c61950b075199a351d78804d
 
 > Fichier binaire non inclus (706 octets)
+
+## .git/objects/61/53a090823205974b35493ef2fc7ef88507e0ef
+
+> Fichier binaire non inclus (210 octets)
 
 ## .git/objects/66/2cdad636335aa7ddf87ecc104425ae2a03645b
 
 > Fichier binaire non inclus (163 octets)
 
+## .git/objects/69/e0c1e58e9d8eef6940b3f034e916dff2b9b5ed
+
+> Fichier binaire non inclus (53 octets)
+
 ## .git/objects/6a/fc057e641164c8f51ae71ffb807f658fd8d4de
 
 > Fichier binaire non inclus (113 octets)
+
+## .git/objects/6c/3a5652a769d42a705a88a57b3e4c3fa4e9160e
+
+> Fichier binaire non inclus (279 octets)
 
 ## .git/objects/7a/469c898b6c29c5529444b2a460cded43955950
 
 ```text
 x1Â0©óŠí…‘R!¹C¢¥âgûD,lòYHyïàc\º)fC‘€e¹œs“C£Ê·ß÷]$så6…ð_Hó5ÕÜ²ŽN#KÃñNžÜO°ŠõÏzŽÒÙLà({oc5êRX½ÀYÕ¶?&Ë(ž
 ```
+
+## .git/objects/83/6b0fa16df3e85cc2deea25e9dacaeb8b887659
+
+> Fichier binaire non inclus (278 octets)
+
+## .git/objects/8c/b126ddeb5a8a33247c28d4fd65e53ab077d60c
+
+> Fichier binaire non inclus (244 octets)
+
+## .git/objects/8f/4ec334a94058e5cd8a2c34e28102f10f847860
+
+> Fichier binaire non inclus (557 octets)
+
+## .git/objects/92/ad2e70272378effe63b116ed39542ed3273ad7
+
+> Fichier binaire non inclus (1000 octets)
 
 ## .git/objects/96/16032d6011eb0cda6fce84acf48c78ec8505de
 
@@ -1142,9 +1288,41 @@ x1Â0©óŠí…‘R!¹C¢¥âgûD,lòYHyïàc\º)fC‘€e¹œs“C£Ê·ß÷]$så6…ð_Hó5ÕÜ²ŽN
 
 > Fichier binaire non inclus (244 octets)
 
+## .git/objects/9a/66f582cbe0ce3baeb420da975502068b24e4ab
+
+> Fichier binaire non inclus (244 octets)
+
+## .git/objects/9c/2f2408502613931cbb8aa1c1f85efbe0af7e6b
+
+> Fichier binaire non inclus (80 octets)
+
+## .git/objects/9e/f2e6dadb2ad2f1dc58adf45d6a894ba3474b87
+
+> Fichier binaire non inclus (53 octets)
+
+## .git/objects/a0/801ca44c8761704da73cd617292f1b55b03df8
+
+> Fichier binaire non inclus (433 octets)
+
 ## .git/objects/a2/5ca07857e74c16aa08409574d02a04b7aee99f
 
 > Fichier binaire non inclus (211 octets)
+
+## .git/objects/a6/c8114721bb11d3a98a15eb99989c8dd4a8bd5b
+
+> Fichier binaire non inclus (113 octets)
+
+## .git/objects/ac/8640438f29a90bfc27df380a9bdbfef7e405e8
+
+> Fichier binaire non inclus (2015 octets)
+
+## .git/objects/ad/3cedbf5943c12399732301b12e853deb88267b
+
+> Fichier binaire non inclus (98 octets)
+
+## .git/objects/b1/92683d230eac9793518b58be6ca5398abd6e60
+
+> Fichier binaire non inclus (53 octets)
 
 ## .git/objects/b3/107607c4998ca8746787a6d21009e795dee3c5
 
@@ -1154,9 +1332,17 @@ x1Â0©óŠí…‘R!¹C¢¥âgûD,lòYHyïàc\º)fC‘€e¹œs“C£Ê·ß÷]$så6…ð_Hó5ÕÜ²ŽN
 
 > Fichier binaire non inclus (53 octets)
 
+## .git/objects/b4/f74b85225b9ef3a4019de98593c4b2da875297
+
+> Fichier binaire non inclus (193 octets)
+
 ## .git/objects/b7/9df636fb4d1a1b11336ff0fc3e7855af93fea9
 
 > Fichier binaire non inclus (415 octets)
+
+## .git/objects/ba/ef302c97d16c79b319d281043571ee94014230
+
+> Fichier binaire non inclus (216 octets)
 
 ## .git/objects/ba/ffdc9b2df085ac01f9c0420213a40f6da944ff
 
@@ -1170,17 +1356,58 @@ x1Â0©óŠí…‘R!¹C¢¥âgûD,lòYHyïàc\º)fC‘€e¹œs“C£Ê·ß÷]$så6…ð_Hó5ÕÜ²ŽN
 
 > Fichier binaire non inclus (2975 octets)
 
+## .git/objects/bf/7735b0afbb274ffa01336e92fb3b5d6cfad46e
+
+> Fichier binaire non inclus (478 octets)
+
 ## .git/objects/c1/89664be7eef83178050a13fc0797ab0a50971d
 
 > Fichier binaire non inclus (2961 octets)
+
+## .git/objects/c7/f1b2b54d4c9a0afd2f170c747bd16f6280f6d4
+
+> Fichier binaire non inclus (763 octets)
+
+## .git/objects/cb/9babef9a99f668dfedcd1bdef2ae8e4224a37c
+
+```text
+x•ÎMjÃ@@á®çÚŠ,kþ ”4$t×;Hc9qéx‚=éù›+dûàƒWZ­K¢ñ¥of%„Ù'*jXlT1eÂIrô	CRbcQw“ÍÖÊsdMžÈk¶yÆ!O–“Ïca¥IRô”£“{¿¶ö¥œ>¿¿ŽgxŸdÝÛýr¸TY~ßJ«0ÄÐ3û¯8 ºG}ìu{º*?P®ÒáÏ¶}i«û½‘E]
+```
+
+## .git/objects/cc/50ea877b82eff68f6f1a93895ed4cb0670db3d
+
+> Fichier binaire non inclus (80 octets)
+
+## .git/objects/ce/a31b562c2f2b8318b01e8ee5df5caa52a50188
+
+```text
+x“ÁnÛ0†wîSÙ9†ÖùÖeÀvÙ€íÚ¦#-²¤RŠ®èõ9úb£ÇMèI€D~ÿÏßtãcŸ¯?½[¯×Wk8P7bÉð›R„ïäøâ²>¸+€}iˆe’ªL•ÕgÃZ(.G¾«µfH³4Œ¦°¯Áæœ¤ÞlZ‹œ¥š‹6lÎ‹¯OÉGGuƒüø[_$¿bæÒO-Ãa25	ªÕ¾†YhóâÉ
+™1IØj˜’L½Gô…ä„ž†ñ®Åm,!×ðÞÃHÈ"•R,ÁbÉ“'€^Ø3 ˆ9¥ÝàÂ\J¹ÜÕ°j;µØƒtÑõóYz»RÅ(gV%À‹Ïàº§GôS`ØcØmcÜ;é5J3Ò™hœéM1Ö˜ƒ1bTÈìƒ
+ö»¢º¶OCqvy.ì˜dÉ€6žÔnæB‹¨2®Ì(xN¹º¿‡]P‘ñ€‡‡3`¦n½ÿóÔ–©wûç!fÌ.†uPÙ©®šÕÅ†º¸a]dâJˆïRt!K·Ôµ…ŸÝ¾‘’½v¯Æ9Ÿ]½½µj‰õ‹IôGbåø…’ˆÅéN]º%Áÿç*ú—áŽ¦ ”¡‘Î7¦³{ª¸¿šÿõ7÷2ÊEâ
+```
 
 ## .git/objects/d2/208d333d9003c158229765ee6203b4afe16603
 
 > Fichier binaire non inclus (1802 octets)
 
+## .git/objects/d2/60905788171669c3bbbc8b68c8349700cc4ac8
+
+> Fichier binaire non inclus (53 octets)
+
 ## .git/objects/d4/0cf7f44e7c20ef0b41948b2faa84215effa7da
 
 > Fichier binaire non inclus (1424 octets)
+
+## .git/objects/d4/2d0bb1bce69db01fd85be6c014649939e7583f
+
+```text
+x%ŒÁ
+‚PE[ûƒmŒP1‰¤¢E­ÚÊX#<çÅ›§à'ùþXOÜž{ÏiØ6P\ª]š¦ÑœeÒ¼«4ÿR‹{Í{4’M=Ga~“Sc¾R!y‘e&øÙÁ#¨ÇÆ°ñË|ˆºRëqû_!‹ìTeçc E¼¦îâÉµø!pË¬„Ã¹1ŠCò.ã´uÚÖfBDËø n>ä
+```
+
+## .git/objects/d5/50410fa79954a4d6a62e23a5d6431a14fa0851
+
+> Fichier binaire non inclus (131 octets)
 
 ## .git/objects/d7/0f80bc342ea8e3e75964586ed312b4c3e3a9f1
 
@@ -1190,9 +1417,25 @@ x1Â0©óŠí…‘R!¹C¢¥âgûD,lòYHyïàc\º)fC‘€e¹œs“C£Ê·ß÷]$så6…ð_Hó5ÕÜ²ŽN
 
 > Fichier binaire non inclus (125 octets)
 
+## .git/objects/da/cbfd100534ad0f0b9fe48b1f39d8c28c6f3695
+
+> Fichier binaire non inclus (530 octets)
+
+## .git/objects/db/824122210b5ac33b1f44d89fe652fba5115399
+
+> Fichier binaire non inclus (79 octets)
+
 ## .git/objects/dc/8dbb8bee9e0ca3103db0641ebb26a2461ff8ab
 
 > Fichier binaire non inclus (53 octets)
+
+## .git/objects/df/8fc9e1de87bdabbed02bb5fe1709f26ec2c394
+
+> Fichier binaire non inclus (53 octets)
+
+## .git/objects/e1/c411fefdf9f4530d65597c5b98e3b5bb023dee
+
+> Fichier binaire non inclus (76 octets)
 
 ## .git/objects/e4/3e39d095f25c76733e3168a4b8fec4d5a22361
 
@@ -1201,6 +1444,14 @@ x1Â0©óŠí…‘R!¹C¢¥âgûD,lòYHyïàc\º)fC‘€e¹œs“C£Ê·ß÷]$så6…ð_Hó5ÕÜ²ŽN
 ## .git/objects/e4/9cd7abf024e83d1e07e882cf7d6caa6b2f4682
 
 > Fichier binaire non inclus (1272 octets)
+
+## .git/objects/ea/5b21d1f97231962cce183c4de9fce15870075b
+
+> Fichier binaire non inclus (245 octets)
+
+## .git/objects/ed/bf3b870d9e46e5f7dc113970b1dd523ee4e7d4
+
+> Fichier binaire non inclus (195 octets)
 
 ## .git/objects/f7/5944e8e80d3243882751be31084ac16eeb5290
 
@@ -1218,18 +1469,32 @@ x1Â0©óŠí…‘R!¹C¢¥âgûD,lòYHyïàc\º)fC‘€e¹œs“C£Ê·ß÷]$så6…ð_Hó5ÕÜ²ŽN
 
 > Fichier binaire non inclus (2994 octets)
 
+## .git/objects/fc/989621e098a2b316d7eb93f8936bc56ceb06ab
+
+> Fichier binaire non inclus (989 octets)
+
+## .git/objects/fc/e88d47c4f8cf4b5dc15c0bb571be962ccebe98
+
+> Fichier binaire non inclus (1053 octets)
+
 ## .git/refs/heads/main
 
 ```text
-baffdc9b2df085ac01f9c0420213a40f6da944ff
+3f2af84dbad3bfcbb57afce2aae3fd74e9e0d3c0
 
 ```
 
 ## .git/refs/remotes/origin/main
 
 ```text
-baffdc9b2df085ac01f9c0420213a40f6da944ff
+3f2af84dbad3bfcbb57afce2aae3fd74e9e0d3c0
 
+```
+
+## .gitignore
+
+```text
+project_export.*
 ```
 
 ## deploy.yml
@@ -1241,6 +1506,132 @@ baffdc9b2df085ac01f9c0420213a40f6da944ff
   become: yes
   roles:
     - deploy
+```
+
+## group_vars/all/secret.yml
+
+```yaml
+# github_token: "AUQKCEL5H6TFEO6QQFTICVLJIPVEA"
+github_token: AUQKCEI33FWTVOQQOPODVUDJIP2ZY
+
+postgres_password: 
+grafana_admin_password:
+
+user_mail: dansoug@gmail.com
+```
+
+## infra/runners/custom-image/Dockerfile
+
+```text
+# On part de l'image officielle GitHub Runner (Base Ubuntu)
+FROM ghcr.io/actions/actions-runner:latest
+
+# On passe root temporairement pour l'installation
+USER root
+
+# DÃ©sactivation des invites interactives pour Ã©viter les erreurs de build
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 1. Mise Ã  jour systÃ¨me et installation dÃ©pendances minimales
+# On supprime curl/git/etc Ã  la fin si on veut Ãªtre ultra-strict, 
+# mais ici on en a besoin pour le checkout du code et helm.
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    git \
+    unzip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# 2. Installation de Kubectl (Version Stable v1.28.x pour matcher K3s)
+# SECURITÃ‰ : On vÃ©rifie le SHA256 du binaire tÃ©lÃ©chargÃ©
+RUN curl -LO "https://dl.k8s.io/release/v1.28.5/bin/linux/amd64/kubectl" && \
+    curl -LO "https://dl.k8s.io/release/v1.28.5/bin/linux/amd64/kubectl.sha256" && \
+    echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check && \
+    chmod +x kubectl && \
+    mv kubectl /usr/local/bin/ && \
+    rm kubectl.sha256
+
+# 3. Installation de Helm (Script officiel)
+RUN curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+# 4. DURCISSEMENT (HARDENING)
+# Suppression de sudo pour empÃªcher toute Ã©lÃ©vation de privilÃ¨ges
+RUN rm -f /usr/bin/sudo
+
+# On repasse sur l'utilisateur standard 'runner' (UID 1001)
+# C'est CRITIQUE : le conteneur ne tournera jamais en root
+USER runner
+```
+
+## infra/runners/deployment.yaml
+
+```yaml
+# infra/runners/deployment.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: actions-runner-system
+
+---
+# 1. Compte de Service (L'identitÃ© du Runner)
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: deploy-runner-sa
+  namespace: actions-runner-system
+
+---
+# 2. RÃ´le (Les permissions : Admin du cluster pour pouvoir tout dÃ©ployer)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: deploy-runner-admin
+subjects:
+  - kind: ServiceAccount
+    name: deploy-runner-sa
+    namespace: actions-runner-system
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin # On lui donne les pleins pouvoirs pour gÃ©rer les apps
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# 3. Le Runner lui-mÃªme
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-runner-klaro
+  namespace: actions-runner-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: github-runner-klaro
+  template:
+    metadata:
+      labels:
+        app: github-runner-klaro
+    spec:
+      serviceAccountName: deploy-runner-sa
+      containers:
+      - name: runner
+        image: spadmdck/k8s-deploy-runner:v1
+        imagePullPolicy: Always
+        env:
+          - name: GITHUB_REPOSITORY
+            value: "sicDANGBE/klaro" # Ton repo d'application
+          - name: GITHUB_TOKEN
+            value: "AUQKCEL5H6TFEO6QQFTICVLJIPVEA" 
+        
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            # Enregistrement (si pas dÃ©jÃ  fait)
+            ./config.sh --url https://github.com/sicDANGBE/klaro --token ${GITHUB_TOKEN} --unattended --replace --name k8s-runner-01 --labels k8s-deploy
+            # Lancement
+            ./run.sh
 ```
 
 ## inventory.yml
@@ -1276,7 +1667,7 @@ all:
         # Les vars spÃ©cifiques Ã  Docker/Swarm peuvent rester ici si besoin
         vars:
           docker_hub_user: spadmdck
-          docker_hub_pat: "Irmapil-1989"
+          docker_hub_path: "Irmapil-1989"
 
     k8s_cluster:
       children:
@@ -2187,90 +2578,152 @@ ClientAliveInterval 120
 ## project_export.log
 
 ```text
-[2025-12-15 07:57:13] Source  : .
-[2025-12-15 07:57:13] Sortie  : project_export.md
-[2025-12-15 07:57:13] Fichiers trouvÃ©s (avant filtre): 109
-[2025-12-15 07:57:13] Fichiers Ã  concatÃ©ner (aprÃ¨s filtre): 108 (exclus auto:1 dir:0 file:0)
-[2025-12-15 07:57:13] ConcatÃ¨ne [1] .git/COMMIT_EDITMSG (size=13)
-[2025-12-15 07:57:13] ConcatÃ¨ne [2] .git/HEAD (size=21)
-[2025-12-15 07:57:13] ConcatÃ¨ne [3] .git/config (size=264)
-[2025-12-15 07:57:13] ConcatÃ¨ne [4] .git/description (size=73)
-[2025-12-15 07:57:13] ConcatÃ¨ne [5] .git/hooks/applypatch-msg.sample (size=478)
-[2025-12-15 07:57:13] ConcatÃ¨ne [6] .git/hooks/commit-msg.sample (size=896)
-[2025-12-15 07:57:13] ConcatÃ¨ne [7] .git/hooks/fsmonitor-watchman.sample (size=4726)
-[2025-12-15 07:57:13] ConcatÃ¨ne [8] .git/hooks/post-update.sample (size=189)
-[2025-12-15 07:57:13] ConcatÃ¨ne [9] .git/hooks/pre-applypatch.sample (size=424)
-[2025-12-15 07:57:13] ConcatÃ¨ne [10] .git/hooks/pre-commit.sample (size=1643)
-[2025-12-15 07:57:13] ConcatÃ¨ne [11] .git/hooks/pre-merge-commit.sample (size=416)
-[2025-12-15 07:57:13] ConcatÃ¨ne [12] .git/hooks/pre-push.sample (size=1374)
-[2025-12-15 07:57:13] ConcatÃ¨ne [13] .git/hooks/pre-rebase.sample (size=4898)
-[2025-12-15 07:57:13] ConcatÃ¨ne [14] .git/hooks/pre-receive.sample (size=544)
-[2025-12-15 07:57:13] ConcatÃ¨ne [15] .git/hooks/prepare-commit-msg.sample (size=1492)
-[2025-12-15 07:57:13] ConcatÃ¨ne [16] .git/hooks/push-to-checkout.sample (size=2783)
-[2025-12-15 07:57:13] ConcatÃ¨ne [17] .git/hooks/sendemail-validate.sample (size=2308)
-[2025-12-15 07:57:13] ConcatÃ¨ne [18] .git/hooks/update.sample (size=3650)
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/index â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] ConcatÃ¨ne [20] .git/info/exclude (size=240)
-[2025-12-15 07:57:13] ConcatÃ¨ne [21] .git/logs/HEAD (size=524)
-[2025-12-15 07:57:13] ConcatÃ¨ne [22] .git/logs/refs/heads/main (size=342)
-[2025-12-15 07:57:13] ConcatÃ¨ne [23] .git/logs/refs/remotes/origin/main (size=144)
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/01/d2167d3d10068dc2e103cc760a9924a34960dd â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/12/dd915be4a8210d5e1f76057b21a4d05af18278 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/13/a733caa16cec86e457f57dbaf9b8c58385247e â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/18/d034bdec206eba68b4493753af53947030b372 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/1c/1473c234147fe7fc247d23fa080183f873340f â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/1d/bdc784eee7f8adc4af6b772c03ebc34b52641b â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/23/b57a36608a8df344086ad7e4b606034537cf12 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/26/535a0c9d10d5f68d0ef58a108717721a32f60e â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/2d/844f814c96306db61a7c566a5c2ea2d93e33e9 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/30/2920dfd5650225d34cb7f6db2bdd8cd7da4fbf â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/30/a331ae73eef7bb48e0325edb589bced8056792 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/32/909a6b02edc8ac9be3e2fa054bfc8e18123961 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/3e/32478c54689abc143e1802215a81fc6c795e13 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/3f/fdc8b7a539862d9eaa85544d6d323d687c28d3 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/43/9e2595364aa6224f96f8fea9ec40297a2bf4c7 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/4a/7c295e715efc972d9ed4de7c0a25028f5e1c3b â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/4b/1bbe276df1c05ea6efcac02cec07c6fe5907c2 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/51/3d92feb277350e20774e6cec81e830fe2b4be6 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/56/a69a15619c856a37fef233d278b4dc930fce3b â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/58/682fefefd32a7170683511b9bf7f0d11b2a809 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/5c/4877258f52a852c61950b075199a351d78804d â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/66/2cdad636335aa7ddf87ecc104425ae2a03645b â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/6a/fc057e641164c8f51ae71ffb807f658fd8d4de â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] ConcatÃ¨ne [47] .git/objects/7a/469c898b6c29c5529444b2a460cded43955950 (size=122)
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/96/16032d6011eb0cda6fce84acf48c78ec8505de â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/97/42a5926e1be55a42e870e00305824e2b13ffd5 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/97/d5407c91f933f0e6e7ffdb77224c4ab0a97364 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/a2/5ca07857e74c16aa08409574d02a04b7aee99f â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/b3/107607c4998ca8746787a6d21009e795dee3c5 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/b3/a7ab66fd51da17c193ed7a15ba22771183cd7c â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/b7/9df636fb4d1a1b11336ff0fc3e7855af93fea9 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/ba/ffdc9b2df085ac01f9c0420213a40f6da944ff â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/bc/d9d8c1d40153407dbbdc4d703fc44ce55de36d â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/be/757d3459959944bbb1537ec4ca355a165ac7d0 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/c1/89664be7eef83178050a13fc0797ab0a50971d â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/d2/208d333d9003c158229765ee6203b4afe16603 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/d4/0cf7f44e7c20ef0b41948b2faa84215effa7da â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/d7/0f80bc342ea8e3e75964586ed312b4c3e3a9f1 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/da/bf50e0d613b431ad27422ee424607a8cbadc77 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/dc/8dbb8bee9e0ca3103db0641ebb26a2461ff8ab â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/e4/3e39d095f25c76733e3168a4b8fec4d5a22361 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/e4/9cd7abf024e83d1e07e882cf7d6caa6b2f4682 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/f7/5944e8e80d3243882751be31084ac16eeb5290 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/f9/565c084436b011278bf3461b07574d3a5eb644 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/fa/33a4be7bdede970da452b912dd072a56793df5 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] â„¹ï¸  Binaire : .git/objects/fa/648d77f788a63c178b93dea39c0842dbe528d8 â€” rÃ©fÃ©rencÃ© mais non inclus
-[2025-12-15 07:57:13] ConcatÃ¨ne [70] .git/refs/heads/main (size=41)
-[2025-12-15 07:57:13] ConcatÃ¨ne [71] .git/refs/remotes/origin/main (size=41)
-[2025-12-15 07:57:13] ConcatÃ¨ne [72] deploy.yml (size=117)
-[2025-12-15 07:57:13] ConcatÃ¨ne [73] inventory.yml (size=1131)
-[2025-12-15 07:57:13] ConcatÃ¨ne [74] pb/audit_security.yml (size=3561)
-[2025-12-15 07:57:13] ConcatÃ¨ne [75] pb/configure_firewall_swarm.yml (size=3897)
-[2025-12-15 07:57:13] ConcatÃ¨ne [76] pb/init_swarm.yml (size=1470)
-[2025-12-15 07:57:13] ConcatÃ¨ne [77] pb/reports/report_ovh.core.txt (size=10872)
-[2025-12-15 07:57:13] ConcatÃ¨ne [78] pb/reports/report_ovh.worker.01.txt (size=10677)
-[2025-12-15 07:57:13] ConcatÃ¨ne [79] pb/reports/report_ovh.worker.02.txt (size=10658)
-[2025-12-15 07:57:13] ConcatÃ¨ne [80] pb/secure_servers.yml (size=4293)
+[2025-12-29 22:46:30] Source  : .
+[2025-12-29 22:46:30] Sortie  : project_export.md
+[2025-12-29 22:46:30] Fichiers trouvÃ©s (avant filtre): 177
+[2025-12-29 22:46:30] Fichiers Ã  concatÃ©ner (aprÃ¨s filtre): 176 (exclus auto:1 dir:0 file:0)
+[2025-12-29 22:46:30] ConcatÃ¨ne [1] .git/COMMIT_EDITMSG (size=2)
+[2025-12-29 22:46:30] ConcatÃ¨ne [2] .git/FETCH_HEAD (size=99)
+[2025-12-29 22:46:30] ConcatÃ¨ne [3] .git/HEAD (size=21)
+[2025-12-29 22:46:30] ConcatÃ¨ne [4] .git/ORIG_HEAD (size=41)
+[2025-12-29 22:46:30] ConcatÃ¨ne [5] .git/config (size=309)
+[2025-12-29 22:46:30] ConcatÃ¨ne [6] .git/description (size=73)
+[2025-12-29 22:46:30] ConcatÃ¨ne [7] .git/hooks/applypatch-msg.sample (size=478)
+[2025-12-29 22:46:30] ConcatÃ¨ne [8] .git/hooks/commit-msg.sample (size=896)
+[2025-12-29 22:46:30] ConcatÃ¨ne [9] .git/hooks/fsmonitor-watchman.sample (size=4726)
+[2025-12-29 22:46:30] ConcatÃ¨ne [10] .git/hooks/post-update.sample (size=189)
+[2025-12-29 22:46:30] ConcatÃ¨ne [11] .git/hooks/pre-applypatch.sample (size=424)
+[2025-12-29 22:46:30] ConcatÃ¨ne [12] .git/hooks/pre-commit.sample (size=1643)
+[2025-12-29 22:46:30] ConcatÃ¨ne [13] .git/hooks/pre-merge-commit.sample (size=416)
+[2025-12-29 22:46:30] ConcatÃ¨ne [14] .git/hooks/pre-push.sample (size=1374)
+[2025-12-29 22:46:30] ConcatÃ¨ne [15] .git/hooks/pre-rebase.sample (size=4898)
+[2025-12-29 22:46:30] ConcatÃ¨ne [16] .git/hooks/pre-receive.sample (size=544)
+[2025-12-29 22:46:30] ConcatÃ¨ne [17] .git/hooks/prepare-commit-msg.sample (size=1492)
+[2025-12-29 22:46:30] ConcatÃ¨ne [18] .git/hooks/push-to-checkout.sample (size=2783)
+[2025-12-29 22:46:30] ConcatÃ¨ne [19] .git/hooks/sendemail-validate.sample (size=2308)
+[2025-12-29 22:46:30] ConcatÃ¨ne [20] .git/hooks/update.sample (size=3650)
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/index â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] ConcatÃ¨ne [22] .git/info/exclude (size=240)
+[2025-12-29 22:46:30] ConcatÃ¨ne [23] .git/logs/HEAD (size=1155)
+[2025-12-29 22:46:30] ConcatÃ¨ne [24] .git/logs/refs/heads/main (size=973)
+[2025-12-29 22:46:30] ConcatÃ¨ne [25] .git/logs/refs/remotes/origin/main (size=576)
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/01/d2167d3d10068dc2e103cc760a9924a34960dd â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/04/3bf9fef54622a82b0c1489680b71878ee87b26 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/10/7d589fc91036af8fba1ba129901be91a31897c â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/12/dd915be4a8210d5e1f76057b21a4d05af18278 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/13/4cc55cc85ba228ff3170946b66003ef438fb53 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/13/a733caa16cec86e457f57dbaf9b8c58385247e â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/14/ca67e6e6b48fc9890bf8d9708b997f19627940 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/18/d034bdec206eba68b4493753af53947030b372 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/1c/1473c234147fe7fc247d23fa080183f873340f â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/1d/bdc784eee7f8adc4af6b772c03ebc34b52641b â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/20/54facaec7935a72e976aebfd6605f5e326e514 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/23/b57a36608a8df344086ad7e4b606034537cf12 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/26/535a0c9d10d5f68d0ef58a108717721a32f60e â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/2c/66c08e7d25653c7d562db99229e37aeda0c365 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/2d/77948267ca47c8eee91713a792b82efbe209de â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/2d/844f814c96306db61a7c566a5c2ea2d93e33e9 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/2f/e8b10dd366256fcb894488579d0d219e648ed6 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/30/2920dfd5650225d34cb7f6db2bdd8cd7da4fbf â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/30/a331ae73eef7bb48e0325edb589bced8056792 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/31/484b05904cad755c238021fd6f87f529738622 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/32/909a6b02edc8ac9be3e2fa054bfc8e18123961 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/35/c80e9a5b06ea9878e8dcffd7cbb64089ba0c83 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/36/03809970396a1fa88991d76975b78cd2a8b053 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/36/9f29c368049f01a11563ef346b98af2702a221 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/37/640b1bf6239e541e2747193080d79460008cf4 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/3b/342248b6e896d0ed8b1dd20adeb2ec35bc4fec â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/3b/4ca10adc45a5be5f487c8246f3ac180d643717 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/3c/d98bd44d5819a990ef6b6925a10d5d4ed1614a â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/3d/b6b4716de113f5dbf8468ea2e41bd40177dfa9 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/3e/32478c54689abc143e1802215a81fc6c795e13 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/3f/275713e446966701409619f1c5528b64e85221 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/3f/2af84dbad3bfcbb57afce2aae3fd74e9e0d3c0 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/3f/fdc8b7a539862d9eaa85544d6d323d687c28d3 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/43/9e2595364aa6224f96f8fea9ec40297a2bf4c7 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/46/5665e6fe80703c84b1303751ba339298fb884a â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/4a/7c295e715efc972d9ed4de7c0a25028f5e1c3b â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/4b/1bbe276df1c05ea6efcac02cec07c6fe5907c2 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/50/e2d1641e7762cf47166a7afccaacb993949448 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/51/3d92feb277350e20774e6cec81e830fe2b4be6 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/53/94e6388554f4a9370de79aca4101438c29d813 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/56/a69a15619c856a37fef233d278b4dc930fce3b â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/58/682fefefd32a7170683511b9bf7f0d11b2a809 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/59/328ca54a045502fba049aafa1852e66bb5f819 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/5c/4877258f52a852c61950b075199a351d78804d â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/61/53a090823205974b35493ef2fc7ef88507e0ef â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/66/2cdad636335aa7ddf87ecc104425ae2a03645b â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/69/e0c1e58e9d8eef6940b3f034e916dff2b9b5ed â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/6a/fc057e641164c8f51ae71ffb807f658fd8d4de â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/6c/3a5652a769d42a705a88a57b3e4c3fa4e9160e â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] ConcatÃ¨ne [75] .git/objects/7a/469c898b6c29c5529444b2a460cded43955950 (size=122)
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/83/6b0fa16df3e85cc2deea25e9dacaeb8b887659 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/8c/b126ddeb5a8a33247c28d4fd65e53ab077d60c â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/8f/4ec334a94058e5cd8a2c34e28102f10f847860 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/92/ad2e70272378effe63b116ed39542ed3273ad7 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/96/16032d6011eb0cda6fce84acf48c78ec8505de â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/97/42a5926e1be55a42e870e00305824e2b13ffd5 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/97/d5407c91f933f0e6e7ffdb77224c4ab0a97364 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/9a/66f582cbe0ce3baeb420da975502068b24e4ab â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/9c/2f2408502613931cbb8aa1c1f85efbe0af7e6b â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/9e/f2e6dadb2ad2f1dc58adf45d6a894ba3474b87 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/a0/801ca44c8761704da73cd617292f1b55b03df8 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/a2/5ca07857e74c16aa08409574d02a04b7aee99f â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/a6/c8114721bb11d3a98a15eb99989c8dd4a8bd5b â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/ac/8640438f29a90bfc27df380a9bdbfef7e405e8 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/ad/3cedbf5943c12399732301b12e853deb88267b â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/b1/92683d230eac9793518b58be6ca5398abd6e60 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/b3/107607c4998ca8746787a6d21009e795dee3c5 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/b3/a7ab66fd51da17c193ed7a15ba22771183cd7c â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/b4/f74b85225b9ef3a4019de98593c4b2da875297 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/b7/9df636fb4d1a1b11336ff0fc3e7855af93fea9 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/ba/ef302c97d16c79b319d281043571ee94014230 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/ba/ffdc9b2df085ac01f9c0420213a40f6da944ff â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/bc/d9d8c1d40153407dbbdc4d703fc44ce55de36d â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/be/757d3459959944bbb1537ec4ca355a165ac7d0 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/bf/7735b0afbb274ffa01336e92fb3b5d6cfad46e â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/c1/89664be7eef83178050a13fc0797ab0a50971d â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/c7/f1b2b54d4c9a0afd2f170c747bd16f6280f6d4 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] ConcatÃ¨ne [103] .git/objects/cb/9babef9a99f668dfedcd1bdef2ae8e4224a37c (size=168)
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/cc/50ea877b82eff68f6f1a93895ed4cb0670db3d â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] ConcatÃ¨ne [105] .git/objects/ce/a31b562c2f2b8318b01e8ee5df5caa52a50188 (size=497)
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/d2/208d333d9003c158229765ee6203b4afe16603 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/d2/60905788171669c3bbbc8b68c8349700cc4ac8 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/d4/0cf7f44e7c20ef0b41948b2faa84215effa7da â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] ConcatÃ¨ne [109] .git/objects/d4/2d0bb1bce69db01fd85be6c014649939e7583f (size=160)
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/d5/50410fa79954a4d6a62e23a5d6431a14fa0851 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/d7/0f80bc342ea8e3e75964586ed312b4c3e3a9f1 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/da/bf50e0d613b431ad27422ee424607a8cbadc77 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/da/cbfd100534ad0f0b9fe48b1f39d8c28c6f3695 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/db/824122210b5ac33b1f44d89fe652fba5115399 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/dc/8dbb8bee9e0ca3103db0641ebb26a2461ff8ab â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/df/8fc9e1de87bdabbed02bb5fe1709f26ec2c394 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/e1/c411fefdf9f4530d65597c5b98e3b5bb023dee â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/e4/3e39d095f25c76733e3168a4b8fec4d5a22361 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/e4/9cd7abf024e83d1e07e882cf7d6caa6b2f4682 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/ea/5b21d1f97231962cce183c4de9fce15870075b â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/ed/bf3b870d9e46e5f7dc113970b1dd523ee4e7d4 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/f7/5944e8e80d3243882751be31084ac16eeb5290 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/f9/565c084436b011278bf3461b07574d3a5eb644 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/fa/33a4be7bdede970da452b912dd072a56793df5 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/fa/648d77f788a63c178b93dea39c0842dbe528d8 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/fc/989621e098a2b316d7eb93f8936bc56ceb06ab â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] â„¹ï¸  Binaire : .git/objects/fc/e88d47c4f8cf4b5dc15c0bb571be962ccebe98 â€” rÃ©fÃ©rencÃ© mais non inclus
+[2025-12-29 22:46:30] ConcatÃ¨ne [128] .git/refs/heads/main (size=41)
+[2025-12-29 22:46:30] ConcatÃ¨ne [129] .git/refs/remotes/origin/main (size=41)
+[2025-12-29 22:46:30] ConcatÃ¨ne [130] .gitignore (size=16)
+[2025-12-29 22:46:30] ConcatÃ¨ne [131] deploy.yml (size=117)
+[2025-12-29 22:46:30] ConcatÃ¨ne [132] group_vars/all/secret.yml (size=166)
+[2025-12-29 22:46:30] ConcatÃ¨ne [133] infra/runners/custom-image/Dockerfile (size=1513)
+[2025-12-29 22:46:30] ConcatÃ¨ne [134] infra/runners/deployment.yaml (size=1667)
+[2025-12-29 22:46:30] ConcatÃ¨ne [135] inventory.yml (size=1132)
+[2025-12-29 22:46:30] ConcatÃ¨ne [136] pb/audit_security.yml (size=3561)
+[2025-12-29 22:46:30] ConcatÃ¨ne [137] pb/configure_firewall_swarm.yml (size=3897)
+[2025-12-29 22:46:30] ConcatÃ¨ne [138] pb/init_swarm.yml (size=1470)
+[2025-12-29 22:46:30] ConcatÃ¨ne [139] pb/reports/report_ovh.core.txt (size=10872)
+[2025-12-29 22:46:30] ConcatÃ¨ne [140] pb/reports/report_ovh.worker.01.txt (size=10677)
+[2025-12-29 22:46:30] ConcatÃ¨ne [141] pb/reports/report_ovh.worker.02.txt (size=10658)
+[2025-12-29 22:46:30] ConcatÃ¨ne [142] pb/secure_servers.yml (size=4293)
 
 ```
 
@@ -2358,11 +2811,14 @@ ClientAliveInterval 120
     group/kubernetes.core.k8s:
       kubeconfig: /etc/rancher/k3s/k3s.yaml
   block:
+    - include_tasks: traefik.yml
     - include_tasks: portainer.yml
     - include_tasks: rabbitmq.yml
     - include_tasks: n8n.yml
+    - include_tasks: nodered.yml
     - include_tasks: mqtt.yml
     - include_tasks: monitoring.yml
+    - include_tasks: postgres.yml
 ```
 
 ## roles/app_k8s/tasks/monitoring.yml
@@ -2382,7 +2838,7 @@ ClientAliveInterval 120
     values:
       grafana:
         enabled: true
-        adminPassword: "admin" # A changer !
+        adminPassword: "{{ grafana_admin_password }}" # Utilise Ansible Vault
         ingress:
           enabled: true
           ingressClassName: "traefik"
@@ -2391,13 +2847,35 @@ ClientAliveInterval 120
           annotations:
             traefik.ingress.kubernetes.io/router.entrypoints: websecure
             traefik.ingress.kubernetes.io/router.tls: "true"
+            traefik.ingress.kubernetes.io/router.tls.certresolver: "le"
         persistence:
           enabled: true
           storageClass: "{{ storage_class }}"
           size: 5Gi
+
+        additionalDataSources:
+          - name: Loki
+            type: loki
+            url: http://loki-gateway.monitoring.svc.cluster.local
+            access: proxy
+            jsonData: 
+              maxLines: 1000
       
       prometheus:
         prometheusSpec:
+          # IMPORTANT : Permet de scraper les ServiceMonitors de TOUS les namespaces (ex: PostgreSQL dans sgcb)
+          serviceMonitorSelectorNilUsesHelmValues: false
+          podMonitorSelectorNilUsesHelmValues: false
+          ruleSelectorNilUsesHelmValues: false
+          # Configuration de la rÃ©tention
+          retention: 15d
+          retentionSize: "8GB" # SÃ©curitÃ© pour ne pas saturer le disque
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "200m"
+            limits:
+              memory: "2Gi"
           storageSpec:
             volumeClaimTemplate:
               spec:
@@ -2406,8 +2884,67 @@ ClientAliveInterval 120
                 resources:
                   requests:
                     storage: 10Gi
-          # Configuration de la rÃ©tention
-          retention: 10d
+
+        alertmanager:
+        config:
+          global:
+            resolve_timeout: 5m
+          route:
+            group_by: ['alertname', 'job']
+            receiver: "{{user_mail}}" # Ã€ remplacer par un webhook (Slack/Discord/Mail)
+
+        
+- name: DÃ©ploiement Loki
+  kubernetes.core.helm:
+    name: loki
+    chart_ref: grafana/loki
+    release_namespace: monitoring
+    chart_version: 5.41.0
+    values:
+      loki:
+        auth_enabled: false
+        commonConfig:
+          replication_factor: 1
+        
+        # Configuration du stockage S3
+        storage:
+          type: s3
+          s3:
+            endpoint: "{{ s3_endpoint }}" # ex: s3.gra.io.cloud.ovh.net
+            region: "{{ s3_region }}"     # ex: gra
+            bucketnames: "{{ loki_bucket_name }}"
+            access_key_id: "{{ s3_access_key }}"
+            secret_access_key: "{{ s3_secret_key }}"
+            s3forcepathstyle: true
+
+        schemaConfig:
+          configs:
+            - from: "2024-01-01"
+              store: tsdb
+              object_store: s3
+              schema: v13
+              index:
+                prefix: index_
+                period: 24h
+
+      # Persistence locale pour le cache d'index
+      deploymentMode: SingleBinary
+      singleBinary:
+        replicas: 1
+        persistence:
+          enabled: true
+          size: 5Gi
+          storageClass: "{{ storage_class }}"
+
+- name: DÃ©ploiement Promtail
+  kubernetes.core.helm:
+    name: promtail
+    chart_ref: grafana/promtail
+    release_namespace: monitoring
+    values:
+      config:
+        clients:
+          - url: http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push
 ```
 
 ## roles/app_k8s/tasks/mqtt.yml
@@ -2564,6 +3101,217 @@ ClientAliveInterval 120
                             number: 80
 ```
 
+## roles/app_k8s/tasks/nodered.yml
+
+```yaml
+---
+# roles/app_k8s/tasks/nodered.yml
+
+# 1. DÃ‰FINITION DES VARIABLES (Pour faciliter la comparaison)
+- name: "DÃ©finition de la version cible Node-RED"
+  set_fact:
+    nodered_target_image: "nodered/node-red:4.1.2-22"
+
+# 2. INTROSPECTION (On demande au cluster : 'Tu en es oÃ¹ ?')
+- name: "VÃ©rification de l'Ã©tat actuel de Node-RED"
+  kubernetes.core.k8s_info:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    api_version: apps/v1
+    kind: Deployment
+    name: nodered
+    namespace: apps
+  register: nodered_status
+
+# 3. CALCUL DU BESOIN DE DÃ‰PLOIEMENT
+# On dÃ©ploie SI :
+# - Le dÃ©ploiement n'existe pas (resources est vide)
+# - OU L'image actuelle n'est pas celle qu'on veut
+# - OU Le dÃ©ploiement n'est pas "Ready" (pour rÃ©parer un Ã©tat cassÃ©)
+- name: "Analyse de la nÃ©cessitÃ© de dÃ©ployer"
+  set_fact:
+    deploy_needed: >-
+      {{
+        (nodered_status.resources | length == 0) or
+        (nodered_status.resources[0].spec.template.spec.containers[0].image != nodered_target_image) or
+        (nodered_status.resources[0].status.readyReplicas | default(0) | int < nodered_status.resources[0].spec.replicas | default(1) | int)
+      }}
+
+- name: "Debug : Raison du dÃ©ploiement"
+  debug:
+    msg: "DÃ©ploiement requis : {{ deploy_needed }}. Image actuelle : {{ nodered_status.resources[0].spec.template.spec.containers[0].image | default('Inconnue') }}"
+  when: deploy_needed
+
+# 4. DÃ‰PLOIEMENT CONDITIONNEL
+- name: DÃ©ploiement Node-RED (Smart Update)
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml # Explicite pour Ã©viter les erreurs de contexte
+    state: present
+    namespace: apps
+    definition:
+      apiVersion: v1
+      kind: List
+      items:
+        # --- PERSISTANCE ---
+        - apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            name: nodered-data
+            namespace: apps
+          spec:
+            accessModes: [ "ReadWriteOnce" ]
+            storageClassName: "{{ storage_class }}"
+            resources:
+              requests:
+                storage: 5Gi
+
+        # --- DEPLOYMENT ---
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: nodered
+            namespace: apps
+            labels:
+              app: nodered
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: nodered
+            template:
+              metadata:
+                labels:
+                  app: nodered
+              spec:
+                securityContext:
+                  fsGroup: 1000
+                  runAsUser: 1000
+                  runAsGroup: 1000
+                containers:
+                  - name: nodered
+                    image: "{{ nodered_target_image }}" # On utilise la variable dÃ©finie plus haut
+                    imagePullPolicy: Always
+                    ports:
+                      - containerPort: 1880
+                    env:
+                      - name: TZ
+                        value: "Europe/Paris"
+                    volumeMounts:
+                      - name: data
+                        mountPath: /data
+                volumes:
+                  - name: data
+                    persistentVolumeClaim:
+                      claimName: nodered-data
+
+        # --- SERVICE ---
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: nodered
+            namespace: apps
+          spec:
+            selector:
+              app: nodered
+            ports:
+              - port: 80
+                targetPort: 1880
+
+        # --- INGRESS ---
+        - apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: nodered
+            namespace: apps
+            annotations:
+              traefik.ingress.kubernetes.io/router.entrypoints: websecure
+              traefik.ingress.kubernetes.io/router.tls: "true"
+              traefik.ingress.kubernetes.io/router.tls.certresolver: "le"
+          spec:
+            rules:
+              - host: "red.{{ main_domain }}"
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: nodered
+                          port:
+                            number: 80
+  # C'EST ICI QUE LA MAGIE OPÃˆRE :
+  when: deploy_needed
+```
+
+## roles/app_k8s/tasks/ollama.yml
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-storage
+  namespace: ocr-system
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi # Suffisant pour plusieurs modÃ¨les Vision (Llama 3.2, Moondream, etc.)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: ocr-system
+spec:
+  replicas: 1 # Tu pourras scaler via HPA plus tard
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+    spec:
+      containers:
+      - name: ollama
+        image: ollama/ollama:latest
+        ports:
+        - containerPort: 11434
+        env:
+        - name: OLLAMA_HOST
+          value: "0.0.0.0"
+        - name: OLLAMA_MODELS
+          value: "/root/.ollama/models"
+        resources:
+          limits:
+            cpu: "4"    # Ajuste selon tes nodes OVH
+            memory: "8Gi"
+          requests:
+            cpu: "2"
+            memory: "4Gi"
+        volumeMounts:
+        - name: ollama-models
+          mountPath: /root/.ollama/models
+      volumes:
+      - name: ollama-models
+        persistentVolumeClaim:
+          claimName: ollama-storage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama-service
+  namespace: ocr-system
+spec:
+  selector:
+    app: ollama
+  ports:
+  - protocol: TCP
+    port: 11434
+    targetPort: 11434
+  type: ClusterIP
+```
+
 ## roles/app_k8s/tasks/portainer.yml
 
 ```yaml
@@ -2597,6 +3345,57 @@ ClientAliveInterval 120
         storageClass: "{{ storage_class }}"
 ```
 
+## roles/app_k8s/tasks/postgres.yml
+
+```yaml
+---
+- name: Ajout du dÃ©pÃ´t Helm Bitnami
+  kubernetes.core.helm_repository:
+    name: bitnami
+    repo_url: https://charts.bitnami.com/bitnami
+
+- name: DÃ©ploiement de PostgreSQL (Idempotent)
+  kubernetes.core.helm:
+    name: postgres
+    chart_ref: bitnami/postgresql
+    release_namespace: sgcb
+    create_namespace: yes
+    chart_version: 18.2.0
+    wait: yes # Assure l'idempotence en attendant que les ressources soient prÃªtes
+    state: present
+    values:
+      global:
+        storageClass: "local-path" # DÃ©faut sur k3s, Ã  adapter selon ton S3/partage
+      
+      auth:
+        database: "ma_base_saas"
+        username: "admin_user"
+        password: "{{ postgres_password }}" # Utilise Ansible Vault pour ceci
+      
+      # Configuration pour ton Prometheus
+      metrics:
+        enabled: true
+        service:
+          type: ClusterIP
+        # Si tu utilises Prometheus Operator (courant avec k3s/kube-prometheus-stack)
+        serviceMonitor:
+          enabled: true
+          namespace: monitoring # Namespace oÃ¹ se trouve ton Prometheus
+          interval: 30s
+
+      primary:
+        persistence:
+          enabled: true
+          size: 8Gi
+        # Configuration rÃ©seau pour l'accessibilitÃ©
+        service:
+          type: ClusterIP
+          ports:
+            postgresql: 5432
+
+# postgres-postgresql.sgcb.svc.cluster.local <= pour Ãªtre attaquÃ© depuis l'extÃ©rieur
+```
+
 ## roles/app_k8s/tasks/rabbitmq.yml
 
 ```yaml
@@ -2611,12 +3410,36 @@ ClientAliveInterval 120
     name: rabbitmq
     chart_ref: bitnami/rabbitmq
     release_namespace: apps
+    chart_version: "16.0.14"
+
     values:
+
+      global:
+        security:
+          allowInsecureImages: true
+
+      metrics:
+        enabled: true
+        plugins: "rabbitmq_prometheus"
+        serviceMonitor:
+          enabled: true
+          namespace: "apps"
+          interval: 30s
+          labels:
+            release: "monitoring"
+
+      image:
+        registry: docker.io
+        repository: bitnamilegacy/rabbitmq
+        tag: 4.1.3-debian-12-r1
+
       replicaCount: 3 # 1 par noeud pour la haute dispo
+
       auth:
         username: admin
         password: "cdosiuhqsdoifuhqsdoiufh" # A mettre dans un vault idÃ©alement
         erlangCookie: "cdosi_uhq_sd_o_i_f_u_h__q__s_doi_gqmsdofguqsdhfpmuihufh"
+
       ingress:
         enabled: true
         hostname: "rabbitmq.{{ main_domain }}"
@@ -2625,10 +3448,17 @@ ClientAliveInterval 120
           traefik.ingress.kubernetes.io/router.entrypoints: websecure
           traefik.ingress.kubernetes.io/router.tls: "true"
           traefik.ingress.kubernetes.io/router.tls.certresolver: "le"
+
       persistence:
         enabled: true
         storageClass: "{{ storage_class }}"
         size: 8Gi
+```
+
+## roles/app_k8s/tasks/traefik.yml
+
+```yaml
+
 ```
 
 ## roles/app_k8s/vars/main.yml
@@ -2727,7 +3557,7 @@ storage_class: "local-path" # Le stockage par dÃ©faut de K3s
 - name: Login Docker Hub (Manager)
   community.docker.docker_login:
     username: "{{ docker_hub_user | default(omit) }}"
-    password: "{{ docker_hub_pat | default(omit) }}"
+    password: "{{ docker_hub_path | default(omit) }}"
   when: docker_hub_user is defined
 
 # 5. DÃ©ploiement des Stacks
@@ -3866,6 +4696,119 @@ spec:
       size: 128Mi
 ```
 
+## roles/runner/tasks/main.yml
+
+```yaml
+---
+- name: CrÃ©ation du dossier temporaire pour les manifestes
+  file:
+    path: /tmp/k8s-runner
+    state: directory
+    mode: '0700'
+
+- name: GÃ©nÃ©ration du manifeste Runner (avec Token)
+  template:
+    src: deployment.yaml.j2
+    dest: /tmp/k8s-runner/deployment.yaml
+    mode: '0600'
+
+- name: Application du Runner dans le Cluster
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    src: /tmp/k8s-runner/deployment.yaml
+
+- name: Nettoyage du fichier contenant le token
+  file:
+    path: /tmp/k8s-runner
+    state: absent
+```
+
+## roles/runner/templates/deployment.yaml.j2
+
+```text
+# roles/runner/templates/deployment.yaml.j2
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: actions-runner-system
+
+---
+# 1. IdentitÃ© du Runner (ServiceAccount)
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: deploy-runner-sa
+  namespace: actions-runner-system
+
+---
+# 2. Permissions (Admin du Cluster)
+# NÃ©cessaire pour que le runner puisse exÃ©cuter "kubectl apply" partout
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: deploy-runner-admin
+subjects:
+  - kind: ServiceAccount
+    name: deploy-runner-sa
+    namespace: actions-runner-system
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# 3. Le Runner (Deployment)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-runner-klaro
+  namespace: actions-runner-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: github-runner-klaro
+  template:
+    metadata:
+      labels:
+        app: github-runner-klaro
+    spec:
+      serviceAccountName: deploy-runner-sa
+      containers:
+      - name: runner
+        # Ton image Hardened crÃ©Ã©e prÃ©cÃ©demment
+        image: spadmdck/k8s-deploy-runner:v1
+        imagePullPolicy: Always
+        
+        # Variables d'environnement pour l'enregistrement
+        env:
+          - name: GITHUB_REPOSITORY
+            value: "sicDANGBE/klaro"
+          - name: GITHUB_TOKEN
+            value: "{{ github_token }}" # InjectÃ© par Ansible
+            
+        # Ressources limitÃ©es pour Ã©viter qu'un build ne tue le cluster
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "2Gi"
+
+        # Script de dÃ©marrage (Identique Ã  celui testÃ© manuellement)
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            # Configuration unique (si pas dÃ©jÃ  configurÃ©)
+            if [ ! -f .runner ]; then
+              ./config.sh --url https://github.com/saasMsDGH --token ${GITHUB_TOKEN} --unattended --replace --name org-runner-01 --labels k8s-deploy
+            fi
+            # Lancement
+            ./run.sh
+```
+
 ## roles/swarm/tasks/main.yml
 
 ```yaml
@@ -4111,5 +5054,19 @@ add rule inet filter input tcp dport { 80, 443 } accept
   
   roles:
     - app_k8s
+
+# -----------------------------------------------------------------------
+# PLAY 5 : RUNNER KUBERNETES (HELM)
+# Cible : server (UNIQUEMENT LE MANAGER)
+# -----------------------------------------------------------------------
+- name: "DÃ©ploiement Runners Kubernetes"
+  hosts: server  # <--- CHANGEMENT ICI (Avant c'Ã©tait k8s_cluster ou non dÃ©fini)
+  become: true
+  tags: ["k8s_runner"]
+  
+  roles:
+    - runner
+
+
 ```
 

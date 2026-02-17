@@ -1,115 +1,183 @@
-[2025-12-15 07:57:13] Source  : .
-[2025-12-15 07:57:13] Sortie  : project_export.md
-[2025-12-15 07:57:13] Fichiers trouvés (avant filtre): 109
-[2025-12-15 07:57:13] Fichiers à concaténer (après filtre): 108 (exclus auto:1 dir:0 file:0)
-[2025-12-15 07:57:13] Concatène [1] .git/COMMIT_EDITMSG (size=13)
-[2025-12-15 07:57:13] Concatène [2] .git/HEAD (size=21)
-[2025-12-15 07:57:13] Concatène [3] .git/config (size=264)
-[2025-12-15 07:57:13] Concatène [4] .git/description (size=73)
-[2025-12-15 07:57:13] Concatène [5] .git/hooks/applypatch-msg.sample (size=478)
-[2025-12-15 07:57:13] Concatène [6] .git/hooks/commit-msg.sample (size=896)
-[2025-12-15 07:57:13] Concatène [7] .git/hooks/fsmonitor-watchman.sample (size=4726)
-[2025-12-15 07:57:13] Concatène [8] .git/hooks/post-update.sample (size=189)
-[2025-12-15 07:57:13] Concatène [9] .git/hooks/pre-applypatch.sample (size=424)
-[2025-12-15 07:57:13] Concatène [10] .git/hooks/pre-commit.sample (size=1643)
-[2025-12-15 07:57:13] Concatène [11] .git/hooks/pre-merge-commit.sample (size=416)
-[2025-12-15 07:57:13] Concatène [12] .git/hooks/pre-push.sample (size=1374)
-[2025-12-15 07:57:13] Concatène [13] .git/hooks/pre-rebase.sample (size=4898)
-[2025-12-15 07:57:13] Concatène [14] .git/hooks/pre-receive.sample (size=544)
-[2025-12-15 07:57:13] Concatène [15] .git/hooks/prepare-commit-msg.sample (size=1492)
-[2025-12-15 07:57:13] Concatène [16] .git/hooks/push-to-checkout.sample (size=2783)
-[2025-12-15 07:57:13] Concatène [17] .git/hooks/sendemail-validate.sample (size=2308)
-[2025-12-15 07:57:13] Concatène [18] .git/hooks/update.sample (size=3650)
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/index — référencé mais non inclus
-[2025-12-15 07:57:13] Concatène [20] .git/info/exclude (size=240)
-[2025-12-15 07:57:13] Concatène [21] .git/logs/HEAD (size=524)
-[2025-12-15 07:57:13] Concatène [22] .git/logs/refs/heads/main (size=342)
-[2025-12-15 07:57:13] Concatène [23] .git/logs/refs/remotes/origin/main (size=144)
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/01/d2167d3d10068dc2e103cc760a9924a34960dd — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/12/dd915be4a8210d5e1f76057b21a4d05af18278 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/13/a733caa16cec86e457f57dbaf9b8c58385247e — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/18/d034bdec206eba68b4493753af53947030b372 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/1c/1473c234147fe7fc247d23fa080183f873340f — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/1d/bdc784eee7f8adc4af6b772c03ebc34b52641b — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/23/b57a36608a8df344086ad7e4b606034537cf12 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/26/535a0c9d10d5f68d0ef58a108717721a32f60e — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/2d/844f814c96306db61a7c566a5c2ea2d93e33e9 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/30/2920dfd5650225d34cb7f6db2bdd8cd7da4fbf — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/30/a331ae73eef7bb48e0325edb589bced8056792 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/32/909a6b02edc8ac9be3e2fa054bfc8e18123961 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/3e/32478c54689abc143e1802215a81fc6c795e13 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/3f/fdc8b7a539862d9eaa85544d6d323d687c28d3 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/43/9e2595364aa6224f96f8fea9ec40297a2bf4c7 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/4a/7c295e715efc972d9ed4de7c0a25028f5e1c3b — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/4b/1bbe276df1c05ea6efcac02cec07c6fe5907c2 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/51/3d92feb277350e20774e6cec81e830fe2b4be6 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/56/a69a15619c856a37fef233d278b4dc930fce3b — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/58/682fefefd32a7170683511b9bf7f0d11b2a809 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/5c/4877258f52a852c61950b075199a351d78804d — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/66/2cdad636335aa7ddf87ecc104425ae2a03645b — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/6a/fc057e641164c8f51ae71ffb807f658fd8d4de — référencé mais non inclus
-[2025-12-15 07:57:13] Concatène [47] .git/objects/7a/469c898b6c29c5529444b2a460cded43955950 (size=122)
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/96/16032d6011eb0cda6fce84acf48c78ec8505de — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/97/42a5926e1be55a42e870e00305824e2b13ffd5 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/97/d5407c91f933f0e6e7ffdb77224c4ab0a97364 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/a2/5ca07857e74c16aa08409574d02a04b7aee99f — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/b3/107607c4998ca8746787a6d21009e795dee3c5 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/b3/a7ab66fd51da17c193ed7a15ba22771183cd7c — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/b7/9df636fb4d1a1b11336ff0fc3e7855af93fea9 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/ba/ffdc9b2df085ac01f9c0420213a40f6da944ff — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/bc/d9d8c1d40153407dbbdc4d703fc44ce55de36d — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/be/757d3459959944bbb1537ec4ca355a165ac7d0 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/c1/89664be7eef83178050a13fc0797ab0a50971d — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/d2/208d333d9003c158229765ee6203b4afe16603 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/d4/0cf7f44e7c20ef0b41948b2faa84215effa7da — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/d7/0f80bc342ea8e3e75964586ed312b4c3e3a9f1 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/da/bf50e0d613b431ad27422ee424607a8cbadc77 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/dc/8dbb8bee9e0ca3103db0641ebb26a2461ff8ab — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/e4/3e39d095f25c76733e3168a4b8fec4d5a22361 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/e4/9cd7abf024e83d1e07e882cf7d6caa6b2f4682 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/f7/5944e8e80d3243882751be31084ac16eeb5290 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/f9/565c084436b011278bf3461b07574d3a5eb644 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/fa/33a4be7bdede970da452b912dd072a56793df5 — référencé mais non inclus
-[2025-12-15 07:57:13] ℹ️  Binaire : .git/objects/fa/648d77f788a63c178b93dea39c0842dbe528d8 — référencé mais non inclus
-[2025-12-15 07:57:13] Concatène [70] .git/refs/heads/main (size=41)
-[2025-12-15 07:57:13] Concatène [71] .git/refs/remotes/origin/main (size=41)
-[2025-12-15 07:57:13] Concatène [72] deploy.yml (size=117)
-[2025-12-15 07:57:13] Concatène [73] inventory.yml (size=1131)
-[2025-12-15 07:57:13] Concatène [74] pb/audit_security.yml (size=3561)
-[2025-12-15 07:57:13] Concatène [75] pb/configure_firewall_swarm.yml (size=3897)
-[2025-12-15 07:57:13] Concatène [76] pb/init_swarm.yml (size=1470)
-[2025-12-15 07:57:13] Concatène [77] pb/reports/report_ovh.core.txt (size=10872)
-[2025-12-15 07:57:13] Concatène [78] pb/reports/report_ovh.worker.01.txt (size=10677)
-[2025-12-15 07:57:13] Concatène [79] pb/reports/report_ovh.worker.02.txt (size=10658)
-[2025-12-15 07:57:13] Concatène [80] pb/secure_servers.yml (size=4293)
-[2025-12-15 07:57:13] Concatène [81] project_export.log (size=8682)
-[2025-12-15 07:57:13] Concatène [82] roles/app_k8s/tasks/main.yml (size=2550)
-[2025-12-15 07:57:13] Concatène [83] roles/app_k8s/tasks/monitoring.yml (size=1257)
-[2025-12-15 07:57:13] Concatène [84] roles/app_k8s/tasks/mqtt.yml (size=1282)
-[2025-12-15 07:57:13] Concatène [85] roles/app_k8s/tasks/n8n.yml (size=3018)
-[2025-12-15 07:57:13] Concatène [86] roles/app_k8s/tasks/portainer.yml (size=905)
-[2025-12-15 07:57:13] Concatène [87] roles/app_k8s/tasks/rabbitmq.yml (size=987)
-[2025-12-15 07:57:13] Concatène [88] roles/app_k8s/vars/main.yml (size=308)
-[2025-12-15 07:57:13] Concatène [89] roles/apps/tasks/main.yml (size=4169)
-[2025-12-15 07:57:13] Concatène [90] roles/apps/templates/monitoring.yaml.j2 (size=3358)
-[2025-12-15 07:57:13] Concatène [91] roles/apps/templates/portainer.yaml.j2 (size=1219)
-[2025-12-15 07:57:13] Concatène [92] roles/apps/templates/prometheus.yml.j2 (size=331)
-[2025-12-15 07:57:13] Concatène [93] roles/apps/templates/promtail.yaml.j2 (size=1671)
-[2025-12-15 07:57:13] Concatène [94] roles/apps/templates/traefik.yaml.j2 (size=2305)
-[2025-12-15 07:57:13] Concatène [95] roles/clean/tasks/main.yml (size=2512)
-[2025-12-15 07:57:13] Concatène [96] roles/common/handlers/main.yml (size=212)
-[2025-12-15 07:57:13] Concatène [97] roles/common/tasks/main.yml (size=4458)
-[2025-12-15 07:57:13] Concatène [98] roles/common/templates/nftables_base.j2 (size=1080)
-[2025-12-15 07:57:13] Concatène [99] roles/common/templates/nftables_logging.conf.j2 (size=601)
-[2025-12-15 07:57:13] Concatène [100] roles/docker/handlers/main.yml (size=65)
-[2025-12-15 07:57:13] Concatène [101] roles/docker/tasks/main.yml (size=4121)
-[2025-12-15 07:57:13] Concatène [102] roles/k8s/defaults/main.yml (size=178)
-[2025-12-15 07:57:13] Concatène [103] roles/k8s/tasks/main.yml (size=4403)
-[2025-12-15 07:57:13] Concatène [104] roles/k8s/templates/nftables_k8s.conf.j2 (size=1480)
-[2025-12-15 07:57:13] Concatène [105] roles/k8s/templates/traefik-config.yaml.j2 (size=863)
-[2025-12-15 07:57:13] Concatène [106] roles/swarm/tasks/main.yml (size=4383)
-[2025-12-15 07:57:13] Concatène [107] roles/swarm/templates/nftables_swarm.conf.j2 (size=1208)
-[2025-12-15 07:57:13] Concatène [108] site.yml (size=2875)
-[2025-12-15 07:57:13] Concaténation Markdown terminée : 62 fichier(s), 134803 octets.
-[2025-12-15 07:57:13] Aucune règle d’anonymisation — étape sautée.
-[2025-12-15 07:57:13] Terminé. Log détaillé: project_export.log
+[2025-12-29 22:46:30] Source  : .
+[2025-12-29 22:46:30] Sortie  : project_export.md
+[2025-12-29 22:46:30] Fichiers trouvés (avant filtre): 177
+[2025-12-29 22:46:30] Fichiers à concaténer (après filtre): 176 (exclus auto:1 dir:0 file:0)
+[2025-12-29 22:46:30] Concatène [1] .git/COMMIT_EDITMSG (size=2)
+[2025-12-29 22:46:30] Concatène [2] .git/FETCH_HEAD (size=99)
+[2025-12-29 22:46:30] Concatène [3] .git/HEAD (size=21)
+[2025-12-29 22:46:30] Concatène [4] .git/ORIG_HEAD (size=41)
+[2025-12-29 22:46:30] Concatène [5] .git/config (size=309)
+[2025-12-29 22:46:30] Concatène [6] .git/description (size=73)
+[2025-12-29 22:46:30] Concatène [7] .git/hooks/applypatch-msg.sample (size=478)
+[2025-12-29 22:46:30] Concatène [8] .git/hooks/commit-msg.sample (size=896)
+[2025-12-29 22:46:30] Concatène [9] .git/hooks/fsmonitor-watchman.sample (size=4726)
+[2025-12-29 22:46:30] Concatène [10] .git/hooks/post-update.sample (size=189)
+[2025-12-29 22:46:30] Concatène [11] .git/hooks/pre-applypatch.sample (size=424)
+[2025-12-29 22:46:30] Concatène [12] .git/hooks/pre-commit.sample (size=1643)
+[2025-12-29 22:46:30] Concatène [13] .git/hooks/pre-merge-commit.sample (size=416)
+[2025-12-29 22:46:30] Concatène [14] .git/hooks/pre-push.sample (size=1374)
+[2025-12-29 22:46:30] Concatène [15] .git/hooks/pre-rebase.sample (size=4898)
+[2025-12-29 22:46:30] Concatène [16] .git/hooks/pre-receive.sample (size=544)
+[2025-12-29 22:46:30] Concatène [17] .git/hooks/prepare-commit-msg.sample (size=1492)
+[2025-12-29 22:46:30] Concatène [18] .git/hooks/push-to-checkout.sample (size=2783)
+[2025-12-29 22:46:30] Concatène [19] .git/hooks/sendemail-validate.sample (size=2308)
+[2025-12-29 22:46:30] Concatène [20] .git/hooks/update.sample (size=3650)
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/index — référencé mais non inclus
+[2025-12-29 22:46:30] Concatène [22] .git/info/exclude (size=240)
+[2025-12-29 22:46:30] Concatène [23] .git/logs/HEAD (size=1155)
+[2025-12-29 22:46:30] Concatène [24] .git/logs/refs/heads/main (size=973)
+[2025-12-29 22:46:30] Concatène [25] .git/logs/refs/remotes/origin/main (size=576)
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/01/d2167d3d10068dc2e103cc760a9924a34960dd — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/04/3bf9fef54622a82b0c1489680b71878ee87b26 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/10/7d589fc91036af8fba1ba129901be91a31897c — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/12/dd915be4a8210d5e1f76057b21a4d05af18278 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/13/4cc55cc85ba228ff3170946b66003ef438fb53 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/13/a733caa16cec86e457f57dbaf9b8c58385247e — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/14/ca67e6e6b48fc9890bf8d9708b997f19627940 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/18/d034bdec206eba68b4493753af53947030b372 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/1c/1473c234147fe7fc247d23fa080183f873340f — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/1d/bdc784eee7f8adc4af6b772c03ebc34b52641b — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/20/54facaec7935a72e976aebfd6605f5e326e514 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/23/b57a36608a8df344086ad7e4b606034537cf12 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/26/535a0c9d10d5f68d0ef58a108717721a32f60e — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/2c/66c08e7d25653c7d562db99229e37aeda0c365 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/2d/77948267ca47c8eee91713a792b82efbe209de — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/2d/844f814c96306db61a7c566a5c2ea2d93e33e9 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/2f/e8b10dd366256fcb894488579d0d219e648ed6 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/30/2920dfd5650225d34cb7f6db2bdd8cd7da4fbf — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/30/a331ae73eef7bb48e0325edb589bced8056792 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/31/484b05904cad755c238021fd6f87f529738622 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/32/909a6b02edc8ac9be3e2fa054bfc8e18123961 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/35/c80e9a5b06ea9878e8dcffd7cbb64089ba0c83 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/36/03809970396a1fa88991d76975b78cd2a8b053 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/36/9f29c368049f01a11563ef346b98af2702a221 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/37/640b1bf6239e541e2747193080d79460008cf4 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/3b/342248b6e896d0ed8b1dd20adeb2ec35bc4fec — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/3b/4ca10adc45a5be5f487c8246f3ac180d643717 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/3c/d98bd44d5819a990ef6b6925a10d5d4ed1614a — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/3d/b6b4716de113f5dbf8468ea2e41bd40177dfa9 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/3e/32478c54689abc143e1802215a81fc6c795e13 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/3f/275713e446966701409619f1c5528b64e85221 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/3f/2af84dbad3bfcbb57afce2aae3fd74e9e0d3c0 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/3f/fdc8b7a539862d9eaa85544d6d323d687c28d3 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/43/9e2595364aa6224f96f8fea9ec40297a2bf4c7 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/46/5665e6fe80703c84b1303751ba339298fb884a — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/4a/7c295e715efc972d9ed4de7c0a25028f5e1c3b — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/4b/1bbe276df1c05ea6efcac02cec07c6fe5907c2 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/50/e2d1641e7762cf47166a7afccaacb993949448 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/51/3d92feb277350e20774e6cec81e830fe2b4be6 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/53/94e6388554f4a9370de79aca4101438c29d813 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/56/a69a15619c856a37fef233d278b4dc930fce3b — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/58/682fefefd32a7170683511b9bf7f0d11b2a809 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/59/328ca54a045502fba049aafa1852e66bb5f819 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/5c/4877258f52a852c61950b075199a351d78804d — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/61/53a090823205974b35493ef2fc7ef88507e0ef — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/66/2cdad636335aa7ddf87ecc104425ae2a03645b — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/69/e0c1e58e9d8eef6940b3f034e916dff2b9b5ed — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/6a/fc057e641164c8f51ae71ffb807f658fd8d4de — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/6c/3a5652a769d42a705a88a57b3e4c3fa4e9160e — référencé mais non inclus
+[2025-12-29 22:46:30] Concatène [75] .git/objects/7a/469c898b6c29c5529444b2a460cded43955950 (size=122)
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/83/6b0fa16df3e85cc2deea25e9dacaeb8b887659 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/8c/b126ddeb5a8a33247c28d4fd65e53ab077d60c — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/8f/4ec334a94058e5cd8a2c34e28102f10f847860 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/92/ad2e70272378effe63b116ed39542ed3273ad7 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/96/16032d6011eb0cda6fce84acf48c78ec8505de — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/97/42a5926e1be55a42e870e00305824e2b13ffd5 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/97/d5407c91f933f0e6e7ffdb77224c4ab0a97364 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/9a/66f582cbe0ce3baeb420da975502068b24e4ab — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/9c/2f2408502613931cbb8aa1c1f85efbe0af7e6b — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/9e/f2e6dadb2ad2f1dc58adf45d6a894ba3474b87 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/a0/801ca44c8761704da73cd617292f1b55b03df8 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/a2/5ca07857e74c16aa08409574d02a04b7aee99f — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/a6/c8114721bb11d3a98a15eb99989c8dd4a8bd5b — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/ac/8640438f29a90bfc27df380a9bdbfef7e405e8 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/ad/3cedbf5943c12399732301b12e853deb88267b — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/b1/92683d230eac9793518b58be6ca5398abd6e60 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/b3/107607c4998ca8746787a6d21009e795dee3c5 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/b3/a7ab66fd51da17c193ed7a15ba22771183cd7c — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/b4/f74b85225b9ef3a4019de98593c4b2da875297 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/b7/9df636fb4d1a1b11336ff0fc3e7855af93fea9 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/ba/ef302c97d16c79b319d281043571ee94014230 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/ba/ffdc9b2df085ac01f9c0420213a40f6da944ff — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/bc/d9d8c1d40153407dbbdc4d703fc44ce55de36d — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/be/757d3459959944bbb1537ec4ca355a165ac7d0 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/bf/7735b0afbb274ffa01336e92fb3b5d6cfad46e — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/c1/89664be7eef83178050a13fc0797ab0a50971d — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/c7/f1b2b54d4c9a0afd2f170c747bd16f6280f6d4 — référencé mais non inclus
+[2025-12-29 22:46:30] Concatène [103] .git/objects/cb/9babef9a99f668dfedcd1bdef2ae8e4224a37c (size=168)
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/cc/50ea877b82eff68f6f1a93895ed4cb0670db3d — référencé mais non inclus
+[2025-12-29 22:46:30] Concatène [105] .git/objects/ce/a31b562c2f2b8318b01e8ee5df5caa52a50188 (size=497)
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/d2/208d333d9003c158229765ee6203b4afe16603 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/d2/60905788171669c3bbbc8b68c8349700cc4ac8 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/d4/0cf7f44e7c20ef0b41948b2faa84215effa7da — référencé mais non inclus
+[2025-12-29 22:46:30] Concatène [109] .git/objects/d4/2d0bb1bce69db01fd85be6c014649939e7583f (size=160)
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/d5/50410fa79954a4d6a62e23a5d6431a14fa0851 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/d7/0f80bc342ea8e3e75964586ed312b4c3e3a9f1 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/da/bf50e0d613b431ad27422ee424607a8cbadc77 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/da/cbfd100534ad0f0b9fe48b1f39d8c28c6f3695 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/db/824122210b5ac33b1f44d89fe652fba5115399 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/dc/8dbb8bee9e0ca3103db0641ebb26a2461ff8ab — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/df/8fc9e1de87bdabbed02bb5fe1709f26ec2c394 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/e1/c411fefdf9f4530d65597c5b98e3b5bb023dee — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/e4/3e39d095f25c76733e3168a4b8fec4d5a22361 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/e4/9cd7abf024e83d1e07e882cf7d6caa6b2f4682 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/ea/5b21d1f97231962cce183c4de9fce15870075b — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/ed/bf3b870d9e46e5f7dc113970b1dd523ee4e7d4 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/f7/5944e8e80d3243882751be31084ac16eeb5290 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/f9/565c084436b011278bf3461b07574d3a5eb644 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/fa/33a4be7bdede970da452b912dd072a56793df5 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/fa/648d77f788a63c178b93dea39c0842dbe528d8 — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/fc/989621e098a2b316d7eb93f8936bc56ceb06ab — référencé mais non inclus
+[2025-12-29 22:46:30] ℹ️  Binaire : .git/objects/fc/e88d47c4f8cf4b5dc15c0bb571be962ccebe98 — référencé mais non inclus
+[2025-12-29 22:46:30] Concatène [128] .git/refs/heads/main (size=41)
+[2025-12-29 22:46:30] Concatène [129] .git/refs/remotes/origin/main (size=41)
+[2025-12-29 22:46:30] Concatène [130] .gitignore (size=16)
+[2025-12-29 22:46:30] Concatène [131] deploy.yml (size=117)
+[2025-12-29 22:46:30] Concatène [132] group_vars/all/secret.yml (size=166)
+[2025-12-29 22:46:30] Concatène [133] infra/runners/custom-image/Dockerfile (size=1513)
+[2025-12-29 22:46:30] Concatène [134] infra/runners/deployment.yaml (size=1667)
+[2025-12-29 22:46:30] Concatène [135] inventory.yml (size=1132)
+[2025-12-29 22:46:30] Concatène [136] pb/audit_security.yml (size=3561)
+[2025-12-29 22:46:30] Concatène [137] pb/configure_firewall_swarm.yml (size=3897)
+[2025-12-29 22:46:30] Concatène [138] pb/init_swarm.yml (size=1470)
+[2025-12-29 22:46:30] Concatène [139] pb/reports/report_ovh.core.txt (size=10872)
+[2025-12-29 22:46:30] Concatène [140] pb/reports/report_ovh.worker.01.txt (size=10677)
+[2025-12-29 22:46:30] Concatène [141] pb/reports/report_ovh.worker.02.txt (size=10658)
+[2025-12-29 22:46:30] Concatène [142] pb/secure_servers.yml (size=4293)
+[2025-12-29 22:46:30] Concatène [143] project_export.log (size=16225)
+[2025-12-29 22:46:30] Concatène [144] roles/app_k8s/tasks/main.yml (size=2650)
+[2025-12-29 22:46:30] Concatène [145] roles/app_k8s/tasks/monitoring.yml (size=3730)
+[2025-12-29 22:46:30] Concatène [146] roles/app_k8s/tasks/mqtt.yml (size=1282)
+[2025-12-29 22:46:30] Concatène [147] roles/app_k8s/tasks/n8n.yml (size=3018)
+[2025-12-29 22:46:30] Concatène [148] roles/app_k8s/tasks/nodered.yml (size=4390)
+[2025-12-29 22:46:30] Concatène [149] roles/app_k8s/tasks/ollama.yml (size=1377)
+[2025-12-29 22:46:30] Concatène [150] roles/app_k8s/tasks/portainer.yml (size=905)
+[2025-12-29 22:46:30] Concatène [151] roles/app_k8s/tasks/postgres.yml (size=1398)
+[2025-12-29 22:46:30] Concatène [152] roles/app_k8s/tasks/rabbitmq.yml (size=1436)
+[2025-12-29 22:46:30] Concatène [153] roles/app_k8s/tasks/traefik.yml (size=0)
+[2025-12-29 22:46:30] Concatène [154] roles/app_k8s/vars/main.yml (size=308)
+[2025-12-29 22:46:30] Concatène [155] roles/apps/tasks/main.yml (size=4170)
+[2025-12-29 22:46:30] Concatène [156] roles/apps/templates/monitoring.yaml.j2 (size=3358)
+[2025-12-29 22:46:30] Concatène [157] roles/apps/templates/portainer.yaml.j2 (size=1219)
+[2025-12-29 22:46:30] Concatène [158] roles/apps/templates/prometheus.yml.j2 (size=331)
+[2025-12-29 22:46:30] Concatène [159] roles/apps/templates/promtail.yaml.j2 (size=1671)
+[2025-12-29 22:46:30] Concatène [160] roles/apps/templates/traefik.yaml.j2 (size=2305)
+[2025-12-29 22:46:30] Concatène [161] roles/clean/tasks/main.yml (size=2512)
+[2025-12-29 22:46:30] Concatène [162] roles/common/handlers/main.yml (size=212)
+[2025-12-29 22:46:30] Concatène [163] roles/common/tasks/main.yml (size=4458)
+[2025-12-29 22:46:30] Concatène [164] roles/common/templates/nftables_base.j2 (size=1080)
+[2025-12-29 22:46:30] Concatène [165] roles/common/templates/nftables_logging.conf.j2 (size=601)
+[2025-12-29 22:46:30] Concatène [166] roles/docker/handlers/main.yml (size=65)
+[2025-12-29 22:46:30] Concatène [167] roles/docker/tasks/main.yml (size=4121)
+[2025-12-29 22:46:30] Concatène [168] roles/k8s/defaults/main.yml (size=178)
+[2025-12-29 22:46:30] Concatène [169] roles/k8s/tasks/main.yml (size=4403)
+[2025-12-29 22:46:30] Concatène [170] roles/k8s/templates/nftables_k8s.conf.j2 (size=1480)
+[2025-12-29 22:46:30] Concatène [171] roles/k8s/templates/traefik-config.yaml.j2 (size=863)
+[2025-12-29 22:46:30] Concatène [172] roles/runner/tasks/main.yml (size=562)
+[2025-12-29 22:46:30] Concatène [173] roles/runner/templates/deployment.yaml.j2 (size=2132)
+[2025-12-29 22:46:30] Concatène [174] roles/swarm/tasks/main.yml (size=4383)
+[2025-12-29 22:46:30] Concatène [175] roles/swarm/templates/nftables_swarm.conf.j2 (size=1208)
+[2025-12-29 22:46:30] Concatène [176] site.yml (size=3291)
+[2025-12-29 22:46:30] Concaténation Markdown terminée : 77 fichier(s), 161700 octets.
+[2025-12-29 22:46:30] Aucune règle d’anonymisation — étape sautée.
+[2025-12-29 22:46:30] Terminé. Log détaillé: project_export.log
