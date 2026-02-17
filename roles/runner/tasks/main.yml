@@ -1,0 +1,23 @@
+---
+- name: Création du dossier temporaire pour les manifestes
+  file:
+    path: /tmp/k8s-runner
+    state: directory
+    mode: '0700'
+
+- name: Génération du manifeste Runner (avec Token)
+  template:
+    src: deployment.yaml.j2
+    dest: /tmp/k8s-runner/deployment.yaml
+    mode: '0600'
+
+- name: Application du Runner dans le Cluster
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    src: /tmp/k8s-runner/deployment.yaml
+
+- name: Nettoyage du fichier contenant le token
+  file:
+    path: /tmp/k8s-runner
+    state: absent

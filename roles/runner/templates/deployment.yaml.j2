@@ -1,0 +1,80 @@
+# roles/runner/templates/deployment.yaml.j2
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: actions-runner-system
+
+---
+# 1. Identité du Runner (ServiceAccount)
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: deploy-runner-sa
+  namespace: actions-runner-system
+
+---
+# 2. Permissions (Admin du Cluster)
+# Nécessaire pour que le runner puisse exécuter "kubectl apply" partout
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: deploy-runner-admin
+subjects:
+  - kind: ServiceAccount
+    name: deploy-runner-sa
+    namespace: actions-runner-system
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# 3. Le Runner (Deployment)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-runner-klaro
+  namespace: actions-runner-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: github-runner-klaro
+  template:
+    metadata:
+      labels:
+        app: github-runner-klaro
+    spec:
+      serviceAccountName: deploy-runner-sa
+      containers:
+      - name: runner
+        # Ton image Hardened créée précédemment
+        image: spadmdck/k8s-deploy-runner:v1.1.1
+        imagePullPolicy: Always
+        
+        # Variables d'environnement pour l'enregistrement
+        env:
+          - name: GITHUB_REPOSITORY
+            value: "sicDANGBE"
+          - name: GITHUB_TOKEN
+            value: "{{ github_token }}" # Injecté par Ansible
+            
+        # Ressources limitées pour éviter qu'un build ne tue le cluster
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "2Gi"
+
+        # Script de démarrage (Identique à celui testé manuellement)
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            # Configuration unique (si pas déjà configuré)
+            if [ ! -f .runner ]; then
+              ./config.sh --url https://github.com/saasMsDGH --token ${GITHUB_TOKEN} --unattended --replace --name org-runner-subst --labels k8s-deploy
+            fi
+            # Lancement
+            ./run.sh
