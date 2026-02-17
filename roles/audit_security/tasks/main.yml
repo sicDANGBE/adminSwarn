@@ -1,0 +1,110 @@
+---
+# Audit role: collect system, docker, network, and SSH info and write reports locally.
+
+# --- 1. SYSTEM STATE ---
+- name: Verification de l'OS et Kernel
+  command: uname -a
+  register: sys_kernel
+
+- name: Liste des utilisateurs critiques (passwd)
+  shell: grep -E '^(root|supadmin|dockremap|debian)' /etc/passwd
+  register: sys_users
+
+# --- 2. DOCKER ---
+- name: Lecture du daemon.json
+  command: cat /etc/docker/daemon.json
+  register: docker_conf
+  ignore_errors: yes
+
+- name: Verification des fichiers de mapping (subuid)
+  command: cat /etc/subuid
+  register: subuid_file
+  ignore_errors: yes
+
+- name: Statut du service Docker
+  command: systemctl status docker --no-pager
+  register: docker_status
+  ignore_errors: yes
+
+- name: Logs recents de Docker (si erreur)
+  shell: journalctl -u docker -n 20 --no-pager
+  register: docker_logs
+  ignore_errors: yes
+
+- name: Verification des permissions dossier Docker
+  shell: ls -ld /var/lib/docker
+  register: docker_perm
+  ignore_errors: yes
+
+# --- 3. NETWORK & SECURITY ---
+- name: Regles NFTables actives
+  command: nft list ruleset
+  register: nft_rules
+  ignore_errors: yes
+
+- name: Ports en ecoute (SS)
+  shell: ss -tulnp
+  register: net_ports
+
+- name: Configuration SSH active (sans commentaires)
+  shell: grep -vE '^#|^$' /etc/ssh/sshd_config
+  register: ssh_conf
+
+# --- 4. LOCAL REPORT ---
+- name: Creation du dossier de rapports local
+  delegate_to: localhost
+  become: no
+  file:
+    path: "{{ audit_report_path }}"
+    state: directory
+
+- name: Ecriture du rapport localement
+  delegate_to: localhost
+  become: no
+  copy:
+    dest: "{{ audit_report_path }}/report_{{ inventory_hostname }}.txt"
+    content: |
+      =============================================
+      RAPPORT D'AUDIT : {{ inventory_hostname }}
+      Date : {{ ansible_date_time.iso8601 }}
+      IP : {{ ansible_default_ipv4.address }}
+      =============================================
+
+      [1] NOYAU & OS
+      ---------------------------------------------
+      {{ sys_kernel.stdout }}
+
+      [2] UTILISATEURS CLES
+      ---------------------------------------------
+      {{ sys_users.stdout }}
+
+      [3] DOCKER : CONFIGURATION
+      ---------------------------------------------
+      >> daemon.json :
+      {{ docker_conf.stdout | default('Fichier introuvable') }}
+
+      >> subuid mapping :
+      {{ subuid_file.stdout | default('Fichier introuvable') }}
+
+      >> Permissions /var/lib/docker :
+      {{ docker_perm.stdout | default('Dossier introuvable') }}
+
+      [4] DOCKER : SANTE
+      ---------------------------------------------
+      >> Status SystemD :
+      {{ docker_status.stdout | default('Service introuvable') }}
+
+      >> Derniers Logs (Erreurs potentielles) :
+      {{ docker_logs.stdout }}
+
+      [5] PARE-FEU (NFTABLES)
+      ---------------------------------------------
+      {{ nft_rules.stdout | default('Aucune regle chargee') }}
+
+      [6] PORTS OUVERTS
+      ---------------------------------------------
+      {{ net_ports.stdout }}
+
+      [7] CONFIG SSH
+      ---------------------------------------------
+      {{ ssh_conf.stdout }}

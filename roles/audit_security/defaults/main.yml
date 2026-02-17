@@ -1,0 +1,5 @@
+---
+# Emplacement des rapports sur la machine de controle
+# Exemple: ./reports
+
+audit_report_path: "./reports"
