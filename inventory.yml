@@ -28,7 +28,7 @@ all:
         # Les vars spécifiques à Docker/Swarm peuvent rester ici si besoin
         vars:
           docker_hub_user: spadmdck
-          docker_hub_pat: "Irmapil-1989"
+          docker_hub_path: "Irmapil-1989"
 
     k8s_cluster:
       children:
