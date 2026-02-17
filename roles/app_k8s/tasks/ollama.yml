@@ -1,0 +1,127 @@
+---
+# roles/app_k8s/tasks/ollama.yml
+
+- name: Déploiement Ollama (LLM Engine & Hub)
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition:
+      apiVersion: v1
+      kind: List
+      items:
+        # --- PERSISTANCE DES MODÈLES (HUB CENTRAL) ---
+        - apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            name: ollama-storage
+            namespace: ollama-system # Namespace générique
+          spec:
+            accessModes: [ "ReadWriteOnce" ]
+            storageClassName: "{{ storage_class }}" # Utilise 'local-path'
+            resources:
+              requests:
+                storage: 30Gi # Augmenté pour accueillir plus de modèles LLM
+
+        # --- DEPLOYMENT OLLAMA ---
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: ollama
+            namespace: ollama-system
+            labels:
+              app: ollama
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: ollama
+            template:
+              metadata:
+                labels:
+                  app: ollama
+              spec:
+                containers:
+                  - name: ollama
+                    image: ollama/ollama:latest
+                    ports:
+                      - containerPort: 11434
+                    env:
+                      - name: OLLAMA_HOST
+                        value: "0.0.0.0"
+                      - name: OLLAMA_MODELS
+                        value: "/root/.ollama/models"
+                    resources:
+                      limits:
+                        cpu: "4"
+                        memory: "8Gi" #
+                      requests:
+                        cpu: "2"
+                        memory: "4Gi" #
+                    volumeMounts:
+                      - name: ollama-models
+                        mountPath: /root/.ollama/models
+                volumes:
+                  - name: ollama-models
+                    persistentVolumeClaim:
+                      claimName: ollama-storage
+
+        # --- SERVICE HUB ---
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: ollama-service
+            namespace: ollama-system
+          spec:
+            selector:
+              app: ollama
+            ports:
+              - protocol: TCP
+                port: 11434
+                targetPort: 11434
+            type: ClusterIP
+
+        # --- INGRESS TRAEFIK (Accès API pour ton app Go / n8n) ---
+        # - apiVersion: networking.k8s.io/v1
+        #   kind: Ingress
+        #   metadata:
+        #     name: ollama-ingress
+        #     namespace: ollama-system
+        #     annotations:
+        #       traefik.ingress.kubernetes.io/router.entrypoints: websecure #
+        #       traefik.ingress.kubernetes.io/router.tls: "true" #
+        #       traefik.ingress.kubernetes.io/router.tls.certresolver: "le" #
+        #   spec:
+        #     rules:
+        #       - host: "ollama.{{ main_domain }}" # Host générique
+        #         http:
+        #           paths:
+        #             - path: /
+        #               pathType: Prefix
+        #               backend:
+        #                 service:
+        #                   name: ollama-service
+        #                   port:
+        #                     number: 11434
+
+# --- POST-INSTALLATION : PULL DES MODÈLES ---
+
+- name: Attente du Pod Ollama
+  kubernetes.core.k8s_info:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    kind: Pod
+    namespace: ollama-system
+    label_selectors:
+      - app=ollama
+  register: ollama_pod
+  until: "ollama_pod.resources | length > 0 and (ollama_pod.resources[0].status.phase == 'Running')"
+  retries: 20
+  delay: 10
+
+- name: Téléchargement des modèles (Vision + LLM Léger)
+  command: "kubectl exec -n ollama-system deployment/ollama -- ollama pull {{ item }}"
+  loop:
+    - "llama3.2-vision" # Pour l'OCR
+    - "llama3.2:1b"      # Pour le résumé et les tâches textuelles rapides
+    - "llama3.2:3b"      # Modèle intermédiaire
+  register: model_pull
+  changed_when: "'success' in model_pull.stdout"

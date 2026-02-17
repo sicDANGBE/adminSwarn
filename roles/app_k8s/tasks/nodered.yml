@@ -1,0 +1,136 @@
+---
+# roles/app_k8s/tasks/nodered.yml
+
+# 1. DÉFINITION DES VARIABLES (Pour faciliter la comparaison)
+- name: "Définition de la version cible Node-RED"
+  set_fact:
+    nodered_target_image: "nodered/node-red:4.1.2-22"
+
+# 2. INTROSPECTION (On demande au cluster : 'Tu en es où ?')
+- name: "Vérification de l'état actuel de Node-RED"
+  kubernetes.core.k8s_info:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    api_version: apps/v1
+    kind: Deployment
+    name: nodered
+    namespace: apps
+  register: nodered_status
+
+# 3. CALCUL DU BESOIN DE DÉPLOIEMENT
+# On déploie SI :
+# - Le déploiement n'existe pas (resources est vide)
+# - OU L'image actuelle n'est pas celle qu'on veut
+# - OU Le déploiement n'est pas "Ready" (pour réparer un état cassé)
+- name: "Analyse de la nécessité de déployer"
+  set_fact:
+    deploy_needed: >-
+      {{
+        (nodered_status.resources | length == 0) or
+        (nodered_status.resources[0].spec.template.spec.containers[0].image != nodered_target_image) or
+        (nodered_status.resources[0].status.readyReplicas | default(0) | int < nodered_status.resources[0].spec.replicas | default(1) | int)
+      }}
+
+- name: "Debug : Raison du déploiement"
+  debug:
+    msg: "Déploiement requis : {{ deploy_needed }}. Image actuelle : {{ nodered_status.resources[0].spec.template.spec.containers[0].image | default('Inconnue') }}"
+  when: deploy_needed
+
+# 4. DÉPLOIEMENT CONDITIONNEL
+- name: Déploiement Node-RED (Smart Update)
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml # Explicite pour éviter les erreurs de contexte
+    state: present
+    namespace: apps
+    definition:
+      apiVersion: v1
+      kind: List
+      items:
+        # --- PERSISTANCE ---
+        - apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            name: nodered-data
+            namespace: apps
+          spec:
+            accessModes: [ "ReadWriteOnce" ]
+            storageClassName: "{{ storage_class }}"
+            resources:
+              requests:
+                storage: 5Gi
+
+        # --- DEPLOYMENT ---
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: nodered
+            namespace: apps
+            labels:
+              app: nodered
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: nodered
+            template:
+              metadata:
+                labels:
+                  app: nodered
+              spec:
+                securityContext:
+                  fsGroup: 1000
+                  runAsUser: 1000
+                  runAsGroup: 1000
+                containers:
+                  - name: nodered
+                    image: "{{ nodered_target_image }}" # On utilise la variable définie plus haut
+                    imagePullPolicy: Always
+                    ports:
+                      - containerPort: 1880
+                    env:
+                      - name: TZ
+                        value: "Europe/Paris"
+                    volumeMounts:
+                      - name: data
+                        mountPath: /data
+                volumes:
+                  - name: data
+                    persistentVolumeClaim:
+                      claimName: nodered-data
+
+        # --- SERVICE ---
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: nodered
+            namespace: apps
+          spec:
+            selector:
+              app: nodered
+            ports:
+              - port: 80
+                targetPort: 1880
+
+        # --- INGRESS ---
+        - apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: nodered
+            namespace: apps
+            annotations:
+              traefik.ingress.kubernetes.io/router.entrypoints: websecure
+              traefik.ingress.kubernetes.io/router.tls: "true"
+              traefik.ingress.kubernetes.io/router.tls.certresolver: "le"
+          spec:
+            rules:
+              - host: "red.{{ main_domain }}"
+                http:
+                  paths:
+                    - path: /
+                      pathType: Prefix
+                      backend:
+                        service:
+                          name: nodered
+                          port:
+                            number: 80
+  # C'EST ICI QUE LA MAGIE OPÈRE :
+  when: deploy_needed

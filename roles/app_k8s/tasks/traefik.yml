@@ -1,0 +1,5 @@
+---
+- name: Traefik tasks placeholder
+  debug:
+    msg: "Traefik tasks not defined"
+  when: false
