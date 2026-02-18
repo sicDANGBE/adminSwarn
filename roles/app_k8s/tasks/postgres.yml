@@ -8,7 +8,7 @@
   assert:
     that:
       - postgres_password is defined
-      - postgres_password | length > 0
+      - (postgres_password | default('')) | length > 0
     fail_msg: "postgres_password est vide ou non defini (group_vars/all/secret.yml)."
 
 - name: Creation du namespace sgcb (si absent)
