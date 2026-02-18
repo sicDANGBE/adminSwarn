@@ -5,6 +5,14 @@
     name: cnrancher
     repo_url: https://charts.rancher.io
 
+- name: Creation du namespace admin (si absent)
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    api_version: v1
+    kind: Namespace
+    name: admin
+    state: present
+
 - name: "Vérification des variables d'authentification admin"
   assert:
     that:
