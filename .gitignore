@@ -1,1 +1,2 @@
 project_export.*
+group_vars/all/secret.yml
