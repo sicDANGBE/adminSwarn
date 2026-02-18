@@ -4,6 +4,190 @@
     name: bitnami
     repo_url: https://charts.bitnami.com/bitnami
 
+- name: Verification du mot de passe Postgres
+  assert:
+    that:
+      - postgres_password is defined
+      - postgres_password | length > 0
+    fail_msg: "postgres_password est vide ou non defini (group_vars/all/secret.yml)."
+
+- name: Creation du namespace sgcb (si absent)
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    api_version: v1
+    kind: Namespace
+    name: sgcb
+    state: present
+
+- name: Secret d'auth PostgreSQL (existingSecret)
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: postgres-auth
+        namespace: sgcb
+      type: Opaque
+      stringData:
+        # Utilise le meme mot de passe pour l'utilisateur custom et postgres
+        password: "{{ postgres_password }}"
+        postgres-password: "{{ postgres_password }}"
+
+- name: Verification du secret TLS PostgreSQL
+  kubernetes.core.k8s_info:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    api_version: v1
+    kind: Secret
+    name: postgres-tls
+    namespace: sgcb
+  register: postgres_tls_secret
+
+- name: Creation du dossier temporaire TLS
+  tempfile:
+    state: directory
+    suffix: pg-tls
+  register: postgres_tls_tmp
+  when: postgres_tls_secret.resources | length == 0
+
+- name: Generation CA (cle + cert)
+  block:
+    - name: Generation cle CA
+      command: "openssl genrsa -out {{ postgres_tls_tmp.path }}/ca.key 4096"
+
+    - name: Generation cert CA
+      command: >-
+        openssl req -x509 -new -nodes
+        -key {{ postgres_tls_tmp.path }}/ca.key
+        -sha256 -days 3650
+        -subj "/CN=postgres-ca"
+        -out {{ postgres_tls_tmp.path }}/ca.crt
+
+    - name: Generation cle serveur
+      command: "openssl genrsa -out {{ postgres_tls_tmp.path }}/tls.key 4096"
+
+    - name: Creation config SAN pour le certificat serveur
+      copy:
+        dest: "{{ postgres_tls_tmp.path }}/openssl.cnf"
+        content: |
+          [ req ]
+          default_bits = 4096
+          prompt = no
+          default_md = sha256
+          distinguished_name = dn
+          req_extensions = req_ext
+
+          [ dn ]
+          CN = postgres-postgresql.sgcb.svc.cluster.local
+
+          [ req_ext ]
+          subjectAltName = @alt_names
+
+          [ alt_names ]
+          DNS.1 = postgres-postgresql
+          DNS.2 = postgres-postgresql.sgcb
+          DNS.3 = postgres-postgresql.sgcb.svc
+          DNS.4 = postgres-postgresql.sgcb.svc.cluster.local
+
+    - name: Generation CSR serveur
+      command: >-
+        openssl req -new
+        -key {{ postgres_tls_tmp.path }}/tls.key
+        -out {{ postgres_tls_tmp.path }}/server.csr
+        -config {{ postgres_tls_tmp.path }}/openssl.cnf
+
+    - name: Signature du certificat serveur par la CA
+      command: >-
+        openssl x509 -req
+        -in {{ postgres_tls_tmp.path }}/server.csr
+        -CA {{ postgres_tls_tmp.path }}/ca.crt
+        -CAkey {{ postgres_tls_tmp.path }}/ca.key
+        -CAcreateserial
+        -out {{ postgres_tls_tmp.path }}/tls.crt
+        -days 365
+        -sha256
+        -extensions req_ext
+        -extfile {{ postgres_tls_tmp.path }}/openssl.cnf
+  when: postgres_tls_secret.resources | length == 0
+
+- name: Lecture des fichiers TLS
+  block:
+    - name: Slurp CA
+      slurp:
+        src: "{{ postgres_tls_tmp.path }}/ca.crt"
+      register: postgres_tls_ca
+
+    - name: Slurp cert serveur
+      slurp:
+        src: "{{ postgres_tls_tmp.path }}/tls.crt"
+      register: postgres_tls_crt
+
+    - name: Slurp cle serveur
+      slurp:
+        src: "{{ postgres_tls_tmp.path }}/tls.key"
+      register: postgres_tls_key
+
+    - name: Creation du secret TLS PostgreSQL
+      kubernetes.core.k8s:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: postgres-tls
+            namespace: sgcb
+          type: Opaque
+          data:
+            ca.crt: "{{ postgres_tls_ca.content }}"
+            tls.crt: "{{ postgres_tls_crt.content }}"
+            tls.key: "{{ postgres_tls_key.content }}"
+  when: postgres_tls_secret.resources | length == 0
+
+- name: Nettoyage des fichiers temporaires TLS
+  file:
+    path: "{{ postgres_tls_tmp.path }}"
+    state: absent
+  when: postgres_tls_secret.resources | length == 0
+
+- name: Restriction reseau PostgreSQL (admin + apps uniquement)
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: NetworkPolicy
+      metadata:
+        name: postgres-allow-admin-apps
+        namespace: sgcb
+      spec:
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/instance: postgres
+            app.kubernetes.io/name: postgresql
+        policyTypes:
+          - Ingress
+        ingress:
+          - from:
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: admin
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: apps
+            ports:
+              - protocol: TCP
+                port: 5432
+          # Autorise uniquement le scraping metrics depuis le namespace monitoring
+          - from:
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: monitoring
+            ports:
+              - protocol: TCP
+                port: 9187
+
 - name: Déploiement de PostgreSQL (Idempotent)
   kubernetes.core.helm:
     name: postgres
@@ -20,8 +204,16 @@
       auth:
         database: "ma_base_saas"
         username: "admin_user"
-        password: "{{ postgres_password }}" # Utilise Ansible Vault pour ceci
+        existingSecret: "postgres-auth"
       
+      tls:
+        enabled: true
+        autoGenerated: false
+        certificatesSecret: "postgres-tls"
+        certFilename: "tls.crt"
+        certKeyFilename: "tls.key"
+        certCAFilename: "ca.crt"
+
       # Configuration pour ton Prometheus
       metrics:
         enabled: true
