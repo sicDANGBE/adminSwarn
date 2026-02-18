@@ -67,6 +67,7 @@
   loop:
     - portainer
     - apps
+    - admin
     - monitoring
     - ollama-system
 
