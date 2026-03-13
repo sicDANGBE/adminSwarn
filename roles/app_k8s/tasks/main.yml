@@ -85,7 +85,10 @@
     - include_tasks: portainer.yml
     - include_tasks: rabbitmq.yml
     - include_tasks: n8n.yml
+    - include_tasks: n8n-security.yml       # Améliorations sécurité N8N
+    - include_tasks: mcp-server.yml         # 🤖 MCP Server pour N8N IA integration
     - include_tasks: nodered.yml
+    - include_tasks: nodered-security.yml   # Améliorations sécurité Node-RED
     - include_tasks: mqtt.yml
     - include_tasks: monitoring.yml
     - include_tasks: postgres.yml

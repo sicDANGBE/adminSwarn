@@ -1,10 +1,9 @@
 ---
+- name: Restart Rsyslog
+  service: name=rsyslog state=restarted
+
 - name: Restart SSH
   service: name=ssh state=restarted
 
 - name: Reload NFTables
   service: name=nftables state=reloaded
-  notify: Restart Docker
-
-- name: Restart Docker
-  service: name=docker state=restarted

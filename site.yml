@@ -1,110 +1,50 @@
 ---
-# -----------------------------------------------------------------------
-# PLAY 1 : INFRASTRUCTURE BASE (SYSTÈME COMMUN)
-# Cible : k8s_cluster (Server + Agents)
-# -----------------------------------------------------------------------
-- name: "Déploiement Infrastructure Système"
+- name: "Infrastructure système"
   hosts: k8s_cluster
   become: true
-  
-  # Les handlers sont propres à ce Play
   handlers:
     - name: Restart Rsyslog
       service: name=rsyslog state=restarted
 
     - name: Reload NFTables
       service: name=nftables state=reloaded
-      
-    - name: Restart Docker
-      service: name=docker state=restarted
-      
+
     - name: Restart SSH
       service: name=ssh state=restarted
 
   roles:
-    # 1. Nettoyage (Destructif, à lancer explicitement)
-    # Commande : ansible-playbook site.yml --tags "clean"
     - role: clean
       tags: ["never", "clean"]
-
-    # 2. Configuration Système (Utilisateurs, Firewall Base, Fail2Ban)
-    # Commande : ansible-playbook site.yml --tags "common"
     - role: common
       tags: ["common", "system"]
 
-    # 3. Moteur Docker (Legacy / Swarm uniquement)
-    # Commande : ansible-playbook site.yml --tags "docker"
-    - role: docker
-      tags: ["never", "docker", "engine"]
-
-    # 4. Orchestration Swarm (Legacy / Incompatible avec k8s sur le même nœud)
-    # Commande : ansible-playbook site.yml --tags "swarm"
-    - role: swarm
-      tags: ["never", "swarm", "network"]
-
-# -----------------------------------------------------------------------
-# PLAY 2 : APPLICATIONS SWARM (Legacy)
-# Cible : Manager uniquement (à lancer explicitement)
-# -----------------------------------------------------------------------
-- name: "Déploiement Applications (Swarm Stacks)"
-  hosts: ovh.core
-  become: true
-  tags: ["never", "apps", "deploy", "swarm_apps"]
-  
-  handlers:
-    - name: Reload NFTables
-      service: name=nftables state=reloaded
-      
-  roles:
-    - apps
-
-# -----------------------------------------------------------------------
-# PLAY 3 : INFRASTRUCTURE KUBERNETES (k8s)
-# Cible : k8s_cluster (Server + Agents)
-# -----------------------------------------------------------------------
-- name: "Déploiement Cluster Kubernetes (k8s)"
+- name: "Cluster Kubernetes"
   hosts: k8s_cluster
   become: true
   tags: ["k8s", "kubernetes"]
-  
-  # Handlers spécifiques au contexte k8s
   handlers:
     - name: Reload NFTables
       service: name=nftables state=reloaded
 
   roles:
-    # Installe le Master puis les Workers
-    # Commande : ansible-playbook site.yml --tags "k8s"
     - k8s
 
-# -----------------------------------------------------------------------
-# PLAY 4 : APPS KUBERNETES (HELM)
-# Cible : server (UNIQUEMENT LE MANAGER)
-# -----------------------------------------------------------------------
-- name: "Déploiement Applications Kubernetes"
-  hosts: server  # <--- CHANGEMENT ICI (Avant c'était k8s_cluster ou non défini)
+- name: "Applications Kubernetes"
+  hosts: server
   become: true
   tags: ["app_k8s"]
   
   roles:
     - app_k8s
 
-# -----------------------------------------------------------------------
-# PLAY 5 : RUNNER KUBERNETES (HELM)
-# Cible : server (UNIQUEMENT LE MANAGER)
-# -----------------------------------------------------------------------
-- name: "Déploiement Runners Kubernetes"
-  hosts: server  # <--- CHANGEMENT ICI (Avant c'était k8s_cluster ou non défini)
+- name: "Runners Kubernetes"
+  hosts: server
   become: true
   tags: ["k8s_runner"]
   
   roles:
     - runner
 
-# -----------------------------------------------------------------------
-# PLAY 6 : AUDIT SECURITE (OPTIONNEL)
-# Cible : k8s_cluster
-# -----------------------------------------------------------------------
 - name: "Audit de securite"
   hosts: k8s_cluster
   become: true

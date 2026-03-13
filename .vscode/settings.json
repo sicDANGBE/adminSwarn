@@ -1,0 +1,25 @@
+{
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": true
+  },
+  "copilot.advanced": {
+    "mcp_servers": [
+      {
+        "name": "n8n-mcp",
+        "url": "https://mcp.dgsynthex.online",
+        "auth": {
+          "type": "bearer",
+          "token": "sk-mcp-health-2026-secure-token-xyz1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o"
+        },
+        "capabilities": [
+          "list_tools",
+          "call_tool",
+          "list_resources",
+          "read_resource"
+        ]
+      }
+    ]
+  }
+}

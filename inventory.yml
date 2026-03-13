@@ -1,5 +1,4 @@
 all:
-  # --- VARIABLES GLOBALES (Appliquées à TOUT le monde) ---
   vars:
     sysadmin_user: supadmin
     ansible_user: supadmin
@@ -8,34 +7,17 @@ all:
     ansible_become: yes
     local_public_key: "~/.ssh/id_rsa.pub"
     main_domain: dgsynthex.online
-    
-    # Manager Swarm dynamique (pour compatibilité rôles existants)
-    manager_host: "{{ groups['manager'][0] | default('') }}" 
 
   children:
-    swarm_nodes:
-      children:
-        manager:
-          hosts:
-            ovh.core:
-              ansible_host: vps-940a692a.vps.ovh.net
-        workers:
-          hosts:
-            ovh.worker.01:
-              ansible_host: vps-255dab72.vps.ovh.net
-            ovh.worker.02:
-              ansible_host: vps-9e3ed523.vps.ovh.net
-        # Les vars spécifiques à Docker/Swarm peuvent rester ici si besoin
-        vars:
-          docker_hub_user: spadmdck
-          docker_hub_path: "Irmapil-1989"
-
     k8s_cluster:
       children:
         server:
           hosts:
             ovh.core:
+              ansible_host: vps-940a692a.vps.ovh.net
         agents:
           hosts:
             ovh.worker.01:
+              ansible_host: vps-255dab72.vps.ovh.net
             ovh.worker.02:
+              ansible_host: vps-9e3ed523.vps.ovh.net

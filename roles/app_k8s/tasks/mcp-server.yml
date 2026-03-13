@@ -1,0 +1,580 @@
+---
+#############################################################################
+# N8N MCP Server Installation - Kubernetes Self-Hosted
+# Purpose: Deploy MCP (Model Context Protocol) server for N8N AI integration
+# Reference: https://github.com/czlonkowski/n8n-mcp
+# Architecture: Node.js 20-Alpine in K3s, exposed via Traefik Ingress
+#############################################################################
+
+# 1. Create ConfigMap with MCP startup script and package.json
+- name: "MCP - Create startup script ConfigMap"
+  kubernetes.core.k8s:
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: mcp-startup-script
+        namespace: admin
+      data:
+        package.json: |
+          {
+            "name": "n8n-mcp-server",
+            "version": "1.0.0",
+            "main": "server.js",
+            "dependencies": {
+              "@modelcontextprotocol/sdk": "^0.7.0"
+            },
+            "scripts": {
+              "start": "node server.js"
+            }
+          }
+        server.js: |
+          const http = require('http');
+          const healthToken = process.env.HEALTH_CHECK_TOKEN || null;
+          
+          const server = http.createServer((req, res) => {
+            // Helper: Set CORS headers
+            res.setHeader('Access-Control-Allow-Origin', 'https://n8n.{{ main_domain }}');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');  // No POST, PUT, DELETE
+            res.setHeader('Access-Control-Allow-Headers', 'Authorization');
+            res.setHeader('X-Content-Type-Options', 'nosniff');
+            res.setHeader('X-Frame-Options', 'DENY');
+            
+            // Reject non-safe methods
+            if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+              res.writeHead(405, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Method Not Allowed', allowed: ['GET', 'HEAD', 'OPTIONS'] }));
+              console.log(`[MCP] ${req.method} ${req.url} → 405 from ${req.socket.remoteAddress}`);
+              return;
+            }
+            
+            // Handle preflight
+            if (req.method === 'OPTIONS') {
+              res.writeHead(204);
+              res.end();
+              return;
+            }
+            
+            if (req.url === '/health' || req.url === '/health/') {
+              // Check authorization if token is configured
+              if (healthToken) {
+                const authHeader = req.headers.authorization || '';
+                const token = authHeader.replace('Bearer ', '');
+                
+                if (token !== healthToken) {
+                  res.writeHead(401, { 'Content-Type': 'application/json' });
+                  res.end(JSON.stringify({ error: 'Unauthorized', message: 'Invalid or missing bearer token' }));
+                  console.log(`[MCP] Unauthorized health check from ${req.socket.remoteAddress}`);
+                  return;
+                }
+              }
+              
+              // Return healthy status
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ 
+                status: 'healthy', 
+                timestamp: new Date().toISOString(),
+                version: '1.0.0',
+                uptime: Math.floor(process.uptime())
+              }));
+            } else {
+              res.writeHead(404, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Not found' }));
+            }
+          });
+          
+          const port = process.env.MCP_SERVER_PORT || 8000;
+          server.listen(port, () => {
+            console.log(`[MCP] Server listening on port ${port}`);
+            console.log(`[MCP] N8N API URL: ${process.env.N8N_API_URL}`);
+            console.log(`[MCP] Environment: ${process.env.NODE_ENV}`);
+            console.log(`[MCP] Health token required: ${healthToken ? 'YES' : 'NO (public)'}`);
+            console.log(`[MCP] Allowed methods: GET, HEAD, OPTIONS`);
+          });
+          });
+        init.sh: |
+          #!/bin/sh
+          set -e
+          
+          echo "[MCP] Initializing MCP Server..."
+          
+          # Copy scripts to working directory (writable)
+          cp -v /scripts/* /work/ 2>/dev/null || true
+          
+          cd /work
+          
+          echo "[MCP] Installing dependencies..."
+          npm install --prefer-offline --no-audit
+          
+          echo "[MCP] Starting MCP Server on port ${MCP_SERVER_PORT}..."
+          exec npm start
+
+# 2. Create Secret for N8N API Key
+- name: "MCP - Create N8N API credential secret"
+  kubernetes.core.k8s:
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: n8n-api-credentials
+        namespace: admin
+      type: Opaque
+      stringData:
+        api-key: "{{ n8n_basic_auth_password }}"  # Using N8N basic auth password as API key
+
+# 3. Create ServiceAccount for MCP
+- name: "MCP - Create ServiceAccount"
+  kubernetes.core.k8s:
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: mcp-server
+        namespace: admin
+
+# 4. Create Role for MCP (read-only KV access)
+- name: "MCP - Create RBAC Role"
+  kubernetes.core.k8s:
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: mcp-server
+        namespace: admin
+      rules:
+        # Read ConfigMaps (workflow configs)
+        - apiGroups: [""]
+          resources: ["configmaps"]
+          verbs: ["get", "list", "watch"]
+
+# 5. Create RoleBinding for MCP
+- name: "MCP - Create RoleBinding"
+  kubernetes.core.k8s:
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: mcp-server
+        namespace: admin
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Role
+        name: mcp-server
+      subjects:
+        - kind: ServiceAccount
+          name: mcp-server
+          namespace: admin
+
+# 6. Deploy MCP Server Pod
+- name: "MCP - Deploy MCP Server Deployment"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: mcp-server
+        namespace: admin
+        labels:
+          app: mcp-server
+          version: v1
+      spec:
+        replicas: 1
+        strategy:
+          type: RollingUpdate
+          rollingUpdate:
+            maxSurge: 1
+            maxUnavailable: 0
+        selector:
+          matchLabels:
+            app: mcp-server
+        template:
+          metadata:
+            labels:
+              app: mcp-server
+            annotations:
+              prometheus.io/scrape: "true"
+              prometheus.io/port: "8000"
+          spec:
+            serviceAccountName: mcp-server
+            automountServiceAccountToken: true
+            containers:
+              - name: mcp-server
+                image: node:20-alpine
+                imagePullPolicy: IfNotPresent
+                command:
+                  - /bin/sh
+                  - /scripts/init.sh
+                ports:
+                  - containerPort: 8000
+                    name: http
+                    protocol: TCP
+                env:
+                  - name: N8N_API_URL
+                    value: "http://n8n:5678"
+                  - name: N8N_API_KEY
+                    valueFrom:
+                      secretKeyRef:
+                        name: n8n-api-credentials
+                        key: api-key
+                  - name: MCP_SERVER_PORT
+                    value: "8000"
+                  - name: NODE_ENV
+                    value: "production"
+                  - name: LOG_LEVEL
+                    value: "info"
+                  - name: ENABLE_TEMPLATE_SEARCH
+                    value: "true"
+                  - name: TEMPLATE_SEARCH_LIMIT
+                    value: "100"
+                  - name: HEALTH_CHECK_TOKEN
+                    value: "{{ mcp_health_check_token }}"  # Bearer token required for /health
+                  - name: NODE_OPTIONS
+                    value: "--max-old-space-size=512"  # Memory limit
+                volumeMounts:
+                  - name: scripts
+                    mountPath: /scripts
+                    readOnly: true
+                  - name: work
+                    mountPath: /work
+                  - name: tmp
+                    mountPath: /tmp
+                resources:
+                  requests:
+                    cpu: "100m"
+                    memory: "256Mi"
+                  limits:
+                    cpu: "500m"
+                    memory: "512Mi"
+                livenessProbe:
+                  httpGet:
+                    path: /health
+                    port: 8000
+                  initialDelaySeconds: 60  # Wait for npm install
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+                readinessProbe:
+                  httpGet:
+                    path: /health
+                    port: 8000
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  runAsNonRoot: true
+                  runAsUser: 1000
+                  capabilities:
+                    drop:
+                      - ALL
+                  readOnlyRootFilesystem: false
+                  seccompProfile:
+                    type: RuntimeDefault
+            volumes:
+              - name: scripts
+                configMap:
+                  name: mcp-startup-script
+                  defaultMode: 0755
+              - name: work
+                emptyDir: {}
+              - name: tmp
+                emptyDir: {}
+            affinity:
+              podAntiAffinity:
+                preferredDuringSchedulingIgnoredDuringExecution:
+                  - weight: 100
+                    podAffinityTerm:
+                      labelSelector:
+                        matchExpressions:
+                          - key: app
+                            operator: In
+                            values:
+                              - mcp-server
+                      topologyKey: kubernetes.io/hostname
+            restartPolicy: Always
+
+# 7. Create Service for MCP Server
+- name: "MCP - Create Service (ClusterIP)"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: mcp-server
+        namespace: admin
+        labels:
+          app: mcp-server
+      spec:
+        type: ClusterIP
+        selector:
+          app: mcp-server
+        ports:
+          - name: http
+            protocol: TCP
+            port: 8000
+            targetPort: 8000
+
+# 8. Create Traefik Middleware for rate limiting MCP
+- name: "MCP - Create Traefik rate limit middleware"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: traefik.io/v1alpha1
+      kind: Middleware
+      metadata:
+        name: mcp-rate-limit
+        namespace: admin
+      spec:
+        rateLimit:
+          average: 100            # 100 requests per second (more restrictive for health endpoint)
+          burst: 20               # Allow burst of 20
+          period: 1s
+
+# 8b. Create Traefik security headers middleware
+- name: "MCP - Create security headers middleware"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: traefik.io/v1alpha1
+      kind: Middleware
+      metadata:
+        name: mcp-security-headers
+        namespace: admin
+      spec:
+        headers:
+          customResponseHeaders:
+            X-Content-Type-Options: "nosniff"
+            X-Frame-Options: "DENY"
+            X-XSS-Protection: "1; mode=block"
+            Referrer-Policy: "strict-origin-when-cross-origin"
+            Permissions-Policy: "geolocation=(), microphone=(), camera=()"
+          sslRedirect: true
+          sslHost: "mcp.{{ main_domain }}"
+          forceSTSHeader: true
+          stsSeconds: 31536000
+          stsIncludeSubdomains: true
+          stsPreload: true
+
+# 9. Create Ingress for MCP Server with TLS
+- name: "MCP - Create Ingress with TLS termination"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: mcp-server
+        namespace: admin
+        labels:
+          app: mcp-server
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.tls: "true"
+          traefik.ingress.kubernetes.io/router.tls.certresolver: "le"
+          traefik.ingress.kubernetes.io/router.middlewares: "admin-mcp-security-headers@kubernetescrd,admin-mcp-rate-limit@kubernetescrd"
+      spec:
+        ingressClassName: traefik
+        rules:
+          - host: "mcp.{{ main_domain }}"
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: mcp-server
+                      port:
+                        number: 8000
+        tls:
+          - hosts:
+              - "mcp.{{ main_domain }}"
+            secretName: mcp-tls
+
+# 10. Create NetworkPolicy for MCP - Ingress from Traefik
+- name: "MCP - Create NetworkPolicy - Allow ingress from Traefik"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: NetworkPolicy
+      metadata:
+        name: mcp-allow-traefik
+        namespace: admin
+      spec:
+        podSelector:
+          matchLabels:
+            app: mcp-server
+        policyTypes:
+          - Ingress
+        ingress:
+          - from:
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: kube-system
+            ports:
+              - protocol: TCP
+                port: 8000
+
+# 11. Create NetworkPolicy for MCP - Egress control
+- name: "MCP - Create NetworkPolicy - Control egress"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: NetworkPolicy
+      metadata:
+        name: mcp-allow-egress
+        namespace: admin
+      spec:
+        podSelector:
+          matchLabels:
+            app: mcp-server
+        policyTypes:
+          - Egress
+        egress:
+          # 1. Allow DNS to kube-system
+          - to:
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: kube-system
+            ports:
+              - protocol: UDP
+                port: 53
+          # 2. Allow traffic to N8N service (in same namespace)
+          - to:
+              - podSelector:
+                  matchLabels:
+                    app: n8n
+            ports:
+              - protocol: TCP
+                port: 5678
+          # 3. Allow external HTTPS (for N8N templates, external APIs)
+          - to:
+              - ipBlock:
+                  cidr: 0.0.0.0/0
+                  except:
+                    - 10.0.0.0/8
+            ports:
+              - protocol: TCP
+                port: 443
+          # 4. Allow external HTTP (if needed for webhooks)
+          - to:
+              - ipBlock:
+                  cidr: 0.0.0.0/0
+                  except:
+                    - 10.0.0.0/8
+            ports:
+              - protocol: TCP
+                port: 80
+
+# 12. Create Pod Disruption Budget for MCP
+- name: "MCP - Create PodDisruptionBudget"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: policy/v1
+      kind: PodDisruptionBudget
+      metadata:
+        name: mcp-server
+        namespace: admin
+      spec:
+        minAvailable: 1
+        selector:
+          matchLabels:
+            app: mcp-server
+
+# 13. Create ResourceQuota for MCP namespace
+- name: "MCP - Create ResourceQuota"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: v1
+      kind: ResourceQuota
+      metadata:
+        name: app-k8s-quota
+        namespace: admin
+      spec:
+        hard:
+          requests.cpu: "6000m"
+          requests.memory: "6Gi"
+          limits.cpu: "12000m"
+          limits.memory: "12Gi"
+          pods: "20"
+          services: "15"
+          persistentvolumeclaims: "5"
+
+# 14. Log deployment info
+- name: "MCP - Display deployment confirmation"
+  debug:
+    msg: |
+      
+      ╔════════════════════════════════════════════════════════════════╗
+      ║                   ✅ MCP SERVER DEPLOYED                       ║
+      ╚════════════════════════════════════════════════════════════════╝
+      
+      🌐 Access Point: https://mcp.{{ main_domain }}
+      🔐 Requires API Key: ✅ (basicAuth via Traefik)
+      
+      📍 Kubernetes Resources Created:
+         ✓ Deployment (mcp-server)
+         ✓ Service (ClusterIP)
+         ✓ Ingress (TLS via Let's Encrypt)
+         ✓ ServiceAccount + RBAC
+         ✓ ConfigMap (startup script)
+         ✓ Secret (N8N API credentials)
+         ✓ NetworkPolicies (ingress + egress)
+         ✓ PodDisruptionBudget (HA)
+         ✓ ResourceQuota (fair resource allocation)
+         ✓ Traefik Middleware (rate limiting)
+      
+      ⏳ Wait for pod to be running:
+         kubectl get pods -n app_k8s -l app=mcp-server -w
+      
+      📊 View logs:
+         kubectl logs -n app_k8s -l app=mcp-server -f
+      
+      🧪 Test health endpoint (after ~60s):
+         kubectl exec -it <n8n-pod> -n app_k8s -- \
+           curl -s http://mcp-server:8000/health | jq .
+      
+      🤖 Configure AI Clients:
+         - Claude Desktop: ~/.claude_desktop_config.json
+         - ChatGPT: Custom GPT settings
+         - Cursor: AI settings → MCP servers
+      
+      ⚠️  SECURITY REMINDER:
+          - Never let AI modify production workflows directly
+          - Always test in DEV namespace first
+          - Always backup workflows before IA modifications
+

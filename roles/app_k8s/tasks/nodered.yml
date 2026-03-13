@@ -1,7 +1,6 @@
 ---
 # roles/app_k8s/tasks/nodered.yml
 
-# 1. DÉFINITION DES VARIABLES (Pour faciliter la comparaison)
 - name: "Définition de la version cible Node-RED"
   set_fact:
     nodered_target_image: "nodered/node-red:4.1.2-22"
@@ -22,44 +21,23 @@
       - admin_auth_password is defined or admin_auth_password_bcrypt is defined
     fail_msg: "Définis admin_auth_user et admin_auth_password (ou admin_auth_password_bcrypt)."
 
+- name: "Vérification des secrets natifs Node-RED"
+  assert:
+    that:
+      - nodered_credential_secret is defined or n8n_encryption_key is defined
+    fail_msg: "Définis nodered_credential_secret, ou au minimum n8n_encryption_key pour chiffrer les credentials Node-RED."
+
 - name: "Construction de la ligne htpasswd"
   set_fact:
     admin_auth_users_line: >-
       {{ admin_auth_user }}:{{ admin_auth_password_bcrypt if admin_auth_password_bcrypt is defined else (admin_auth_password | password_hash('bcrypt')) }}
+    nodered_auth_user_effective: "{{ nodered_auth_user | default(admin_auth_user) }}"
+    nodered_auth_password_hash_effective: "{{ nodered_auth_password_bcrypt | default(admin_auth_password_bcrypt if admin_auth_password_bcrypt is defined else (admin_auth_password | password_hash('bcrypt'))) }}"
+    nodered_credential_secret_effective: "{{ nodered_credential_secret | default(n8n_encryption_key) }}"
 
-# 2. INTROSPECTION (On demande au cluster : 'Tu en es où ?')
-- name: "Vérification de l'état actuel de Node-RED"
-  kubernetes.core.k8s_info:
-    kubeconfig: /etc/rancher/k3s/k3s.yaml
-    api_version: apps/v1
-    kind: Deployment
-    name: nodered
-    namespace: admin
-  register: nodered_status
-
-# 3. CALCUL DU BESOIN DE DÉPLOIEMENT
-# On déploie SI :
-# - Le déploiement n'existe pas (resources est vide)
-# - OU L'image actuelle n'est pas celle qu'on veut
-# - OU Le déploiement n'est pas "Ready" (pour réparer un état cassé)
-- name: "Analyse de la nécessité de déployer"
-  set_fact:
-    deploy_needed: >-
-      {{
-        (nodered_status.resources | length == 0) or
-        (nodered_status.resources[0].spec.template.spec.containers[0].image != nodered_target_image) or
-        (nodered_status.resources[0].status.readyReplicas | default(0) | int < nodered_status.resources[0].spec.replicas | default(1) | int)
-      }}
-
-- name: "Debug : Raison du déploiement"
-  debug:
-    msg: "Déploiement requis : {{ deploy_needed }}. Image actuelle : {{ nodered_status.resources[0].spec.template.spec.containers[0].image | default('Inconnue') }}"
-  when: deploy_needed
-
-# 4. DÉPLOIEMENT CONDITIONNEL
-- name: Déploiement Node-RED (Smart Update)
+- name: Déploiement Node-RED durci
   kubernetes.core.k8s:
-    kubeconfig: /etc/rancher/k3s/k3s.yaml # Explicite pour éviter les erreurs de contexte
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
     namespace: admin
     definition:
@@ -79,6 +57,99 @@
               requests:
                 storage: 5Gi
 
+        - apiVersion: v1
+          kind: Secret
+          metadata:
+            name: nodered-security
+            namespace: admin
+          type: Opaque
+          stringData:
+            admin-user: "{{ nodered_auth_user_effective }}"
+            admin-password-hash: "{{ nodered_auth_password_hash_effective }}"
+            http-node-user: "{{ nodered_auth_user_effective }}"
+            http-node-password-hash: "{{ nodered_auth_password_hash_effective }}"
+            credential-secret: "{{ nodered_credential_secret_effective }}"
+
+        - apiVersion: v1
+          kind: Secret
+          metadata:
+            name: admin-basic-auth
+            namespace: admin
+          type: Opaque
+          stringData:
+            users: "{{ admin_auth_users_line }}"
+
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: nodered-settings
+            namespace: admin
+          data:
+            settings.js: |
+              module.exports = {
+                  adminAuth: {
+                      type: "credentials",
+                      users: [{
+                          username: process.env.NODE_RED_ADMIN_USER,
+                          password: process.env.NODE_RED_ADMIN_PASSWORD_HASH,
+                          permissions: "*"
+                      }]
+                  },
+                  httpNodeAuth: {
+                      user: process.env.NODE_RED_HTTP_NODE_USER,
+                      pass: process.env.NODE_RED_HTTP_NODE_PASSWORD_HASH
+                  },
+                  credentialSecret: process.env.NODE_RED_CREDENTIAL_SECRET,
+                  diagnostics: {
+                      enabled: false,
+                      ui: false
+                  },
+                  runtimeState: {
+                      enabled: false,
+                      ui: false
+                  },
+                  functionExternalModules: false,
+                  externalModules: {
+                      autoInstall: false,
+                      palette: {
+                          allowInstall: false,
+                          allowUpload: false
+                      }
+                  },
+                  editorTheme: {
+                      projects: {
+                          enabled: false
+                      }
+                  }
+              };
+
+        - apiVersion: traefik.io/v1alpha1
+          kind: Middleware
+          metadata:
+            name: admin-auth
+            namespace: admin
+          spec:
+            basicAuth:
+              secret: admin-basic-auth
+
+        - apiVersion: traefik.io/v1alpha1
+          kind: Middleware
+          metadata:
+            name: admin-security-headers
+            namespace: admin
+          spec:
+            headers:
+              browserXssFilter: true
+              contentTypeNosniff: true
+              customResponseHeaders:
+                X-Robots-Tag: "noindex, nofollow"
+              forceSTSHeader: true
+              frameDeny: true
+              referrerPolicy: "same-origin"
+              stsIncludeSubdomains: true
+              stsPreload: true
+              stsSeconds: 31536000
+
         # --- DEPLOYMENT ---
         - apiVersion: apps/v1
           kind: Deployment
@@ -97,26 +168,90 @@
                 labels:
                   app: nodered
               spec:
+                automountServiceAccountToken: false
                 securityContext:
                   fsGroup: 1000
-                  runAsUser: 1000
                   runAsGroup: 1000
+                  runAsNonRoot: true
+                  runAsUser: 1000
+                  seccompProfile:
+                    type: RuntimeDefault
                 containers:
                   - name: nodered
-                    image: "{{ nodered_target_image }}" # On utilise la variable définie plus haut
-                    imagePullPolicy: Always
+                    image: "{{ nodered_target_image }}"
+                    imagePullPolicy: IfNotPresent
                     ports:
                       - containerPort: 1880
                     env:
                       - name: TZ
                         value: "Europe/Paris"
+                      - name: NODE_RED_ADMIN_USER
+                        valueFrom:
+                          secretKeyRef:
+                            name: nodered-security
+                            key: admin-user
+                      - name: NODE_RED_ADMIN_PASSWORD_HASH
+                        valueFrom:
+                          secretKeyRef:
+                            name: nodered-security
+                            key: admin-password-hash
+                      - name: NODE_RED_HTTP_NODE_USER
+                        valueFrom:
+                          secretKeyRef:
+                            name: nodered-security
+                            key: http-node-user
+                      - name: NODE_RED_HTTP_NODE_PASSWORD_HASH
+                        valueFrom:
+                          secretKeyRef:
+                            name: nodered-security
+                            key: http-node-password-hash
+                      - name: NODE_RED_CREDENTIAL_SECRET
+                        valueFrom:
+                          secretKeyRef:
+                            name: nodered-security
+                            key: credential-secret
+                    livenessProbe:
+                      tcpSocket:
+                        port: 1880
+                      initialDelaySeconds: 45
+                      periodSeconds: 20
+                    readinessProbe:
+                      tcpSocket:
+                        port: 1880
+                      initialDelaySeconds: 15
+                      periodSeconds: 10
+                    startupProbe:
+                      tcpSocket:
+                        port: 1880
+                      failureThreshold: 30
+                      periodSeconds: 10
+                    resources:
+                      requests:
+                        cpu: "100m"
+                        memory: "256Mi"
+                      limits:
+                        cpu: "500m"
+                        memory: "512Mi"
+                    securityContext:
+                      allowPrivilegeEscalation: false
+                      capabilities:
+                        drop:
+                          - ALL
+                      readOnlyRootFilesystem: false
                     volumeMounts:
                       - name: data
                         mountPath: /data
+                      - name: settings
+                        mountPath: /data/settings.js
+                        subPath: settings.js
+                        readOnly: true
                 volumes:
                   - name: data
                     persistentVolumeClaim:
                       claimName: nodered-data
+                  - name: settings
+                    configMap:
+                      name: nodered-settings
 
         # --- SERVICE ---
         - apiVersion: v1
@@ -125,30 +260,35 @@
             name: nodered
             namespace: admin
           spec:
+            type: ClusterIP
             selector:
               app: nodered
             ports:
               - port: 80
                 targetPort: 1880
 
-        # --- AUTH (Traefik BasicAuth) ---
-        - apiVersion: v1
-          kind: Secret
+        - apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
           metadata:
-            name: admin-basic-auth
-            namespace: admin
-          type: Opaque
-          stringData:
-            users: "{{ admin_auth_users_line }}"
-
-        - apiVersion: traefik.io/v1alpha1
-          kind: Middleware
-          metadata:
-            name: admin-auth
+            name: nodered-ingress-only-from-traefik
             namespace: admin
           spec:
-            basicAuth:
-              secret: admin-basic-auth
+            podSelector:
+              matchLabels:
+                app: nodered
+            policyTypes:
+              - Ingress
+            ingress:
+              - from:
+                  - namespaceSelector:
+                      matchLabels:
+                        kubernetes.io/metadata.name: kube-system
+                    podSelector:
+                      matchLabels:
+                        app.kubernetes.io/name: traefik
+                ports:
+                  - protocol: TCP
+                    port: 1880
 
         # --- INGRESS ---
         - apiVersion: networking.k8s.io/v1
@@ -160,8 +300,9 @@
               traefik.ingress.kubernetes.io/router.entrypoints: websecure
               traefik.ingress.kubernetes.io/router.tls: "true"
               traefik.ingress.kubernetes.io/router.tls.certresolver: "le"
-              traefik.ingress.kubernetes.io/router.middlewares: "admin-admin-auth@kubernetescrd"
+              traefik.ingress.kubernetes.io/router.middlewares: "admin-admin-auth@kubernetescrd,admin-admin-security-headers@kubernetescrd"
           spec:
+            ingressClassName: traefik
             rules:
               - host: "red.{{ main_domain }}"
                 http:
@@ -173,5 +314,3 @@
                           name: nodered
                           port:
                             number: 80
-  # C'EST ICI QUE LA MAGIE OPÈRE :
-  when: deploy_needed

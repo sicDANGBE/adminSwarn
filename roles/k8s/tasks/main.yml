@@ -30,7 +30,7 @@
 
 # --- 2. GESTION FIREWALL ---
 
-- name: Nettoyage des règles Firewall Swarm (Obsolètes)
+- name: Nettoyage des règles firewall legacy
   file:
     path: /etc/nftables.d/10-swarm.conf
     state: absent

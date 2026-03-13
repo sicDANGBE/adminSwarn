@@ -1,0 +1,496 @@
+---
+# roles/app_k8s/tasks/nodered-security.yml
+# Améliorations de sécurité avancées pour Node-RED
+
+- name: "Node-RED - Création ServiceAccount sécurisé"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: nodered
+        namespace: admin
+        labels:
+          app: nodered
+
+- name: "Node-RED - Création Role RBAC restrictif"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: nodered
+        namespace: admin
+      rules:
+        # Lecture seule pour ConfigMaps (settings, flows)
+        - apiGroups: [""]
+          resources: ["configmaps"]
+          verbs: ["get", "list", "watch"]
+        # Créer ConfigMaps uniquement pour flow exports
+        - apiGroups: [""]
+          resources: ["configmaps"]
+          verbs: ["create"]
+          resourceNames: ["nodered-flows-backup"]
+
+- name: "Node-RED - Création RoleBinding"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: nodered
+        namespace: admin
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Role
+        name: nodered
+      subjects:
+        - kind: ServiceAccount
+          name: nodered
+          namespace: admin
+
+- name: "Node-RED - ConfigMap avec configuration avancée"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: nodered-settings-extended
+        namespace: admin
+      data:
+        # Rate limiting config
+        http-request-limit: "10mb"
+        http-max-requests-per-minute: "60"
+        # Function execution timeout
+        function-timeout: "30000"  # milliseconds
+        # Audit level
+        audit-level: "info"
+        # Disable specific node types
+        disabled-nodes: |
+          - file
+          - exec
+          - http-request (restricted)
+
+- name: "Node-RED - Middleware Rate Limiting (Traefik)"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: traefik.io/v1alpha1
+      kind: Middleware
+      metadata:
+        name: nodered-rate-limit
+        namespace: admin
+      spec:
+        rateLimit:
+          average: 50               # Lower than N8N (50 req/sec)
+          burst: 25
+          period: 1s
+
+- name: "Node-RED - Pod Disruption Budget"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: policy/v1
+      kind: PodDisruptionBudget
+      metadata:
+        name: nodered
+        namespace: admin
+      spec:
+        minAvailable: 1
+        selector:
+          matchLabels:
+            app: nodered
+
+- name: "Node-RED - NetworkPolicy Egress (restrict outbound)"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: NetworkPolicy
+      metadata:
+        name: nodered-egress-control
+        namespace: admin
+      spec:
+        podSelector:
+          matchLabels:
+            app: nodered
+        policyTypes:
+          - Egress
+        egress:
+          # DNS resolution
+          - to:
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: kube-system
+            ports:
+              - protocol: UDP
+                port: 53
+          # Internal services: MQTT, PostgreSQL, RabbitMQ
+          - to:
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: apps
+            ports:
+              - protocol: TCP
+                port: 1883   # MQTT
+              - protocol: TCP
+                port: 8883   # MQTT+TLS
+              - protocol: TCP
+                port: 5432   # PostgreSQL
+              - protocol: TCP
+                port: 5672   # RabbitMQ
+              - protocol: TCP
+                port: 8080   # N8N webhooks
+          # External HTTP/HTTPS (Node-RED nodes integrations)
+          - to:
+              - podSelector: {}
+            ports:
+              - protocol: TCP
+                port: 80
+              - protocol: TCP
+                port: 443
+          # Kubernetes API (if needed for K8s integration)
+          - to:
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: default
+            ports:
+              - protocol: TCP
+                port: 443
+
+- name: "Node-RED - ResourceQuota namespace admin"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: v1
+      kind: ResourceQuota
+      metadata:
+        name: admin-quota
+        namespace: admin
+      spec:
+        hard:
+          requests.cpu: "2000m"
+          requests.memory: "2Gi"
+          limits.cpu: "4000m"
+          limits.memory: "4Gi"
+          pods: "10"
+          services: "10"
+          persistentvolumeclaims: "5"
+
+- name: "Node-RED - Audit Configuration"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: nodered-audit-config
+        namespace: admin
+        annotations:
+          audit-enabled: "true"
+          audit-level: "info"
+      data:
+        audit-log-destination: "/data/debug.log"
+        enabled-audits: |
+          - flow-deploy
+          - node-create
+          - node-delete
+          - wire-change
+          - auth-attempt
+          - api-call
+
+- name: "Node-RED - Updated settings.js with security enhancements"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: nodered-settings
+        namespace: admin
+      data:
+        settings.js: |
+          module.exports = {
+              // Authentication
+              adminAuth: {
+                  type: "credentials",
+                  users: [{
+                      username: process.env.NODE_RED_ADMIN_USER,
+                      password: process.env.NODE_RED_ADMIN_PASSWORD_HASH,
+                      permissions: "*"
+                  }]
+              },
+              httpNodeAuth: {
+                  user: process.env.NODE_RED_HTTP_NODE_USER,
+                  pass: process.env.NODE_RED_HTTP_NODE_PASSWORD_HASH
+              },
+              
+              // Credential encryption
+              credentialSecret: process.env.NODE_RED_CREDENTIAL_SECRET,
+              
+              // Security
+              httpAdminRoot: "/",
+              httpNodeRoot: "/api",
+              httpStatic: "/usr/share/node-red/public",
+              
+              // Logging & Audit
+              logging: {
+                  console: {
+                      level: "info",
+                      metrics: false,
+                      audit: true
+                  }
+              },
+              
+              // Disable dangerous features
+              functionExternalModules: false,
+              externalModules: {
+                  autoInstall: false,
+                  palette: {
+                      allowInstall: false,
+                      allowUpload: false
+                  }
+              },
+              
+              // Disable projects (if not needed)
+              projects: {
+                  enabled: false
+              },
+              
+              // Rate limiting
+              rateLimit: {
+                  enabled: true,
+                  requests: 60,
+                  window: 60000  // milliseconds
+              },
+              
+              // CORS restrictions
+              httpCors: {
+                  origin: "https://red.{{ main_domain }}",
+                  credentials: true,
+                  maxAge: 3600
+              },
+              
+              // Flow management
+              flows: {
+                  credentialSecret: process.env.NODE_RED_CREDENTIAL_SECRET
+              },
+              
+              // Disable diagnostics
+              diagnostics: {
+                  enabled: false,
+                  ui: false
+              },
+              runtimeState: {
+                  enabled: false,
+                  ui: false
+              },
+              
+              // Editor theme
+              editorTheme: {
+                  projects: {
+                      enabled: false
+                  },
+                  tours: false,
+                  header: {
+                      title: "Node-RED",
+                      image: false
+                  }
+              },
+              
+              // Disable node types (security)
+              nodesExcludes: [
+                  "node-red/core/io/21-file.js",
+                  "node-red/core/io/23-watch.js"
+              ]
+          };
+
+- name: "Node-RED - Update Deployment with ServiceAccount & improved settings"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: nodered
+        namespace: admin
+        labels:
+          app: nodered
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: nodered
+        template:
+          metadata:
+            labels:
+              app: nodered
+            annotations:
+              prometheus.io/scrape: "true"
+              prometheus.io/port: "1880"
+              prometheus.io/path: "/metrics"
+          spec:
+            serviceAccountName: nodered
+            automountServiceAccountToken: false  # Only mount if K8s integration needed
+            securityContext:
+              fsGroup: 1000
+              runAsGroup: 1000
+              runAsNonRoot: true
+              runAsUser: 1000
+              seccompProfile:
+                type: RuntimeDefault
+            containers:
+              - name: nodered
+                image: "nodered/node-red:4.1.2-22"
+                imagePullPolicy: IfNotPresent
+                ports:
+                  - containerPort: 1880
+                    name: http
+                env:
+                  - name: TZ
+                    value: "Europe/Paris"
+                  - name: NODE_RED_ADMIN_USER
+                    valueFrom:
+                      secretKeyRef:
+                        name: nodered-security
+                        key: admin-user
+                  - name: NODE_RED_ADMIN_PASSWORD_HASH
+                    valueFrom:
+                      secretKeyRef:
+                        name: nodered-security
+                        key: admin-password-hash
+                  - name: NODE_RED_HTTP_NODE_USER
+                    valueFrom:
+                      secretKeyRef:
+                        name: nodered-security
+                        key: http-node-user
+                  - name: NODE_RED_HTTP_NODE_PASSWORD_HASH
+                    valueFrom:
+                      secretKeyRef:
+                        name: nodered-security
+                        key: http-node-password-hash
+                  - name: NODE_RED_CREDENTIAL_SECRET
+                    valueFrom:
+                      secretKeyRef:
+                        name: nodered-security
+                        key: credential-secret
+                  # Additional security variables
+                  - name: NODE_RED_LOG_LEVEL
+                    value: "info"
+                  - name: NODE_RED_AUDIT_ENABLED
+                    value: "true"
+                  - name: NODE_RED_READONLY
+                    value: "false"
+                  - name: NODE_RED_MAX_BODY_SIZE
+                    value: "10mb"
+                livenessProbe:
+                  httpGet:
+                    path: /
+                    port: 1880
+                  initialDelaySeconds: 45
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+                readinessProbe:
+                  httpGet:
+                    path: /
+                    port: 1880
+                  initialDelaySeconds: 15
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+                startupProbe:
+                  httpGet:
+                    path: /
+                    port: 1880
+                  failureThreshold: 30
+                  periodSeconds: 10
+                resources:
+                  requests:
+                    cpu: "100m"
+                    memory: "256Mi"
+                  limits:
+                    cpu: "500m"
+                    memory: "512Mi"
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                      - ALL
+                  readOnlyRootFilesystem: false  # Node-RED writes logs
+                  runAsNonRoot: true
+                  runAsUser: 1000
+                volumeMounts:
+                  - name: data
+                    mountPath: /data
+                  - name: settings
+                    mountPath: /data/settings.js
+                    subPath: settings.js
+                    readOnly: true
+                  - name: tmp
+                    mountPath: /tmp
+            volumes:
+              - name: data
+                persistentVolumeClaim:
+                  claimName: nodered-data
+              - name: settings
+                configMap:
+                  name: nodered-settings
+              - name: tmp
+                emptyDir: {}
+
+- name: "Node-RED - Update Ingress with rate limiting"
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    namespace: admin
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: nodered
+        namespace: admin
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: websecure
+          traefik.ingress.kubernetes.io/router.tls: "true"
+          traefik.ingress.kubernetes.io/router.tls.certresolver: "le"
+          traefik.ingress.kubernetes.io/router.middlewares: "admin-admin-auth@kubernetescrd,admin-admin-security-headers@kubernetescrd,admin-nodered-rate-limit@kubernetescrd"
+      spec:
+        ingressClassName: traefik
+        rules:
+          - host: "red.{{ main_domain }}"
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: nodered
+                      port:
+                        number: 80
