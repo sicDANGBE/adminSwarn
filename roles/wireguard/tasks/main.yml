@@ -1,0 +1,218 @@
+---
+- name: Vérifier la configuration WireGuard
+  assert:
+    that:
+      - wireguard_interface_addresses | length > 0
+    fail_msg: "Définissez au minimum l'interface et l'adresse locale WireGuard."
+
+- name: Installer les paquets WireGuard
+  apt:
+    name: "{{ wireguard_packages }}"
+    state: present
+    update_cache: true
+
+- name: Créer le répertoire WireGuard
+  file:
+    path: /etc/wireguard
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Vérifier si le fichier de clé privée existe
+  stat:
+    path: "{{ wireguard_key_file }}"
+  register: wireguard_key_file_stat
+
+- name: Vérifier si la configuration WireGuard existe déjà
+  stat:
+    path: "{{ wireguard_existing_config_path }}"
+  register: wireguard_existing_config_stat
+
+- name: Lire le fichier de clé privée existant
+  slurp:
+    src: "{{ wireguard_key_file }}"
+  register: wireguard_key_file_content
+  when: wireguard_key_file_stat.stat.exists
+  no_log: true
+
+- name: Lire la configuration WireGuard existante
+  slurp:
+    src: "{{ wireguard_existing_config_path }}"
+  register: wireguard_existing_config_content
+  when: wireguard_existing_config_stat.stat.exists
+  no_log: true
+
+- name: Extraire la clé privée depuis la configuration existante
+  set_fact:
+    wireguard_private_key_from_config: "{{ wireguard_existing_config_content.content | b64decode | regex_search('(?m)^PrivateKey\\s*=\\s*\\S+$') | default('') | regex_replace('^PrivateKey\\s*=\\s*', '') | trim }}"
+  when: wireguard_existing_config_stat.stat.exists
+  no_log: true
+
+- name: Calculer la clé privée WireGuard effective
+  set_fact:
+    wireguard_runtime_private_key: "{{ (wireguard_private_key | default('') | trim) or (wireguard_key_file_content.content | default('') | b64decode | trim) or (wireguard_private_key_from_config | default('') | trim) }}"
+    wireguard_runtime_private_key_source: >-
+      {% if wireguard_private_key | default('') | trim | length > 0 %}provided
+      {% elif wireguard_key_file_content.content | default('') | b64decode | trim | length > 0 %}file
+      {% elif wireguard_private_key_from_config | default('') | trim | length > 0 %}config
+      {% else %}none
+      {% endif %}
+  no_log: true
+
+- name: Valider la clé privée WireGuard candidate
+  command: wg pubkey
+  args:
+    stdin: "{{ wireguard_runtime_private_key }}"
+    stdin_add_newline: false
+  register: wireguard_candidate_public_key
+  changed_when: false
+  failed_when: false
+  when: wireguard_runtime_private_key | default('') | length > 0
+  check_mode: false
+  no_log: true
+
+- name: Réinitialiser une clé privée invalide pour régénération
+  set_fact:
+    wireguard_runtime_private_key: ""
+    wireguard_runtime_private_key_source: "none"
+  when:
+    - wireguard_runtime_private_key | default('') | length > 0
+    - (wireguard_candidate_public_key | default({})).get('rc', 1) != 0
+    - wireguard_regenerate_invalid_private_key | bool
+    - wireguard_generate_private_key | bool
+  no_log: true
+
+- name: Vérifier qu'une clé privée existante est valide
+  assert:
+    that:
+      - (wireguard_candidate_public_key | default({})).get('rc', 1) == 0
+    fail_msg: "La clé privée WireGuard déjà présente sur l'hôte est invalide. Supprimez la clé/cfg existante ou fournissez une clé valide."
+  when:
+    - wireguard_runtime_private_key | default('') | length > 0
+    - (wireguard_candidate_public_key | default({})).get('rc', 1) != 0
+    - not (wireguard_regenerate_invalid_private_key | bool and wireguard_generate_private_key | bool)
+  no_log: true
+
+- name: Générer la clé privée WireGuard si absente
+  command: wg genkey
+  register: wireguard_generated_private_key
+  changed_when: true
+  when:
+    - wireguard_runtime_private_key | default('') | length == 0
+    - wireguard_generate_private_key | bool
+  no_log: true
+
+- name: Enregistrer la clé privée WireGuard générée
+  set_fact:
+    wireguard_runtime_private_key: "{{ (wireguard_generated_private_key | default({})).get('stdout', '') | trim }}"
+  when: ((wireguard_generated_private_key | default({})).get('stdout', '') | trim | length) > 0
+  no_log: true
+
+- name: Vérifier qu'une clé privée WireGuard est disponible
+  assert:
+    that:
+      - wireguard_runtime_private_key | default('') | length > 0
+    fail_msg: "Aucune clé privée WireGuard disponible et la génération automatique est désactivée."
+
+- name: Écrire le fichier de clé privée WireGuard
+  copy:
+    dest: "{{ wireguard_key_file }}"
+    content: "{{ wireguard_runtime_private_key }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Réutiliser la clé publique validée
+  set_fact:
+    wireguard_runtime_public_key: "{{ (wireguard_candidate_public_key | default({})).get('stdout', '') | trim }}"
+  when: ((wireguard_candidate_public_key | default({})).get('stdout', '') | trim | length) > 0
+  no_log: true
+
+- name: Calculer la clé publique WireGuard pour une clé nouvellement générée
+  command: wg pubkey
+  args:
+    stdin: "{{ wireguard_runtime_private_key }}"
+    stdin_add_newline: false
+  register: wireguard_generated_public_key
+  changed_when: false
+  check_mode: false
+  when: ((wireguard_generated_private_key | default({})).get('stdout', '') | trim | length) > 0
+  no_log: true
+
+- name: Exposer la clé publique WireGuard calculée
+  set_fact:
+    wireguard_runtime_public_key: "{{ (wireguard_generated_public_key | default({})).get('stdout', '') | trim }}"
+  when:
+    - ((wireguard_generated_public_key | default({})).get('stdout', '') | trim | length) > 0
+  no_log: true
+
+- name: Vérifier qu'une clé publique WireGuard est disponible
+  assert:
+    that:
+      - wireguard_runtime_public_key | default('') | length > 0
+    fail_msg: "Impossible de calculer la clé publique WireGuard à partir de la clé privée effective."
+  no_log: true
+
+- name: Appliquer les sysctl WireGuard
+  sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: true
+  loop: "{{ wireguard_sysctl | dict2items }}"
+  when: wireguard_sysctl | length > 0
+
+- name: Vérifier les peers WireGuard
+  assert:
+    that:
+      - wireguard_peers | length > 0
+    fail_msg: "Définissez au moins un peer WireGuard et les routes nécessaires pour le forwarding."
+  when: wireguard_manage_mode != 'keys'
+
+- name: Déployer la configuration wg-quick
+  template:
+    src: wg-quick.conf.j2
+    dest: "/etc/wireguard/{{ wireguard_interface_name }}.conf"
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart WireGuard
+  when: wireguard_manage_mode != 'keys'
+
+- name: Déployer les règles nftables WireGuard
+  template:
+    src: nftables_wireguard_gateway.conf.j2
+    dest: "/etc/nftables.d/{{ wireguard_nftables_filename }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when:
+    - wireguard_manage_mode != 'keys'
+    - wireguard_nftables_enabled | bool
+  notify: Reload NFTables
+
+- name: Supprimer les règles nftables WireGuard si désactivées
+  file:
+    path: "/etc/nftables.d/{{ wireguard_nftables_filename }}"
+    state: absent
+  when:
+    - wireguard_manage_mode != 'keys'
+    - not wireguard_nftables_enabled | bool
+  notify: Reload NFTables
+
+- name: Appliquer immédiatement les changements WireGuard
+  meta: flush_handlers
+  when:
+    - wireguard_manage_mode != 'keys'
+    - not ansible_check_mode
+
+- name: Activer le service wg-quick
+  systemd:
+    name: "wg-quick@{{ wireguard_interface_name }}"
+    state: started
+    enabled: true
+  when:
+    - wireguard_manage_mode != 'keys'
+    - not ansible_check_mode

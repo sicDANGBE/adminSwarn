@@ -1,0 +1,63 @@
+---
+- name: Déployer le script de routes statiques
+  template:
+    src: static-routes.sh.j2
+    dest: "{{ static_routes_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+  when: static_routes | length > 0
+  notify: Restart static routes
+
+- name: Supprimer les routes statiques legacy
+  command: >-
+    ip route del {{ item.destination }}
+    via {{ item.via }}{% if item.dev is defined %} dev {{ item.dev }}{% endif %}{% if item.onlink | default(false) %} onlink{% endif %}
+  loop: "{{ static_routes_absent }}"
+  when: static_routes_absent | length > 0
+  failed_when: false
+  changed_when: false
+
+- name: Supprimer le script de routes statiques si aucune route n'est définie
+  file:
+    path: "{{ static_routes_script_path }}"
+    state: absent
+  when: static_routes | length == 0
+
+- name: Déployer le service systemd des routes statiques
+  template:
+    src: static-routes.service.j2
+    dest: "/etc/systemd/system/{{ static_routes_service_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  when: static_routes | length > 0
+  notify:
+    - Reload systemd
+    - Restart static routes
+
+- name: Supprimer le service systemd des routes statiques si aucune route n'est définie
+  file:
+    path: "/etc/systemd/system/{{ static_routes_service_name }}.service"
+    state: absent
+  when: static_routes | length == 0
+  notify: Reload systemd
+
+- name: Appliquer immédiatement les routes statiques
+  meta: flush_handlers
+  when: static_routes | length > 0
+
+- name: Activer le service des routes statiques
+  systemd:
+    name: "{{ static_routes_service_name }}"
+    state: started
+    enabled: true
+  when: static_routes | length > 0
+
+- name: Désactiver le service des routes statiques si aucune route n'est définie
+  systemd:
+    name: "{{ static_routes_service_name }}"
+    state: stopped
+    enabled: false
+  when: static_routes | length == 0
+  failed_when: false

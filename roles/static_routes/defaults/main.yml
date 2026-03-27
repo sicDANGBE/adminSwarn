@@ -1,0 +1,5 @@
+---
+static_routes: []
+static_routes_absent: []
+static_routes_script_path: /usr/local/sbin/ansible-static-routes
+static_routes_service_name: ansible-static-routes

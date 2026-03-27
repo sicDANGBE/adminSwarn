@@ -1,0 +1,7 @@
+---
+static_routes: []
+static_routes_absent:
+  - destination: "{{ wireguard_raspberry_overlay_ip }}/32"
+    via: "{{ hostvars['ovh.core'].ansible_facts['default_ipv4']['address'] | default(hostvars['ovh.core'].ansible_host) }}"
+    dev: "{{ ansible_facts['default_ipv4']['interface'] }}"
+    onlink: true

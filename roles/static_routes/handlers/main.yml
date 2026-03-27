@@ -1,0 +1,10 @@
+---
+- name: Reload systemd
+  systemd:
+    daemon_reload: true
+
+- name: Restart static routes
+  systemd:
+    name: "{{ static_routes_service_name }}"
+    state: restarted
+    enabled: true

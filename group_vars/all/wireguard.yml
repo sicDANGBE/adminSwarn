@@ -1,0 +1,26 @@
+---
+wireguard_network_cidr: "10.8.0.0/24"
+wireguard_listen_port: 51820
+wireguard_ovh_public_endpoint_port: 51820
+wireguard_inventory_ovh_hosts:
+  - "ovh.core"
+  - "ovh.worker.01"
+  - "ovh.worker.02"
+wireguard_inventory_raspberry_host: "raspberry.media"
+
+wireguard_raspberry_interface: "wg-media"
+wireguard_raspberry_overlay_ip: "10.8.0.12"
+wireguard_raspberry_api_port: 8080
+wireguard_raspberry_public_key: "yhAsHM5ObA7v3oVckcf/nBuXL3e+AkCey1LAGSU60mU="
+wireguard_raspberry_allowed_ips_direct:
+  - "10.8.0.11/32"
+  - "10.8.0.21/32"
+  - "10.8.0.22/32"
+
+wireguard_ovh_interface: "wg-media"
+
+wireguard_remote_routes:
+  - "10.8.0.12/32"
+
+wireguard_remote_healthcheck_url: "http://10.8.0.12/health/live"
+wireguard_remote_healthcheck_host_header: "mediaplayer.local"

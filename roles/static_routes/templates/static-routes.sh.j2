@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+
+{% for route in static_routes %}
+ip route replace {{ route.destination }} via {{ route.via }}{% if route.dev is defined %} dev {{ route.dev }}{% endif %}{% if route.onlink | default(false) %} onlink{% endif %}
+{% endfor %}

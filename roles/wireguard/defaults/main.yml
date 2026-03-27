@@ -1,0 +1,27 @@
+---
+wireguard_packages:
+  - wireguard
+  - wireguard-tools
+
+wireguard_interface_name: wg0
+wireguard_interface_addresses: []
+wireguard_interface_mtu: null
+wireguard_listen_port: 51820
+wireguard_private_key: ""
+wireguard_key_file: "/etc/wireguard/{{ wireguard_interface_name }}.key"
+wireguard_existing_config_path: "/etc/wireguard/{{ wireguard_interface_name }}.conf"
+wireguard_generate_private_key: true
+wireguard_regenerate_invalid_private_key: false
+wireguard_manage_mode: full
+wireguard_peers: []
+wireguard_save_config: false
+
+wireguard_sysctl: {}
+
+wireguard_nftables_enabled: false
+wireguard_nftables_filename: "30-wireguard.conf"
+wireguard_allowed_endpoint_ips: []
+wireguard_forward_source_cidrs: []
+wireguard_forward_destination_cidrs: []
+wireguard_forward_underlay_interface: "{{ ansible_facts['default_ipv4']['interface'] | default('eth0') }}"
+wireguard_masquerade_traffic: true

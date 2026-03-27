@@ -24,6 +24,11 @@ Commencez par le document approprié selon votre besoin:
   - Déploiement par phases (common → k8s → apps)
   - Erreurs courantes & solutions
   - Mises à jour & maintenance
+- **[NETWORK_WIREGUARD.md](NETWORK_WIREGUARD.md)** — Accès Raspberry Pi hors cluster via WireGuard direct
+  - Architecture infra sans WireGuard dans Kubernetes
+  - `ovh.core`, `ovh.worker.01` et `ovh.worker.02` comme peers directs de la Raspberry
+  - Suppression de l’intermédiaire IONOS et des routes statiques legacy
+  - Vérification et diagnostic réseau
 
 ### 📚 **Comprendre les Rôles**
 - **[ROLES.md](ROLES.md)** — Documentation détaillée de chaque rôle
@@ -145,6 +150,7 @@ ansible/
 ├── README.md                  # Ce fichier
 ├── ARCHITECTURE.md            # Vue d'ensemble technique
 ├── INSTALLATION.md            # Guide déploiement étape-par-étape
+├── NETWORK_WIREGUARD.md       # Architecture WireGuard directe OVH <-> Raspberry
 ├── ROLES.md                   # Documentation détaillée rôles
 ├── VARIABLES.md               # Guide configuration
 ├── SECURITY.md                # Posture sécurité

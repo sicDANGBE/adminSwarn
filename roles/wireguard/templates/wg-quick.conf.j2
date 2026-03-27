@@ -1,0 +1,27 @@
+[Interface]
+Address = {{ wireguard_interface_addresses | join(', ') }}
+{% if wireguard_listen_port is not none %}
+ListenPort = {{ wireguard_listen_port }}
+{% endif %}
+PrivateKey = {{ wireguard_runtime_private_key }}
+SaveConfig = {{ 'true' if wireguard_save_config | bool else 'false' }}
+{% if wireguard_interface_mtu is not none %}
+MTU = {{ wireguard_interface_mtu }}
+{% endif %}
+
+{% for peer in wireguard_peers %}
+[Peer]
+# {{ peer.name | default('peer-' ~ loop.index) }}
+PublicKey = {{ peer.public_key | default(hostvars[peer.inventory_host].wireguard_runtime_public_key) }}
+{% if peer.preshared_key is defined %}
+PresharedKey = {{ peer.preshared_key }}
+{% endif %}
+AllowedIPs = {{ peer.allowed_ips | join(', ') }}
+{% if peer.endpoint is defined %}
+Endpoint = {{ peer.endpoint }}
+{% endif %}
+{% if peer.persistent_keepalive is defined %}
+PersistentKeepalive = {{ peer.persistent_keepalive }}
+{% endif %}
+
+{% endfor %}

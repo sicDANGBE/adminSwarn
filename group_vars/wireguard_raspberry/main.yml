@@ -1,0 +1,26 @@
+---
+wireguard_interface_name: "{{ wireguard_raspberry_interface }}"
+wireguard_interface_addresses:
+  - "{{ wireguard_raspberry_overlay_ip }}/32"
+wireguard_listen_port: null
+wireguard_save_config: false
+
+wireguard_peers:
+  - name: ovh-core
+    inventory_host: "ovh.core"
+    endpoint: "{{ hostvars['ovh.core'].wireguard_public_endpoint_host }}:{{ wireguard_ovh_public_endpoint_port }}"
+    allowed_ips:
+      - "{{ hostvars['ovh.core'].wireguard_ovh_overlay_ip }}/32"
+    persistent_keepalive: 25
+  - name: ovh-worker-01
+    inventory_host: "ovh.worker.01"
+    endpoint: "{{ hostvars['ovh.worker.01'].wireguard_public_endpoint_host }}:{{ wireguard_ovh_public_endpoint_port }}"
+    allowed_ips:
+      - "{{ hostvars['ovh.worker.01'].wireguard_ovh_overlay_ip }}/32"
+    persistent_keepalive: 25
+  - name: ovh-worker-02
+    inventory_host: "ovh.worker.02"
+    endpoint: "{{ hostvars['ovh.worker.02'].wireguard_public_endpoint_host }}:{{ wireguard_ovh_public_endpoint_port }}"
+    allowed_ips:
+      - "{{ hostvars['ovh.worker.02'].wireguard_ovh_overlay_ip }}/32"
+    persistent_keepalive: 25

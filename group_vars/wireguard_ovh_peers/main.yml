@@ -1,0 +1,23 @@
+---
+wireguard_interface_name: "{{ wireguard_ovh_interface }}"
+wireguard_interface_addresses:
+  - "{{ wireguard_ovh_overlay_ip }}/24"
+wireguard_interface_mtu: 1420
+wireguard_regenerate_invalid_private_key: true
+wireguard_save_config: false
+
+wireguard_peers:
+  - name: raspberry
+    inventory_host: "{{ wireguard_inventory_raspberry_host }}"
+    allowed_ips:
+      - "{{ wireguard_raspberry_overlay_ip }}/32"
+
+wireguard_nftables_enabled: true
+wireguard_nftables_filename: "30-wireguard-peer.conf"
+wireguard_allowed_endpoint_ips: []
+wireguard_forward_source_cidrs: []
+wireguard_forward_destination_cidrs: []
+wireguard_masquerade_traffic: false
+wireguard_forward_underlay_interface: "{{ ansible_facts['default_ipv4']['interface'] }}"
+
+wireguard_sysctl: {}

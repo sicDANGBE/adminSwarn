@@ -1,0 +1,23 @@
+# Managed by Ansible - WireGuard gateway rules
+
+{% if wireguard_allowed_endpoint_ips | length == 0 %}
+add rule inet filter input iifname "{{ wireguard_forward_underlay_interface }}" udp dport {{ wireguard_listen_port }} accept
+{% else %}
+{% for endpoint_ip in wireguard_allowed_endpoint_ips %}
+add rule inet filter input iifname "{{ wireguard_forward_underlay_interface }}" ip saddr {{ endpoint_ip }} udp dport {{ wireguard_listen_port }} accept
+{% endfor %}
+{% endif %}
+
+{% if wireguard_forward_destination_cidrs | length > 0 %}
+add rule inet filter forward iifname "{{ wireguard_forward_underlay_interface }}" oifname "{{ wireguard_interface_name }}"{% if wireguard_forward_source_cidrs | length > 0 %} ip saddr { {{ wireguard_forward_source_cidrs | join(', ') }} }{% endif %} ip daddr { {{ wireguard_forward_destination_cidrs | join(', ') }} } accept
+add rule inet filter forward iifname "{{ wireguard_interface_name }}" oifname "{{ wireguard_forward_underlay_interface }}" ip saddr { {{ wireguard_forward_destination_cidrs | join(', ') }} } ct state established,related accept
+{% endif %}
+
+{% if wireguard_masquerade_traffic | bool and wireguard_forward_destination_cidrs | length > 0 %}
+table ip wireguard_gateway_nat {
+  chain postrouting {
+    type nat hook postrouting priority srcnat; policy accept;
+    oifname "{{ wireguard_interface_name }}"{% if wireguard_forward_source_cidrs | length > 0 %} ip saddr { {{ wireguard_forward_source_cidrs | join(', ') }} }{% endif %} ip daddr { {{ wireguard_forward_destination_cidrs | join(', ') }} } masquerade
+  }
+}
+{% endif %}

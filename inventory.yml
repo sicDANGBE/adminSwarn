@@ -9,15 +9,25 @@ all:
     main_domain: dgsynthex.online
 
   children:
+    wireguard_mesh:
+      children:
+        wireguard_ovh_peers:
+          hosts:
+            ovh.core:
+            ovh.worker.01:
+            ovh.worker.02:
+        wireguard_raspberry:
+          hosts:
+            raspberry.media:
+              ansible_host: rpi
+              ansible_user: supadmin
+              ansible_port: 22
     k8s_cluster:
       children:
         server:
           hosts:
             ovh.core:
-              ansible_host: vps-940a692a.vps.ovh.net
         agents:
           hosts:
             ovh.worker.01:
-              ansible_host: vps-255dab72.vps.ovh.net
             ovh.worker.02:
-              ansible_host: vps-9e3ed523.vps.ovh.net

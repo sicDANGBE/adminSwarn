@@ -1,0 +1,12 @@
+[Unit]
+Description=Ansible managed static routes
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart={{ static_routes_script_path }}
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

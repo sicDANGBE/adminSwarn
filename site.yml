@@ -18,6 +18,33 @@
     - role: common
       tags: ["common", "system"]
 
+- name: "WireGuard - Bootstrap des clés"
+  hosts: wireguard_mesh
+  become: true
+  any_errors_fatal: true
+  tags: ["wireguard", "vpn", "wireguard_keys"]
+  roles:
+    - role: wireguard
+      vars:
+        wireguard_manage_mode: keys
+
+- name: "WireGuard - Configuration des peers"
+  hosts: wireguard_mesh
+  become: true
+  any_errors_fatal: true
+  tags: ["wireguard", "vpn", "wireguard_config"]
+  roles:
+    - role: wireguard
+      vars:
+        wireguard_manage_mode: config
+
+- name: "Cluster Kubernetes - Nettoyage des routes legacy WireGuard"
+  hosts: agents
+  become: true
+  tags: ["wireguard", "routing", "routing_cleanup"]
+  roles:
+    - role: static_routes
+
 - name: "Cluster Kubernetes"
   hosts: k8s_cluster
   become: true
@@ -48,7 +75,7 @@
 - name: "Audit de securite"
   hosts: k8s_cluster
   become: true
-  gather_facts: yes
+  gather_facts: true
   tags: ["never", "audit"]
   roles:
     - audit_security
